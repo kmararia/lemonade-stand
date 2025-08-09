@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Ignore log files
+*.log
+
+# Ignore system-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore binary files
+**.pyc
+
+# Ignore environment and secret files
+.env
+.venv
+.-venv
+._venv
+config.json
+
+# Ignore temporary directories
+*_tmp_/
+*tmp/
