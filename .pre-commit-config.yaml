@@ -1,0 +1,28 @@
+---
+repos:
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v6.0.0
+      hooks:
+          - id: trailing-whitespace
+          - id: check-docstring-first
+          - id: check-toml
+          - id: name-tests-test
+          - id: check-yaml
+            args: [--unsafe]
+
+    - repo: https://github.com/astral-sh/ruff-pre-commit
+      rev: v0.12.8
+      hooks:
+          - id: ruff-check
+            args: [--fix]
+          - id: ruff-format
+
+    - repo: https://github.com/ComPWA/taplo-pre-commit
+      rev: v0.9.3
+      hooks:
+          - id: taplo-format
+
+    - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+      rev: 0.2.3
+      hooks:
+          - id: yamlfmt

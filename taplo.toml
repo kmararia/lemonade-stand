@@ -17,6 +17,9 @@ array_auto_collapse = false
 include = ["pyproject.toml"]
 
 [rule.formatting]
+indent_string = '    '
+indent_entries = true
 align_entries = true
-reorder_keys = false
 align_comments = true
+allowed_blank_lines = 2
+reorder_keys = true
