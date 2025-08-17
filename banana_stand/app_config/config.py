@@ -17,6 +17,7 @@ class AppConfig:
     A dataclass for the applicaton configs
     """
 
+    app_version: str = field(init=False)
     simulation: bool = field(init=False)
     statement_dir: Path = field(init=False)
     root_dir: Path = field(init=False)
@@ -35,8 +36,9 @@ class AppConfig:
         )
 
         # Update object fields variables
-        self.simulation = bool(config_dict["simulation flag"])
-        self.statement_dir = Path(config_dict["statement directory"])
+        self.app_version = config_dict["app-version"]
+        self.simulation = bool(config_dict["simulation-flag"])
+        self.statement_dir = Path(config_dict["statement-directory"])
         self.root_dir = directories.root_dir
 
     def __str__(self):
