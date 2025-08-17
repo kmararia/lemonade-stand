@@ -9,7 +9,7 @@ from banana_stand.app_config.dirs import AppDir
 APP_DIRECTORIES = AppDir()
 
 
-def set_up_logger(name: str):
+def set_up_logger(name: str, level: int = logging.WARNING):
     """
     A logger set up function
     """
@@ -34,9 +34,9 @@ def set_up_logger(name: str):
     console_handler.setFormatter(formatter)
     file_handler.setFormatter(formatter)
 
-    console_handler.setLevel(logging.WARNING)
-    file_handler.setLevel(logging.INFO)
-    logger.setLevel(logging.WARNING)
+    console_handler.setLevel(level)
+    file_handler.setLevel(level)
+    logger.setLevel(level)
 
     # Append handlers
     logger.addHandler(console_handler)
