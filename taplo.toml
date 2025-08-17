@@ -22,4 +22,4 @@ indent_entries = true
 align_entries = true
 align_comments = true
 allowed_blank_lines = 2
-reorder_keys = true
+reorder_keys = false
