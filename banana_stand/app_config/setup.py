@@ -18,7 +18,6 @@ BASE_CONFIG = {
     "app-version": __version__,
     "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     "simulation-flag": False,
-    "statement-directory": Path.cwd(),
 }
 
 
@@ -69,6 +68,11 @@ def set_up_configs(user_config: Path, session_dir: Path):
         ).execute():  # type: ignore
             with user_config.open("r") as file:
                 config_dict = json.load(file)
+
+            # Add configurations if missing
+            for key, val in BASE_CONFIG.items():
+                if key not in config_dict:
+                    config_dict[key] = val
         else:
             config_dict = request_configs(session_dir)
 
