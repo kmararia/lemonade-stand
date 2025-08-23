@@ -3,25 +3,53 @@ Sets up the application configurations
 """
 
 import json
-from datetime import datetime
 from pathlib import Path
 
 from InquirerPy import inquirer
 from InquirerPy import validator
 
-from banana_stand import __version__
+from banana_stand.app_config import metadata
+from banana_stand.utils import VersionMismatchError
 from banana_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-
-BASE_CONFIG = {
-    "app-version": __version__,
-    "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    "simulation-flag": False,
-}
+USER_CONFIG = metadata.USER_CONFIG
 
 
-def request_configs(session_dir: Path) -> dict:
+def check_version(config_path: Path, config_dict: dict):
+    """
+    Validates that the embedding data exists and is upto date
+    """
+
+    def _write_config(configs: dict):
+        with config_path.open("w") as file:
+            json.dump(configs, file, indent=4)
+
+    # Confirm if we need to re-download data
+    if not config_path.exists():
+        _write_config(config_dict)
+        return True
+
+    else:
+        # Check if recent version exists
+        try:
+            keys_check = config_dict.keys()
+            config_dict = json.load(config_path.open("r"))
+
+            if (
+                all(x in keys_check for x in config_dict)
+                and config_dict["version"] == config_dict["version"]
+            ):
+                return False
+            else:
+                raise VersionMismatchError("Non-matching metadata file version")
+
+        except VersionMismatchError:
+            _write_config(config_dict)
+            return True
+
+
+def request_user_configs(session_dir: Path) -> dict:
     """
     Request configuration prefills from the user
     """
@@ -41,22 +69,22 @@ def request_configs(session_dir: Path) -> dict:
         only_directories=True,
     ).execute()
 
-    # Confirm if simulation
-    sim_choice = inquirer.select(  # type: ignore
-        message="Is this a simulation run (not intended to write out data)?",
+    # Confirm if export
+    export_choice = inquirer.select(  # type: ignore
+        message="Would you like to write out data?",
         choices=["Yes", "No", "Not Sure"],
     ).execute()
 
     # Final set ups
-    BASE_CONFIG["simulation-flag"] = sim_choice == "Yes"
-    BASE_CONFIG["statement-directory"] = str(
+    USER_CONFIG["export-flag"] = export_choice == "Yes"
+    USER_CONFIG["statement-directory"] = str(
         Path.cwd() if len(statement_dir.strip()) == 0 else Path(statement_dir)
     )
 
-    return BASE_CONFIG
+    return USER_CONFIG
 
 
-def set_up_configs(user_config: Path, session_dir: Path):
+def get_user_configs(user_config: Path, session_dir: Path):
     """
     Sets up application configurations. Uses saved configs or user input configs
     """
@@ -70,14 +98,14 @@ def set_up_configs(user_config: Path, session_dir: Path):
                 config_dict = json.load(file)
 
             # Add configurations if missing
-            for key, val in BASE_CONFIG.items():
+            for key, val in USER_CONFIG.items():
                 if key not in config_dict:
                     config_dict[key] = val
         else:
-            config_dict = request_configs(session_dir)
+            config_dict = request_user_configs(session_dir)
 
     else:
-        config_dict = request_configs(session_dir)
+        config_dict = request_user_configs(session_dir)
 
     # Write out to json file
     user_config.parent.mkdir(parents=True, exist_ok=True)
