@@ -28,7 +28,8 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
     # Set up the statement file year
     file_year = re.search(
-        re.compile(r"([A-Za-z]{3,9})\s*(\d{2}),?\s*(\d{4}\b)", re.IGNORECASE), pdf_text
+        re.compile(r"([A-Za-z]{3,9})\s*(\d{2}),?\s*(\b\d{4}\b)", re.IGNORECASE),
+        pdf_text,
     )
 
     file_year = (file_year.group(3)) if file_year else (datetime.now().year)
@@ -85,6 +86,7 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
     return pl.DataFrame(
         data=data,
         schema=schema,
+        orient="row",
     )
 
 
