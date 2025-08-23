@@ -23,7 +23,7 @@ class Statement:
     A dataclass for a statement file
     """
 
-    file_path: str | Path
+    file_path: Path
     read_func: Callable
     pages: list = field(init=False)
     transactions: pl.DataFrame = field(init=False)
@@ -37,7 +37,9 @@ class Statement:
 
         self.pages = self.read_func(Path(self.file_path))
 
-        full_transactions = get_transactions(pdf_text="\n".join(self.pages))
+        full_transactions = get_transactions(
+            pdf_text="\n".join(self.pages)
+        ).with_columns(pl.lit(self.file_path.name).alias("source_file"))
         self.transactions = clean_transactions(data_df=full_transactions)
 
 
