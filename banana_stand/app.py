@@ -7,10 +7,10 @@ from dash import Dash
 
 from banana_stand.app_config import AppDir
 from banana_stand.app_config import UserConfig
+from banana_stand.dashboard import WebApp
 from banana_stand.data_prep import Statement
 from banana_stand.data_prep import Transactions
 from banana_stand.data_prep import read_pdfplumber
-from banana_stand.display import WebApp
 
 DIRECTORIES = AppDir()
 
