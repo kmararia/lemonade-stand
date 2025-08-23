@@ -2,10 +2,10 @@
 Bring up module functions
 """
 
-from banana_stand.data_prep.dtos import Statement
-from banana_stand.data_prep.dtos import Transactions
-from banana_stand.data_prep.read import read_pdfplumber
-from banana_stand.data_prep.read import read_pymullm
+from .read import read_pdfplumber
+from .read import read_pymullm
+from .utils import Statement
+from .utils import Transactions
 
 __all__ = [
     "Statement",
