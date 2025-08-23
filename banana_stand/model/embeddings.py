@@ -16,10 +16,12 @@ from banana_stand.app_config import MetaData
 from banana_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
+
 GLOVE_METADATA = MetaData("model")
+DIRECTORIES = AppDir()
 
 
-def get_glove_embeddings(dirs: AppDir):
+def get_glove_embeddings():
     """
     Prepare the GloVe embeddings datasets
     """
@@ -27,7 +29,7 @@ def get_glove_embeddings(dirs: AppDir):
     configs = GLOVE_METADATA.dot_data
 
     # Set up write out file
-    zipped_file = dirs.root_dir / "shared" / "schema" / "glove_embeddings.zip"
+    zipped_file = DIRECTORIES.root_dir / "shared" / "schema" / "glove_embeddings.zip"
     zipped_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Download data in stream chunks if needed
