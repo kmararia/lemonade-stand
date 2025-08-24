@@ -10,6 +10,7 @@ from dash import html
 layout = html.Div(
     children=[
         html.Div(
+            id="home-page",
             children=[
                 html.P(children="🍌", className="header-emoji"),
                 html.H1(
@@ -24,16 +25,12 @@ layout = html.Div(
             className="header",
         ),
         html.Div(
-            children=[],
-            className="menu",
-        ),
-        html.Div(
             children=[
                 html.Div(
                     children=[
                         dcc.Link(
                             html.Img(
-                                src="/assets/images/income.png",
+                                src="/assets/images/income2.jpg",
                                 className="image-option",
                             ),
                             href="/income",
@@ -49,7 +46,7 @@ layout = html.Div(
                     children=[
                         dcc.Link(
                             html.Img(
-                                src="/assets/images/savings.png",
+                                src="/assets/images/savings2.jpg",
                                 className="image-option",
                             ),
                             href="/income",
@@ -65,7 +62,7 @@ layout = html.Div(
                     children=[
                         dcc.Link(
                             html.Img(
-                                src="/assets/images/expenses.jpg",
+                                src="/assets/images/expenses2.jpg",
                                 className="image-option",
                             ),
                             href="/expenses",
