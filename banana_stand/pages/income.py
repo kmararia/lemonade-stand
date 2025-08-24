@@ -23,6 +23,37 @@ MAX_DATE = str(USER_DATA.income["date"].max())
 layout = html.Div(
     children=[
         html.Div(
+            className="side-panel",
+            children=[
+                html.Div(
+                    className="hamburger",
+                    children=[html.Span() for _ in range(3)],
+                ),
+                html.Div(
+                    className="panel-content",
+                    children=[
+                        html.H2("Dashboard Menu"),
+                        dcc.Link(
+                            html.Button("Home", className="button-86"),
+                            href="/",
+                        ),
+                        dcc.Link(
+                            html.Button("Income", className="button-86"),
+                            href="/income",
+                        ),
+                        dcc.Link(
+                            html.Button("Savings", className="button-86"),
+                            href="/savings",
+                        ),
+                        dcc.Link(
+                            html.Button("Expenses", className="button-86"),
+                            href="/expenses",
+                        ),
+                    ],
+                ),
+            ],
+        ),
+        html.Div(
             children=[
                 html.P(children="🍌", className="header-emoji"),
                 html.H1(

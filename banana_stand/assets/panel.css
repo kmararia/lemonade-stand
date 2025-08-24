@@ -1,0 +1,59 @@
+/* BURGER MENU */
+.hamburger {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    width: 20px;
+    height: 15px;
+    cursor: pointer;
+    z-index: 1100;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: opacity 0.4s ease;
+}
+
+.hamburger span {
+    display: block;
+    height: 2px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+}
+
+
+/* SIDE PANEL */
+.side-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 100vh;
+    color: #f4e80a;
+    background-color: #1e1e1e;
+    padding: 0;
+    box-shadow: 4px 0 6px rgba(0,0,0,0.2);
+    overflow: hidden;
+    z-index: 1000;
+    display: flex;
+    flex-direction: row;
+    transition: width 0.4s ease;
+}
+
+.side-panel:hover {
+    width: 220px;
+}
+
+.panel-content {
+    max-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    gap: 20px;
+    transition: max-width 0.4s ease, padding 0.4s ease;
+}
+
+.side-panel:hover .panel-content {
+    max-width: 220px;
+    padding: 20px;
+}
