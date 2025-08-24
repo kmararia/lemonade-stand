@@ -41,7 +41,7 @@ class UserData:
 
         # Rename fields
         transactions.data = transactions.data.with_columns(
-            pl.lit("category").alias("transaction_category"),
+            pl.lit("Category").alias("transaction_category"),
             pl.lit("income").alias("transaction_type"),
         ).rename(
             {
@@ -49,25 +49,26 @@ class UserData:
                 "transaction_category": "category",
                 "transaction_amount": "amount",
                 "transaction_type": "type",
+                "source_file": "source",
             }
         )
 
         # Create summarized datasets
         income = (
             transactions.data.filter(pl.col("type") == "income")
-            .group_by(["date", "category"])
+            .group_by(["date", "category", "source"])
             .agg(pl.col("amount").sum().alias("amount"))
         )
 
         savings = (
             transactions.data.filter(pl.col("type") == "savings")
-            .group_by(["date", "category"])
+            .group_by(["date", "category", "source"])
             .agg(pl.col("amount").sum().alias("amount"))
         )
 
         expenses = (
             transactions.data.filter(pl.col("type") == "expenses")
-            .group_by(["date", "category"])
+            .group_by(["date", "category", "source"])
             .agg(pl.col("amount").sum().alias("amount"))
         )
 
