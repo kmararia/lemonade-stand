@@ -1,4 +1,12 @@
 /* MAIN BODY */
+#home-page {
+    height: 100vh;
+    background-image: url("/assets/images/banana_stand.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 body {
     font-family: "Lato", sans-serif;
     margin: 0;
@@ -9,14 +17,14 @@ body {
 
 /* PAGE TOP HEADER */
 .header {
-    background-color: #323232;
+    background-color: #2c392e;
     height: 288px;
     padding: 16px 0 0 0;
 }
 
 .header-emoji {
     font-size: 48px;
-    margin: 0 auto;
+    margin: 20px auto auto;
     text-align: center;
 }
 
