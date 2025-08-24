@@ -15,6 +15,7 @@ from banana_stand.data_store import USER_DATA
 
 # Define module variables
 CATEGORY_LIST = USER_DATA.income["category"].unique().sort().to_list()
+SOURCE_LIST = USER_DATA.income["source"].unique().sort().to_list() + ["All - Selected"]
 MIN_DATE = str(USER_DATA.income["date"].min())
 MAX_DATE = str(USER_DATA.income["date"].max())
 
@@ -71,7 +72,22 @@ layout = html.Div(
             children=[
                 html.Div(
                     children=[
-                        html.Div(children="Type", className="menu-title"),
+                        html.Div(children="Source", className="menu-title"),
+                        dcc.Dropdown(
+                            id="source-filter",
+                            options=[
+                                {"label": source, "value": source}
+                                for source in SOURCE_LIST
+                            ],
+                            value="All - Selected",
+                            clearable=False,
+                            searchable=True,
+                        ),
+                    ],
+                ),
+                html.Div(
+                    children=[
+                        html.Div(children="Category", className="menu-title"),
                         dcc.Dropdown(
                             id="category-filter",
                             options=[
@@ -81,22 +97,23 @@ layout = html.Div(
                             value=CATEGORY_LIST[0] if len(CATEGORY_LIST) else None,
                             clearable=False,
                             searchable=True,
-                            className="dropdown",
                         ),
                     ],
                 ),
                 html.Div(
                     children=[
                         html.Div(
-                            children="Date Range",
+                            children="Date range",
                             className="menu-title",
                         ),
                         dcc.DatePickerRange(
                             id="date-range",
+                            display_format="MMM D YYYY",
                             min_date_allowed=MIN_DATE,
                             max_date_allowed=MAX_DATE,
                             start_date=MIN_DATE,
                             end_date=MAX_DATE,
+                            className="date-bar",
                         ),
                     ]
                 ),
@@ -124,8 +141,9 @@ layout = html.Div(
     Input("date-range", "start_date"),
     Input("date-range", "end_date"),
     Input("category-filter", "value"),
+    Input("source-filter", "value"),
 )
-def update_charts(start_date: str, end_date: str, category):
+def update_charts(start_date: str, end_date: str, category: str, source: str):
     """
     Updates the data displayed based on callback inputs
     """
@@ -135,7 +153,13 @@ def update_charts(start_date: str, end_date: str, category):
         (pl.col("date") >= datetime.strptime(start_date, "%Y-%m-%d"))
         & (pl.col("date") <= datetime.strptime(end_date, "%Y-%m-%d"))
         & (pl.col("category") == category)
+        & ((pl.col("source") == source) if source != "All - Selected" else pl.lit(True))
     ).sort(["date", "category"])
+
+    # Summarize data
+    filtered_data_df = filtered_data_df.group_by("date").agg(
+        pl.col("amount").sum().alias("amount")
+    )
 
     return {
         "data": [
@@ -155,6 +179,9 @@ def update_charts(start_date: str, end_date: str, category):
             "xaxis": {"fixedrange": True},
             "yaxis": {"tickprefix": "$", "fixedrange": True},
             "colorway": ["#17B897"],
+            "plot_bgcolor": "#1e1e1e",
+            "paper_bgcolor": "#1e1e1e",
+            "font": {"color": "#e0e0e0"},
         },
     }
 
