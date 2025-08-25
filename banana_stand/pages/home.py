@@ -9,25 +9,35 @@ from dash import html
 # Set up page layout
 layout = html.Div(
     children=[
+        html.Div(id="home-page"),
         html.Div(
-            id="home-page",
             children=[
                 html.P(children="🍌", className="header-emoji"),
                 html.H1(
-                    children="Banana-stand App",
+                    children=html.H1("Banana-stand App", className="title-button"),
                     className="header-title",
                 ),
                 html.P(
-                    children="A web application to monitor personal expenditure",
+                    children="A web application to monitor your personal expenditure",
                     className="header-description",
                 ),
             ],
-            className="header",
+            className="home-header",
+        ),
+        html.Div(
+            children=[
+                html.Div(className="ripple-loader"),
+            ],
+            className="ripple-container",
         ),
         html.Div(
             children=[
                 html.Div(
                     children=[
+                        dcc.Link(
+                            html.Button("Income", className="image-button"),
+                            href="/income",
+                        ),
                         dcc.Link(
                             html.Img(
                                 src="/assets/images/income2.jpg",
@@ -35,15 +45,15 @@ layout = html.Div(
                             ),
                             href="/income",
                         ),
-                        dcc.Link(
-                            html.Button("Income", className="button-85"),
-                            href="/income",
-                        ),
                     ],
                     className="image-container",
                 ),
                 html.Div(
                     children=[
+                        dcc.Link(
+                            html.Button("Savings", className="image-button"),
+                            href="/income",
+                        ),
                         dcc.Link(
                             html.Img(
                                 src="/assets/images/savings2.jpg",
@@ -51,24 +61,20 @@ layout = html.Div(
                             ),
                             href="/income",
                         ),
-                        dcc.Link(
-                            html.Button("Savings", className="button-85"),
-                            href="/income",
-                        ),
                     ],
                     className="image-container",
                 ),
                 html.Div(
                     children=[
                         dcc.Link(
+                            html.Button("Expenses", className="image-button"),
+                            href="/expenses",
+                        ),
+                        dcc.Link(
                             html.Img(
                                 src="/assets/images/expenses2.jpg",
                                 className="image-option",
                             ),
-                            href="/expenses",
-                        ),
-                        dcc.Link(
-                            html.Button("Expenses", className="button-85"),
                             href="/expenses",
                         ),
                     ],

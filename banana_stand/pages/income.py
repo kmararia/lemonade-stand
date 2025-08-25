@@ -23,6 +23,8 @@ MAX_DATE = str(USER_DATA.income["date"].max())
 # Set up page layout
 layout = html.Div(
     children=[
+        html.Div(id="dummy-output"),
+        html.Button("⬅ Back", id="back-button"),
         html.Div(
             className="side-panel",
             children=[
@@ -35,19 +37,19 @@ layout = html.Div(
                     children=[
                         html.H2("Dashboard Menu"),
                         dcc.Link(
-                            html.Button("Home", className="button-86"),
+                            html.Button("Home", className="panel-button"),
                             href="/",
                         ),
                         dcc.Link(
-                            html.Button("Income", className="button-86"),
+                            html.Button("Income", className="panel-button"),
                             href="/income",
                         ),
                         dcc.Link(
-                            html.Button("Savings", className="button-86"),
+                            html.Button("Savings", className="panel-button"),
                             href="/savings",
                         ),
                         dcc.Link(
-                            html.Button("Expenses", className="button-86"),
+                            html.Button("Expenses", className="panel-button"),
                             href="/expenses",
                         ),
                     ],
@@ -55,20 +57,21 @@ layout = html.Div(
             ],
         ),
         html.Div(
+            className="header",
             children=[
                 html.P(children="🍌", className="header-emoji"),
                 html.H1(
-                    children="Banana-stand App",
+                    children=html.H1("Banana-stand App", className="title-button"),
                     className="header-title",
                 ),
                 html.P(
-                    children="A web application to monitor personal expenditure",
+                    children="A web application to monitor your personal expenditure",
                     className="header-description",
                 ),
             ],
-            className="header",
         ),
         html.Div(
+            className="menu",
             children=[
                 html.Div(
                     children=[
@@ -103,36 +106,53 @@ layout = html.Div(
                 html.Div(
                     children=[
                         html.Div(
-                            children="Date range",
                             className="menu-title",
+                            children="Date range",
                         ),
                         dcc.DatePickerRange(
                             id="date-range",
-                            display_format="MMM D YYYY",
+                            className="date-bar",
+                            display_format="MMM D, YYYY",
                             min_date_allowed=MIN_DATE,
                             max_date_allowed=MAX_DATE,
                             start_date=MIN_DATE,
                             end_date=MAX_DATE,
-                            className="date-bar",
                         ),
                     ]
                 ),
             ],
-            className="menu",
         ),
         html.Div(
+            className="wrapper",
             children=[
                 html.Div(
+                    className="graph-card",
                     children=dcc.Graph(
                         id="income-chart",
                         config={"displayModeBar": "hover"},
                     ),
-                    className="card",
                 ),
             ],
-            className="wrapper",
         ),
+        # html.Div(
+        #     className="bouncy-container",
+        #     children=[html.Div(className="bouncy-item")],
+        # ),
     ]
+)
+
+
+dash.clientside_callback(
+    """
+    function(n_clicks) {
+        if(n_clicks > 0) {
+            window.history.back();
+        }
+        return "";
+    }
+    """,
+    dash.Output("dummy-output", "children"),
+    dash.Input("back-button", "n_clicks"),
 )
 
 
@@ -179,8 +199,8 @@ def update_charts(start_date: str, end_date: str, category: str, source: str):
             "xaxis": {"fixedrange": True},
             "yaxis": {"tickprefix": "$", "fixedrange": True},
             "colorway": ["#17B897"],
-            "plot_bgcolor": "#1e1e1e",
-            "paper_bgcolor": "#1e1e1e",
+            "plot_bgcolor": "#181818",
+            "paper_bgcolor": "#181818",
             "font": {"color": "#e0e0e0"},
         },
     }
