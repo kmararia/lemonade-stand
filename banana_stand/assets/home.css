@@ -1,0 +1,237 @@
+/* MAIN BODY */
+#home-page {
+    height: 60vh;
+    z-index: -99;
+    background-image: url("/assets/images/banana_stand.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.home-header {
+    height: 288px;
+    top: 80px;
+    padding: 16px 0 0 0;
+}
+
+/* LOADING RIPPLE */
+.ripple-container {
+    height: 270px;
+    width: auto;
+    align-items: center;
+    justify-content: center;
+    outline: none;
+    padding-top: 0px;
+    margin: -150px auto;
+    background: transparent !important;
+    animation: fadeSlideIn 1.5s ease-out;
+}
+
+.ripple-loader {
+  border: 0 solid transparent;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  margin: 60px auto;
+}
+
+.ripple-loader::before,
+.ripple-loader::after {
+ content: '';
+ border: 7px solid #ccc;
+ border-radius: 50%;
+ width: inherit;
+ height: inherit;
+ position: absolute;
+ animation: loader 2s linear infinite;
+ opacity: 0;
+}
+
+.ripple-loader::before {
+ animation-delay: 1s;
+}
+
+@keyframes loader {
+ 0% {
+  transform: scale(1);
+  opacity: 0;
+ }
+
+ 50% {
+  opacity: 1;
+ }
+
+ 100% {
+  transform: scale(0);
+  opacity: 0;
+ }
+}
+
+
+/* IMAGE MENU */
+.image-menu {
+    width: 1212px;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 10px;
+    padding: 0px 15px;
+    margin: -60px auto 0 auto;
+    background-color: red;
+    border-radius: 10px;
+    border: none;
+    color: white;
+    position: relative;
+    transition-duration: .2s;
+    background: linear-gradient(0deg, #000, #272727);
+    animation: fadeSlideIn 1.5s ease-out;
+}
+
+.image-menu:before, .image-menu:after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    border-radius: 10px;
+    background: linear-gradient(
+      45deg, #fb0094, #0000ff, #00ff00,#ffff00,
+      #ff0000, #fb0094, #0000ff, #00ff00,#ffff00, #ff0000
+    );
+    background-size: 400%;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    z-index: -1;
+    animation: steam 20s linear infinite;
+}
+
+@keyframes steam {
+    0% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 400% 0;
+    }
+
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.image-menu:after {
+    filter: blur(100px);
+}
+
+.image-title {
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #17B897;
+}
+
+
+/* IMAGE SELECTOR */
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    gap: 20px;
+}
+
+.image-option {
+    width: 350px;
+    height: 200px;
+    transition: transform 0.3s ease;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeSlideIn 0.6s forwards;
+}
+
+.image-option:hover {
+    transform: scale(1.1);
+}
+
+.image-option:nth-child(1) { animation-delay: 0.1s; }
+.image-option:nth-child(2) { animation-delay: 0.3s; }
+.image-option:nth-child(3) { animation-delay: 0.5s; }
+.image-option:nth-child(4) { animation-delay: 0.7s; }
+
+
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* LED COLORED IMAGE BUTTON */
+.image-button {
+    padding: 0.6em 9em;
+    border: none;
+    outline: none;
+    color: rgb(255, 255, 255);
+    background: #111;
+    cursor: pointer;
+    position: relative;
+    z-index: 0;
+    border-radius: 30px;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.image-button:before {
+    content: "";
+    background: linear-gradient(
+      45deg,
+      #ff0000,
+      #ff7300,
+      #fffb00,
+      #48ff00,
+      #00ffd5,
+      #002bff,
+      #7a00ff,
+      #ff00c8,
+      #ff0000
+    );
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(5px);
+    -webkit-filter: blur(5px);
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    animation: glowing-button-85 20s linear infinite;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 10px;
+}
+
+@keyframes glowing-button-85 {
+    0% {
+      background-position: 0 0;
+    }
+    50% {
+      background-position: 400% 0;
+    }
+    100% {
+      background-position: 0 0;
+    }
+}
+
+.image-button:after {
+    z-index: -1;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #222;
+    left: 0;
+    top: 0;
+    border-radius: 10px;
+}
