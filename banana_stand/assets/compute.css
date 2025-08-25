@@ -1,3 +1,19 @@
+/* INFO GRAPHS */
+.wrapper {
+    margin-right: auto;
+    margin-left: auto;
+    max-width: 1024px;
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-top: 50px;
+}
+
+.graph-card {
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+
 /* SELECTION MENU */
 .menu {
     height: 92px;
@@ -7,7 +23,7 @@
     padding-top: 24px;
     border-radius: 12px;
     margin: -70px auto 0 auto;
-    background-color: #1e1e1e;
+    background-color: #181818;
     box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
 }
 
@@ -28,7 +44,7 @@
     color: #422800;
     cursor: pointer;
     font-weight: 600;
-    font-size: 17px;
+    font-size: 16px;
 }
 
 .Select--single>.Select-control .Select-value,
@@ -84,7 +100,7 @@
     cursor: pointer;
     color: #422800;
     font-weight: 600;
-    font-size: 17px;
+    font-size: 16px;
 }
 
 .DateInput_input__focused {
