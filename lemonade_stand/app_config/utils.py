@@ -89,7 +89,7 @@ class AppDir:
         else:
             apps_dir = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
 
-        return apps_dir / "banana-stand"
+        return apps_dir / "lemonade-stand"
 
     def get_os_home(self) -> Path:
         """

@@ -11,7 +11,7 @@ Expenses page layout configurations
 # from dash import dcc
 # from dash import html
 
-# from lemonade_stand.data_store import USER_DATA
+# from lemonade_stand.meta_data import USER_DATA
 
 # # Define module variables
 # CATEGORY_LIST = USER_DATA.expenses["category"].unique().sort().to_list()
@@ -43,5 +43,5 @@ Expenses page layout configurations
 
 # # Register page
 # dash.register_page(
-#     __name__, path="/expenses", name="Expenses", title="Expenses - Banana Stand"
+#     __name__, path="/expenses", name="Expenses", title="Expenses - Lemonade Stand"
 # )

@@ -11,7 +11,7 @@ from dash import Output
 from dash import dcc
 from dash import html
 
-from lemonade_stand.data_store import USER_DATA
+from lemonade_stand.meta_data import USER_DATA
 
 # Define module variables
 CATEGORY_LIST = USER_DATA.income["category"].unique().sort().to_list()
@@ -204,5 +204,5 @@ def update_charts(start_date: str, end_date: str, category: str, source: str):
 
 # Register page
 dash.register_page(
-    __name__, path="/income", name="Income", title="Income - Banana Stand"
+    __name__, path="/income", name="Income", title="Income - Lemonade Stand"
 )

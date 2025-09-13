@@ -5,7 +5,7 @@ Holds metadata configurations for different module steps
 import importlib.metadata
 from datetime import datetime
 
-__version__ = importlib.metadata.version("banana-stand")
+__version__ = importlib.metadata.version("lemonade-stand")
 
 USER_CONFIG = {
     "app-version": __version__,

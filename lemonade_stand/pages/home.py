@@ -88,4 +88,4 @@ layout = html.Div(
 
 
 # Register page
-dash.register_page(__name__, path="/", name="Home", title="Banana Stand")
+dash.register_page(__name__, path="/", name="Home", title="Lemonade Stand")
