@@ -1,0 +1,55 @@
+---
+name: 🐞 Bug report
+description: File an issue/bug report
+title: '[BUG] <title>'
+labels: [issue]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for reporting an issue!
+              Please fill in as much of the following form as you're able.
+    - type: checkboxes
+      attributes:
+          label: Is there an existing issue for this?
+          description: Please search to see if an issue already exists for the bug you encountered
+          options:
+              - label: I have searched the existing issues
+                required: true
+    - type: input
+      attributes:
+          label: Section affected
+          description: Please specify module/section affected
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Current Behavior
+          description: A concise description of what you're experiencing (provide screenshots if possible)
+      validations:
+          required: false
+    - type: textarea
+      attributes:
+          label: What steps will reproduce the bug?
+          description: >
+              Enter details about your bug, preferably a simple code snippet that can
+              be run using `node` directly without installing third-party dependencies
+              or downloading code from the internet (i.e. no ZIP archive, no GitHub
+              repository, etc.).
+      validations:
+          required: false
+    - type: textarea
+      attributes:
+          label: Expected Behavior
+          description: A concise description of what you expect to happen
+      validations:
+          required: false
+    - type: textarea
+      attributes:
+          label: Potential Tasks
+          description: List down any potential tasks to be able to fix this issue
+          value: |-
+              - [ ] Connects to #...
+              - [ ] Fill in more tasks
+              - [ ] ????
+              - [ ] DefDone: *How can this be considered done?*

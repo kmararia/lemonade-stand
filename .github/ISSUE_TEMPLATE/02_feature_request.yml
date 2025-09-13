@@ -1,0 +1,39 @@
+---
+name: 🎰 Feature Request
+description: Request a new feature
+title: '[FEATURE] <title>'
+labels: [enhancement]
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for filling a feature request!
+              Please fill in as much of the following form as you're able.
+    - type: checkboxes
+      attributes:
+          label: Is there an existing request for this?
+          description: Please search to see if this feature has already been requested
+          options:
+              - label: I have searched the existing requests
+                required: true
+    - type: input
+      attributes:
+          label: Section requested
+          description: Please specify module/section that will be updated with this feature
+      validations:
+          required: true
+    - type: textarea
+      attributes:
+          label: Feature description
+          description: A concise description of what you would like to have
+      validations:
+          required: false
+    - type: textarea
+      attributes:
+          label: Potential Tasks
+          description: List down any potential tasks to get this feature added
+          value: |-
+              - [ ] Connects to #...
+              - [ ] Fill in more tasks
+              - [ ] ????
+              - [ ] DefDone: *How can this be considered done?*
