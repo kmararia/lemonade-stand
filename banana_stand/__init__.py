@@ -1,5 +1,5 @@
 """
-Mark banana_stand package
+Mark lemonade_stand package
 """
 
-from banana_stand.app import create_app
+from lemonade_stand.app import create_app

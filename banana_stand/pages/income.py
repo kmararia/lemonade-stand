@@ -1,5 +1,5 @@
 """
-Settings for income page layout
+Income page layout configurations
 """
 
 from datetime import datetime
@@ -10,8 +10,7 @@ from dash import Input
 from dash import Output
 from dash import dcc
 from dash import html
-
-from banana_stand.data_store import USER_DATA
+from lemonade_stand.data_store import USER_DATA
 
 # Define module variables
 CATEGORY_LIST = USER_DATA.income["category"].unique().sort().to_list()
@@ -123,10 +122,10 @@ layout = html.Div(
             ],
         ),
         html.Div(
-            className="wrapper",
+            className="glow-container",
             children=[
                 html.Div(
-                    className="graph-card",
+                    className="box",
                     children=dcc.Graph(
                         id="income-chart",
                         config={"displayModeBar": "hover"},
@@ -134,10 +133,6 @@ layout = html.Div(
                 ),
             ],
         ),
-        # html.Div(
-        #     className="bouncy-container",
-        #     children=[html.Div(className="bouncy-item")],
-        # ),
     ]
 )
 

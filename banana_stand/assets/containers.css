@@ -1,16 +1,28 @@
-/* INFO GRAPHS */
-.wrapper {
-    margin-right: auto;
-    margin-left: auto;
-    max-width: 1024px;
+/* GRAPHS CONTAINERS */
+/* GLOW ON HOVER CARD -> https://uiverse.io/joe-watson-sbf/honest-bullfrog-6 */
+.glow-container {
+    margin: 50px auto 0 auto;
+    max-width: 1124px;
+    max-height: auto;
     padding-right: 10px;
     padding-left: 10px;
-    margin-top: 50px;
 }
 
-.graph-card {
-    margin-bottom: 24px;
-    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+.glow-container .box {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0.2rem;
+    background-color: rgba(255, 255, 255, 0.074);
+    border: 1px solid rgba(255, 255, 255, 0.222);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border-radius: 0.7rem;
+    transition: all ease 0.3s;
+}
+
+.glow-container .box:hover {
+    box-shadow: 0px 0px 20px 1px #ffbb763f;
+    border: 1px solid rgba(255, 255, 255, 0.454);
 }
 
 

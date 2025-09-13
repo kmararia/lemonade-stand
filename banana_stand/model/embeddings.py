@@ -9,11 +9,10 @@ from pathlib import Path
 
 import numpy as np
 import urllib3
+from lemonade_stand.app_config import AppDir
+from lemonade_stand.app_config import MetaData
+from lemonade_stand.utils import set_up_logger
 from tqdm import tqdm
-
-from banana_stand.app_config import AppDir
-from banana_stand.app_config import MetaData
-from banana_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
 

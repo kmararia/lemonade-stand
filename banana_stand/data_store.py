@@ -6,11 +6,10 @@ from dataclasses import dataclass
 from dataclasses import field
 
 import polars as pl
-
-from banana_stand.app_config import UserConfig
-from banana_stand.data_prep import Statement
-from banana_stand.data_prep import Transactions
-from banana_stand.data_prep import read_pdfplumber
+from lemonade_stand.app_config import UserConfig
+from lemonade_stand.data_prep import Statement
+from lemonade_stand.data_prep import Transactions
+from lemonade_stand.data_prep import read_pdfplumber
 
 
 @dataclass(frozen=True)

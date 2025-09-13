@@ -5,8 +5,7 @@ downloaded from http://www.census.gov/geo/maps-data/data/gazetteer2015.html
 
 import numpy as np
 import polars as pl
-
-from banana_stand.app_config import AppDir
+from lemonade_stand.app_config import AppDir
 
 DIRECTORIES = AppDir()
 

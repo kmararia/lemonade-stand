@@ -7,10 +7,9 @@ from pathlib import Path
 
 from InquirerPy import inquirer
 from InquirerPy import validator
-
-from banana_stand.app_config import metadata
-from banana_stand.utils import VersionMismatchError
-from banana_stand.utils import set_up_logger
+from lemonade_stand.app_config import metadata
+from lemonade_stand.utils import VersionMismatchError
+from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
 USER_CONFIG = metadata.USER_CONFIG

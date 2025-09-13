@@ -9,9 +9,9 @@ from dataclasses import fields
 from pathlib import Path
 from types import SimpleNamespace
 
-from banana_stand.app_config import metadata
-from banana_stand.app_config.setup import check_version
-from banana_stand.app_config.setup import get_user_configs
+from lemonade_stand.app_config import metadata
+from lemonade_stand.app_config.setup import check_version
+from lemonade_stand.app_config.setup import get_user_configs
 
 
 @dataclass

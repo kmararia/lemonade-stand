@@ -30,7 +30,7 @@
 
 [tool.setuptools.packages.find]
     exclude = ["tests*", "tmp*"]
-    include = ["banana_stand*"]
+    include = ["lemonade_stand*"]
 
 [tool.ruff]
     # Same as Black.
