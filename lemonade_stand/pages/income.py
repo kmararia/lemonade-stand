@@ -10,6 +10,7 @@ from dash import Input
 from dash import Output
 from dash import dcc
 from dash import html
+
 from lemonade_stand.data_store import USER_DATA
 
 # Define module variables
@@ -60,7 +61,7 @@ layout = html.Div(
             children=[
                 html.P(children="🍌", className="header-emoji"),
                 html.H1(
-                    children=html.H1("Banana-stand App", className="title-button"),
+                    children=html.H1("Lemonade-stand App", className="title-button"),
                     className="header-title",
                 ),
                 html.P(

@@ -1,5 +1,5 @@
 """
-Banana-stand entry point.
+Lemonade-stand entry point.
 """
 
 import lemonade_stand

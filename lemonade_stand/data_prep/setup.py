@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 from dateutil.parser import parse
+
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)

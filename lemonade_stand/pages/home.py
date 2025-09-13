@@ -14,7 +14,7 @@ layout = html.Div(
             children=[
                 html.P(children="🍌", className="header-emoji"),
                 html.H1(
-                    children=html.H1("Banana-stand App", className="title-button"),
+                    children=html.H1("Lemonade-stand App", className="title-button"),
                     className="header-title",
                 ),
                 html.P(

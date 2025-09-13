@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from dataclasses import field
 
 import polars as pl
+
 from lemonade_stand.app_config import UserConfig
 from lemonade_stand.data_prep import Statement
 from lemonade_stand.data_prep import Transactions

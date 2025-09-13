@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pdfplumber
 import pymupdf4llm
+
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)

@@ -7,6 +7,7 @@ from pathlib import Path
 
 from InquirerPy import inquirer
 from InquirerPy import validator
+
 from lemonade_stand.app_config import metadata
 from lemonade_stand.utils import VersionMismatchError
 from lemonade_stand.utils import set_up_logger
