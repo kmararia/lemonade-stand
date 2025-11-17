@@ -18,7 +18,7 @@
 
 ## Getting Help
 
-* Issues: https://github.com/KelvinMararia/banana-stand/issues
+* Issues: https://github.com/kmararia/lemonade-stand/issues
 * Discussion Forum:
 * Development Discussion:
 
