@@ -1,5 +1,5 @@
 """
-Lemonade-stand entry point.
+Main application entry point.
 """
 
 import lemonade_stand

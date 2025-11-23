@@ -15,6 +15,21 @@ from lemonade_stand.app_config.setup import get_user_configs
 
 
 @dataclass
+class WebConfigs:  ## NOTE: Need to give user ability to update this through web app. Save configs to app dir
+    """
+    A dataclass to hold default images to be display on the web application
+    """
+
+    theme: str = "dark"  ## NOTE: NEED TO ADD A LIGHT THEME
+    img_home: str = "/assets/images/income2.jpg"
+    img_header: str = "/assets/images/income2.jpg"
+
+    img_income: str = "/assets/images/income2.jpg"
+    img_savings: str = "/assets/images/savings2.jpg"
+    img_expenses: str = "/assets/images/expenses2.jpg"
+
+
+@dataclass
 class UserConfig:
     """
     A dataclass for the applicaton configs
@@ -108,7 +123,9 @@ class MetaData:
 
     category: str
     refresh_flag: bool = field(init=False)
-    dict_data: dict = field(init=False)
+    dict_data: dict = field(
+        init=False
+    )  ## NOTE: MAYBE NEED TO GET RID OF DICT FOR EFFICIENCY
     dot_data: SimpleNamespace = field(init=False)
 
     def __post_init__(self):

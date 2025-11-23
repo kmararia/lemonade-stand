@@ -5,7 +5,7 @@
     license = "MIT"
     readme = "README.md"
     requires-python = ">=3.12"
-    authors = [{ name = "Kelvin Mararia", email = "kevohnjuguna254@gmail.com" }]
+    authors = [{ name = "Kelvin", email = "kelvinmararia@icloud.com" }]
     dependencies = [
         "dash>=3.2.0",
         "inquirerpy>=0.3.4",

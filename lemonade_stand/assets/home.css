@@ -2,7 +2,7 @@
 #home-page {
     height: 60vh;
     z-index: -99;
-    background-image: url("/assets/images/lemonade_stand.jpg");
+    background-image: url("/assets/images/slim_lemonade.jpg");   /*NOTE: Need to check if this can be converted into a user variable*/
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

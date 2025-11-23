@@ -6,15 +6,18 @@ import dash
 from dash import dcc
 from dash import html
 
+from lemonade_stand.app_config import WebConfigs
+
 # Set up page layout
 layout = html.Div(
     children=[
         html.Div(id="home-page"),
         html.Div(
+            className="home-header",
             children=[
-                html.P(children="🍌", className="header-emoji"),
+                html.P(children="🍋", className="header-emoji"),
                 html.H1(
-                    children=html.H1("Lemonade-stand App", className="title-button"),
+                    children=html.H1("Lemonade Stand", className="title-button"),
                     className="header-title",
                 ),
                 html.P(
@@ -22,17 +25,18 @@ layout = html.Div(
                     className="header-description",
                 ),
             ],
-            className="home-header",
         ),
         html.Div(
+            className="ripple-container",
             children=[
                 html.Div(className="ripple-loader"),
             ],
-            className="ripple-container",
         ),
         html.Div(
+            className="image-menu",
             children=[
                 html.Div(
+                    className="image-container",
                     children=[
                         dcc.Link(
                             html.Button("Income", className="image-button"),
@@ -40,15 +44,15 @@ layout = html.Div(
                         ),
                         dcc.Link(
                             html.Img(
-                                src="/assets/images/income2.jpg",
+                                src=WebConfigs.img_income,
                                 className="image-option",
                             ),
                             href="/income",
                         ),
                     ],
-                    className="image-container",
                 ),
                 html.Div(
+                    className="image-container",
                     children=[
                         dcc.Link(
                             html.Button("Savings", className="image-button"),
@@ -56,15 +60,15 @@ layout = html.Div(
                         ),
                         dcc.Link(
                             html.Img(
-                                src="/assets/images/savings2.jpg",
+                                src=WebConfigs.img_savings,
                                 className="image-option",
                             ),
                             href="/income",
                         ),
                     ],
-                    className="image-container",
                 ),
                 html.Div(
+                    className="image-container",
                     children=[
                         dcc.Link(
                             html.Button("Expenses", className="image-button"),
@@ -72,16 +76,14 @@ layout = html.Div(
                         ),
                         dcc.Link(
                             html.Img(
-                                src="/assets/images/expenses2.jpg",
+                                src=WebConfigs.img_expenses,
                                 className="image-option",
                             ),
                             href="/expenses",
                         ),
                     ],
-                    className="image-container",
                 ),
             ],
-            className="image-menu",
         ),
     ]
 )

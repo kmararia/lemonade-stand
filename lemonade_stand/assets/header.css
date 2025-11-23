@@ -11,7 +11,7 @@ body {
 .header {
     height: 288px;
     padding: 16px 0 0 0;
-    background-image: url("/assets/images/lemonade_stand_slim.jpg");
+    background-image: url("/assets/images/lemonade_stand_slim.jpg");   /*NOTE: Need to check if this can be converted into a user variable*/
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
