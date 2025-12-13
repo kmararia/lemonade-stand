@@ -1,25 +1,18 @@
 include = ["**/*.toml"]
-exclude = [
-  "**/tmp/**",
-]
+exclude = []
 
 [formatting]
+    align_comments      = true
+    align_entries       = true
+    allowed_blank_lines = 2
+    indent_entries      = true
+    indent_string       = '    '
+    reorder_keys        = false
 
 [[rule]]
+    include = ["taplo.toml"]
+    keys    = ["formatting"]
 
 [rule.formatting]
-include = ["taplo.toml"]
-keys = ["exclude"]
-
-array_auto_collapse = false
-
-[[rule]]
-include = ["pyproject.toml"]
-
-[rule.formatting]
-indent_string = '    '
-indent_entries = true
-align_entries = true
-align_comments = true
-allowed_blank_lines = 2
-reorder_keys = false
+    array_auto_collapse = false
+    reorder_keys        = true
