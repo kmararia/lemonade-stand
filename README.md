@@ -24,8 +24,8 @@
 
 ## Reporting Bugs and Contributing Code
 
-* Want to report a bug or request a feature? Please open [an issue](https://github.com/KelvinMararia/banana-stand/issues/new).
-* Want to help us build **_LemonadeStand_**? Fork the project, edit in a [dev environment](https://github.com/KelvinMararia/banana-stand/wiki/Local-development-setup) and make a pull request. We need all the help we can get!
+* Want to report a bug or request a feature? Please open [an issue](https://github.com/kmararia/lemonade-stand/issues/new).
+* Want to help us build **_Lemonade-Stand_**? Fork the project, edit in a [dev environment](https://github.com/kmararia/lemonade-stand/wiki/Local-development-setup) and make a pull request. We need all the help we can get!
 
 
 ## License
