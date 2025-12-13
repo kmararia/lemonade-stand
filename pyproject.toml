@@ -8,29 +8,21 @@
     description = ""
     license = "MIT"
     readme = "README.md"
-    requires-python = ">=3.14"
+    requires-python = ">=3.13"
     authors = [{ name = "Kelvin", email = "kelvinmararia@icloud.com" }]
     dependencies = [
-        "dash>=3.2.0",
+        "dash>=3.3.0",
         "inquirerpy>=0.3.4",
-        "llama-index>=0.13.1",
-        "pdfplumber>=0.11.7",
-        "polars>=1.32.2",
-        "pyarrow>=21.0.0",
-        "pymupdf4llm>=0.0.27",
+        "llama-index>=0.14.10",
+        "pdfplumber>=0.11.8",
+        "polars>=1.36.1",
+        "pyarrow>=22.0.0",
+        "pymupdf4llm>=0.2.7",
     ]
 
 [project.optional-dependencies]
-    dependencies = []
-    test = [
-        "pyright>=1.1.403",
-        "pytest>=8.4.1",
-        "ruff>=0.12.8",
-    ]
-
-[tool.setuptools.packages.find]
-    exclude = ["tests*", "tmp*"]
-    include = ["lemonade_stand*"]
+    formatters = ["pre-commit>=4.5.0", "ruff>=0.14.9"]
+    test       = ["pyright>=1.1.407", "pytest>=9.0.2"]
 
 [tool.ruff]
     # Same as Black.
