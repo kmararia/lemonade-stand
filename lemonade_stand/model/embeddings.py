@@ -11,8 +11,8 @@ import numpy as np
 import urllib3
 from tqdm import tqdm
 
-from lemonade_stand.app_config import AppDir
-from lemonade_stand.app_config import MetaData
+from lemonade_stand.config import AppDir
+from lemonade_stand.config import MetaData
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)

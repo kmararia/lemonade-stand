@@ -7,10 +7,10 @@ from dataclasses import field
 
 import polars as pl
 
-from lemonade_stand.app_config import UserConfig
-from lemonade_stand.data_prep import Statement
-from lemonade_stand.data_prep import Transactions
-from lemonade_stand.data_prep import read_pdfplumber
+from lemonade_stand.config import UserConfig
+from lemonade_stand.data import Statement
+from lemonade_stand.data import Transactions
+from lemonade_stand.data import read_pdfplumber
 
 
 @dataclass(frozen=True)

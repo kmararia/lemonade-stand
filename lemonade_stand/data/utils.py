@@ -10,8 +10,8 @@ from typing import overload
 
 import polars as pl
 
-from lemonade_stand.data_prep.setup import clean_transactions
-from lemonade_stand.data_prep.setup import get_transactions
+from lemonade_stand.data.setup import clean_transactions
+from lemonade_stand.data.setup import get_transactions
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)

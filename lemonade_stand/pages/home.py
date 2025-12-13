@@ -6,7 +6,7 @@ import dash
 from dash import dcc
 from dash import html
 
-from lemonade_stand.app_config import WebConfigs
+from lemonade_stand.config import WebConfigs
 
 # Set up page layout
 layout = html.Div(

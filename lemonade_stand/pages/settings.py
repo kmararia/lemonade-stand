@@ -1,0 +1,3 @@
+"""
+Settings page layout configurations
+"""
