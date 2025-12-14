@@ -10,9 +10,14 @@ from typing import overload
 
 import polars as pl
 
+from lemonade_stand.config import AppDir
+from lemonade_stand.config import UserConfig
+from lemonade_stand.data.read import read_pdfplumber
+from lemonade_stand.data.read import read_pymullm  # noqa: F401
 from lemonade_stand.data.setup import clean_transactions
 from lemonade_stand.data.setup import get_transactions
 from lemonade_stand.utils import set_up_logger
+from lemonade_stand.utils import write_to_database
 
 LOGGER = set_up_logger(Path(__file__).stem)
 
@@ -95,3 +100,83 @@ class Transactions:
         self.data = pl.concat(
             [x.transactions for x in self.statements_list], how="vertical"
         )
+
+
+@dataclass(frozen=True)
+class UserData:
+    """
+    Dataclass for the user statement data
+    """
+
+    config: UserConfig
+    income: pl.DataFrame = field(init=False)
+    savings: pl.DataFrame = field(init=False)
+    expenses: pl.DataFrame = field(init=False)
+    unknown: pl.DataFrame = field(init=False)
+
+    def __post_init__(self):
+        """
+        Post initialization variables set up
+        """
+
+        # Load all user transactions
+        statements = [
+            Statement(file_path=file, read_func=read_pdfplumber)
+            for file in (self.config.statement_dir).glob("*.pdf")
+        ]
+
+        transactions = Transactions(statements_list=statements)
+
+        # Rename fields
+        transactions.data = transactions.data.with_columns(
+            pl.lit("Category").alias("transaction_category"),
+            (
+                pl.when(pl.col("transaction_amount") < 0)
+                .then(pl.lit("expenses"))
+                .otherwise(pl.lit("income"))
+            ).alias("transaction_type"),
+        ).rename(
+            {
+                "transaction_date": "date",
+                "transaction_category": "category",
+                "transaction_desc": "detail",
+                "transaction_amount": "amount",
+                "transaction_type": "type",
+                "source_file": "source",
+            }
+        )
+
+        # Define a function to create summarized data
+        def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
+            return (
+                data_df.filter(filter_logic)
+                .group_by(["date", "category", "detail", "source"])
+                .agg(pl.col("amount").sum().alias("amount"))
+            )
+
+        # Create summarized datasets
+        income_df = summarize(filter_logic=(pl.col("type") == "income"))
+        savings_df = summarize(filter_logic=(pl.col("type") == "savings"))
+        expenses_df = summarize(filter_logic=(pl.col("type") == "expenses"))
+        unknown_df = summarize(
+            filter_logic=(~pl.col("type").is_in(["income", "savings", "expenses"]))
+        )
+
+        # Update the object variables
+        object.__setattr__(self, "income", income_df)
+        object.__setattr__(self, "savings", savings_df)
+        object.__setattr__(self, "expenses", expenses_df)
+        object.__setattr__(self, "unknown", unknown_df)
+
+        # Write out the tables to a database
+        database_path = write_to_database(
+            database_path=AppDir().database_path,
+            write_info_dict={
+                "income": income_df,
+                "savings": savings_df,
+                "expenses": expenses_df,
+                "unknown": unknown_df,
+            },
+        )
+
+        LOGGER.info("Written tables to database path:\n\t%s", database_path)

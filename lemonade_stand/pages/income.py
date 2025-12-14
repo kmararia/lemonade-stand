@@ -11,7 +11,7 @@ from dash import Output
 from dash import dcc
 from dash import html
 
-from lemonade_stand.meta_data import USER_DATA
+from lemonade_stand.data import USER_DATA
 
 # Define module variables
 CATEGORY_LIST = USER_DATA.income["category"].unique().sort().to_list()
