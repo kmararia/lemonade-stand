@@ -12,6 +12,7 @@
     authors = [{ name = "Kelvin", email = "kelvinmararia@icloud.com" }]
     dependencies = [
         "dash>=3.3.0",
+        "duckdb>=1.4.3",
         "inquirerpy>=0.3.4",
         "llama-index>=0.14.10",
         "pdfplumber>=0.11.8",
@@ -23,6 +24,9 @@
 [project.optional-dependencies]
     formatters = ["pre-commit>=4.5.0", "ruff>=0.14.9"]
     test       = ["pyright>=1.1.407", "pytest>=9.0.2"]
+
+[project.scripts]
+    lemonade_stand = "lemonade_stand.app:create_app"
 
 [tool.ruff]
     # Same as Black.
