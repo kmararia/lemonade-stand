@@ -9,23 +9,22 @@ from typing import overload
 import duckdb
 import polars as pl
 
-# Define database path
-DATABASE_PATH = Path(__file__).parents[2] / "_tmp_" / "app_database.duckdb"
+
+@overload
+def read_from_database(database_path: Path, table_name: str) -> pl.DataFrame: ...
 
 
 @overload
-def read_from_database(table_name: str) -> pl.DataFrame: ...
+def read_from_database(database_path: Path, table_name: None) -> SimpleNamespace: ...
 
 
-@overload
-def read_from_database(table_name: None) -> SimpleNamespace: ...
-
-
-def read_from_database(table_name: str | None = None) -> SimpleNamespace | pl.DataFrame:
+def read_from_database(
+    database_path: Path, table_name: str | None = None
+) -> SimpleNamespace | pl.DataFrame:
     """ """
 
     # Create a DuckDB connection
-    with duckdb.connect(database=str(DATABASE_PATH)) as con:
+    with duckdb.connect(database=str(database_path)) as con:
         # Get the all table names in the database
         table_info_df = con.execute("SELECT * FROM duckdb_tables").pl()
         available_table_list = (
@@ -49,11 +48,16 @@ def read_from_database(table_name: str | None = None) -> SimpleNamespace | pl.Da
         return SimpleNamespace(**data_df_dicts)
 
 
-def write_to_database(write_info_dict: dict[str, pl.DataFrame]) -> Path:
+def write_to_database(
+    database_path: Path, write_info_dict: dict[str, pl.DataFrame]
+) -> Path:
     """ """
 
+    # Create directory if it does not exist
+    database_path.parent.mkdir(exist_ok=True, parents=True)
+
     # Create a DuckDB connection
-    with duckdb.connect(DATABASE_PATH) as con:
+    with duckdb.connect(database_path) as con:
         for table_name, data_df in write_info_dict.items():
             # Register dataframe with table name and write it out
             con.register(f"tmp_{table_name}", data_df.to_arrow())
@@ -79,4 +83,4 @@ def write_to_database(write_info_dict: dict[str, pl.DataFrame]) -> Path:
                 f"Error: table {table_name} not written out. Please retry"
             )
 
-    return DATABASE_PATH
+    return database_path
