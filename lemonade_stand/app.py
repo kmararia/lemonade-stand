@@ -32,4 +32,4 @@ def create_app():
 
     app.layout = dash.page_container
 
-    return app
+    return app.run(port=8050, debug=True)
