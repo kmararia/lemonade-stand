@@ -76,6 +76,7 @@ def request_user_configs(session_dir: Path) -> dict:
     ).execute()
 
     # Final set ups
+    USER_CONFIG["refresh-flag"] = True
     USER_CONFIG["export-flag"] = export_choice == "Yes"
     USER_CONFIG["statement-directory"] = str(
         Path.cwd() if len(statement_dir.strip()) == 0 else Path(statement_dir)

@@ -36,6 +36,7 @@ class UserConfig:
     """
 
     app_version: str = field(init=False)
+    refresh_flag: bool = field(init=False)
     export_data: bool = field(init=False)
     statement_dir: Path = field(init=False)
 
@@ -44,16 +45,16 @@ class UserConfig:
         Post initialization variables set up
         """
 
-        directories = AppDir()
-        user_config = directories.root_dir / "shared" / "config" / "user_config.json"
+        dirs = AppDir()
 
         # Set up the configurations
         config_dict = get_user_configs(
-            user_config=user_config, session_dir=directories.session_dir
+            user_config=dirs.user_config_path, session_dir=dirs.session_dir
         )
 
         # Update object fields variables
         self.app_version = config_dict["app-version"]
+        self.refresh_flag = bool(config_dict["refresh-flag"])
         self.export_data = bool(config_dict["export-flag"])
         self.statement_dir = Path(config_dict["statement-directory"])
 
@@ -78,6 +79,9 @@ class AppDir:
     current_dir: Path = Path.cwd()
     root_dir: Path = field(init=False)
     session_dir: Path = field(init=False)
+    metadata_path: Path = field(init=False)
+    user_config_path: Path = field(init=False)
+    database_path: Path = field(init=False)
 
     def __post_init__(self):
         """
@@ -86,6 +90,10 @@ class AppDir:
 
         self.root_dir = self.get_app_root_dir()
         self.session_dir = self.get_os_home()
+
+        self.metadata_path = self.root_dir / "shared" / "schema" / "metadata.json"
+        self.user_config_path = self.root_dir / "shared" / "config" / "user_config.json"
+        self.database_path = self.root_dir / "shared" / "user_data" / "database.duckdb"
 
     def get_app_root_dir(self) -> Path:
         """
@@ -116,7 +124,7 @@ class AppDir:
 
 
 @dataclass
-class MetaData:
+class ModelConfig:
     """
     A dataclass for the applicaton configs
     """
@@ -139,7 +147,7 @@ class MetaData:
             self.dict_data = metadata.MODEL_CONFIG
 
             self.refresh_flag = check_version(
-                config_path=dirs.root_dir / "shared" / "schema" / "metadata.json",
+                config_path=dirs.metadata_path,
                 config_dict=metadata.MODEL_CONFIG,
             )
 
