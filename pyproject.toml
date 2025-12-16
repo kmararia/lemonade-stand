@@ -11,7 +11,6 @@
     requires-python = ">=3.13"
     authors = [{ name = "Kelvin", email = "kelvinmararia@icloud.com" }]
     dependencies = [
-        "dash>=3.3.0",
         "duckdb>=1.4.3",
         "inquirerpy>=0.3.4",
         "llama-index>=0.14.10",
@@ -19,6 +18,7 @@
         "polars>=1.36.1",
         "pyarrow>=22.0.0",
         "pymupdf4llm>=0.2.7",
+        "shiny>=1.5.1",
     ]
 
 [project.optional-dependencies]
@@ -26,7 +26,7 @@
     test       = ["pyright>=1.1.407", "pytest>=9.0.2"]
 
 [project.scripts]
-    lemonade_stand = "lemonade_stand.app:create_app"
+    lemonade_stand = "lemonade_stand.app:initialize_app"
 
 [tool.ruff]
     # Same as Black.
