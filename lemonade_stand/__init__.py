@@ -1,5 +1,5 @@
 """
-Mark lemonade_stand package
+Main application entry point
 """
 
-from lemonade_stand.app import create_app
+__all__ = []
