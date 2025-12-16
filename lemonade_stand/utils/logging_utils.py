@@ -6,7 +6,9 @@ import logging
 from pathlib import Path
 
 
-def set_up_logger(name: str, log_file_path: Path | None = None):
+def set_up_logger(
+    name: str, level: int = logging.INFO, log_file_path: Path | None = None
+):
     """
     A logger set up function
     """
@@ -25,8 +27,8 @@ def set_up_logger(name: str, log_file_path: Path | None = None):
     # Add formatter to handlers
     console_handler.setFormatter(formatter)
 
-    console_handler.setLevel(logging.WARNING)
-    logger.setLevel(logging.WARNING)
+    console_handler.setLevel(level)
+    logger.setLevel(level)
 
     # Append handlers
     logger.addHandler(console_handler)
@@ -37,7 +39,7 @@ def set_up_logger(name: str, log_file_path: Path | None = None):
 
         file_handler = logging.FileHandler(log_file_path, mode="a", encoding="utf-8")
         file_handler.setFormatter(formatter)
-        file_handler.setLevel(logging.WARNING)
+        file_handler.setLevel(level)
 
         logger.addHandler(file_handler)
 
