@@ -15,18 +15,23 @@
         "inquirerpy>=0.3.4",
         "llama-index>=0.14.10",
         "pdfplumber>=0.11.8",
+        "plotly>=6.5.0",
         "polars>=1.36.1",
         "pyarrow>=22.0.0",
         "pymupdf4llm>=0.2.7",
         "shiny>=1.5.1",
+        "shinywidgets>=0.7.0",
     ]
 
 [project.optional-dependencies]
     formatters = ["pre-commit>=4.5.0", "ruff>=0.14.9"]
-    test       = ["pyright>=1.1.407", "pytest>=9.0.2"]
+    tests      = ["pyright>=1.1.407", "pytest>=9.0.2"]
 
 [project.scripts]
-    lemonade_stand = "lemonade_stand.app:initialize_app"
+    view = "lemonade_stand.app:initialize_app"
+
+[tool.uv]
+    link-mode = "copy"
 
 [tool.ruff]
     # Same as Black.
