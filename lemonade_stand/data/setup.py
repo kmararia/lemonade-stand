@@ -2,6 +2,7 @@
 Scrapping transactions from pdf file texts
 """
 
+import logging
 import re
 from datetime import datetime
 from decimal import Decimal as PyDecimal
@@ -13,7 +14,7 @@ from dateutil.parser import parse
 
 from lemonade_stand.utils import set_up_logger
 
-LOGGER = set_up_logger(Path(__file__).stem)
+LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
 
 
 def get_transactions(pdf_text: str) -> pl.DataFrame:
