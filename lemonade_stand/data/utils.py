@@ -154,6 +154,7 @@ class UserData:
                 data_df.filter(filter_logic)
                 .group_by(["date", "category", "detail", "source"])
                 .agg(pl.col("amount").sum().alias("amount"))
+                .select(["date", "category", "detail", "amount", "source"])
             )
 
         # Create summarized datasets
