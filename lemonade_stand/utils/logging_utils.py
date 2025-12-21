@@ -45,6 +45,5 @@ def set_up_logger(
 
     # Finalize logger
     logger.propagate = False
-    logger.info("Logger set up for module %s", name)
 
     return logger
