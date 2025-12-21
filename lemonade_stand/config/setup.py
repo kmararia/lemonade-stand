@@ -92,9 +92,10 @@ def get_user_configs(user_config: Path, session_dir: Path):
 
     # Search for the configuration file in the path
     if user_config.exists():
-        if inquirer.confirm(  # type: ignore
-            message="Would you like to use prior configurations?", default=True
-        ).execute():  # type: ignore
+        if True:
+            # if inquirer.confirm(  # type: ignore
+            #     message="Would you like to use prior configurations?", default=True
+            # ).execute():  # type: ignore
             with user_config.open("r") as file:
                 config_dict = json.load(file)
 
