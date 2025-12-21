@@ -1,3 +1,0 @@
-"""
-Savings page layout configurations
-"""
