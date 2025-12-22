@@ -1,11 +1,26 @@
-/* Your rounded modal configuration */
+/* ***** SETTINGS CONFIGURATION (MODAL) ***** */
 .modal-content {
     border-radius: 25px !important;
     border: none;
     box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
 
-/* Adjusting the sidebar look */
+/* Custom class for sidebar links */
+.sidebar-link {
+    text-decoration: none !important;
+    color: inherit;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar-link:hover {
+    text-decoration: none !important;
+    opacity: 0.7;
+    color: #00d1b2;
+}
+
+
+/* ***** SIDEBAR CONFIGURATIONS ***** */
 .sidebar {
     border-right: 1px solid #eee;
 }
@@ -16,7 +31,6 @@
 
 
 /* ***** TABLE DATA CONFIGURATIONS ****** */
-/* Target any ID ending in 'table_data' within the grid container */
 [id$="table_data"] .shiny-data-frame {
     --shiny-datagrid-grid-header-bgcolor: #f8f9fa !important;
     --shiny-datagrid-grid-header-color: #212529 !important;
@@ -51,7 +65,7 @@
 }
 
 
-/* DATA DOWNLOAD BUTTON */
+/* ***** DATA DOWNLOAD BUTTON ***** */
 .download-button {
     width: 120px;
     height: 30px;

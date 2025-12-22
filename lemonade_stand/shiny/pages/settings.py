@@ -21,7 +21,7 @@ def settings_ui():
     A UI module for the settings page
     """
 
-    return ui.input_action_link("open_settings", "⚙️ Settings", class_="nav-link")
+    return ui.input_action_link("open_settings", "⚙️ Settings", class_="sidebar-link")
 
 
 @module.server
@@ -52,6 +52,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             footer=ui.modal_button("Dismiss"),
             easy_close=True,
             size="l",
+            class_="modal-content",
         )
 
         # Unhide the modal
