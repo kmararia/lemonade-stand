@@ -152,9 +152,9 @@ class UserData:
         def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
             return (
                 data_df.filter(filter_logic)
-                .group_by(["date", "category", "detail", "source"])
+                .group_by(["date", "type", "category", "detail", "source"])
                 .agg(pl.col("amount").sum().alias("amount"))
-                .select(["date", "category", "detail", "amount", "source"])
+                .select(["date", "type", "category", "detail", "amount", "source"])
             )
 
         # Create summarized datasets
