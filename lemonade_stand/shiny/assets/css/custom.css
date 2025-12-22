@@ -1,0 +1,109 @@
+/* ***** SETTINGS CONFIGURATION (MODAL) ***** */
+.modal-content {
+    border-radius: 25px !important;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
+
+/* Custom class for sidebar links */
+.sidebar-link {
+    text-decoration: none !important;
+    color: inherit;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+}
+
+.sidebar-link:hover {
+    text-decoration: none !important;
+    opacity: 0.7;
+    color: #00d1b2;
+}
+
+
+/* ***** SIDEBAR CONFIGURATIONS ***** */
+.sidebar {
+    border-right: 1px solid #eee;
+}
+
+[data-bs-theme="dark"] .sidebar {
+    border-right: 1px solid #333;
+}
+
+
+/* ***** TABLE DATA CONFIGURATIONS ****** */
+[id$="table_data"] .shiny-data-frame {
+    --shiny-datagrid-grid-header-bgcolor: #f8f9fa !important;
+    --shiny-datagrid-grid-header-color: #212529 !important;
+}
+
+/* Dark Mode Overrides using the same wildcard */
+[data-bs-theme="dark"] [id$="table_data"] {
+    --shiny-datagrid-grid-header-bgcolor: #2d2d2d !important;
+    --shiny-datagrid-grid-header-color: #00d1b2 !important;
+    --shiny-datagrid-grid-border-color: #444 !important;
+}
+
+/* Header Text Styling */
+[id$="table_data"] th {
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: inherit !important; /* Forces it to use the variable color */
+}
+
+/* Fix for the filter input boxes in Dark Mode */
+[data-bs-theme="dark"] .shiny-data-frame input {
+    background-color: #121212 !important;
+    color: white !important;
+    border: 1px solid #444 !important;
+    border-radius: 4px;
+}
+
+/* Ensure the 'Date', 'Category' text labels are visible */
+[data-bs-theme="dark"] .shiny-data-frame .grid-header-label {
+    color: #00d1b2 !important;
+}
+
+
+/* ***** DATA DOWNLOAD BUTTON ***** */
+.download-button {
+    width: 120px;
+    height: 30px;
+    padding: 0 5px;
+
+    /* Flexbox to center the text perfectly */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-color:#017387;
+    border-style: solid;
+    outline: none;
+    background-color: #018773;
+    color: #eee;
+    border-radius: 7px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s ease-out;
+}
+
+.download-button:hover {
+    transform: translateY(-3px);
+    background-color: #017387;
+    color: #fff;
+}
+
+/* Light mode overrides */
+[data-bs-theme="dark"] .download-button {
+    background-color: #002d2b;
+    color: #eee;
+    border: 1px solid #018773;
+}
+
+[data-bs-theme="dark"] .download-button:hover {
+    background-color: #494848;
+    color: #fff;
+    border: 1px solid #870101;
+}

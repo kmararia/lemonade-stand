@@ -32,9 +32,7 @@ def get_data() -> UserData | SimpleNamespace:
         return UserData(config=run_config)
 
 
-# Get and expose only the user data
-USER_DATA = get_data()
-
+# Expose only the user data
 __all__ = [
-    "USER_DATA",
+    "get_data",
 ]

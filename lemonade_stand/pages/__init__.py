@@ -1,3 +1,0 @@
-"""
-Mark the pages package
-"""

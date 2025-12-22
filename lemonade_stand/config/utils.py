@@ -37,6 +37,7 @@ class UserConfig:
 
     app_version: str = field(init=False)
     refresh_flag: bool = field(init=False)
+    add_contributor: bool = field(init=False)
     export_data: bool = field(init=False)
     statement_dir: Path = field(init=False)
 
@@ -55,6 +56,7 @@ class UserConfig:
         # Update object fields variables
         self.app_version = config_dict["app-version"]
         self.refresh_flag = bool(config_dict["refresh-flag"])
+        self.add_contributor = bool(config_dict["add-contributor"])
         self.export_data = bool(config_dict["export-flag"])
         self.statement_dir = Path(config_dict["statement-directory"])
 

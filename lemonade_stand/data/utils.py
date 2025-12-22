@@ -16,6 +16,7 @@ from lemonade_stand.data.read import read_pdfplumber
 from lemonade_stand.data.read import read_pymullm  # noqa: F401
 from lemonade_stand.data.setup import clean_transactions
 from lemonade_stand.data.setup import get_transactions
+from lemonade_stand.data.setup import map_contributors
 from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils import write_to_database
 
@@ -128,14 +129,7 @@ class UserData:
         transactions = Transactions(statements_list=statements)
 
         # Rename fields
-        transactions.data = transactions.data.with_columns(
-            pl.lit("Category").alias("transaction_category"),
-            (
-                pl.when(pl.col("transaction_amount") < 0)
-                .then(pl.lit("expenses"))
-                .otherwise(pl.lit("income"))
-            ).alias("transaction_type"),
-        ).rename(
+        transactions.data = transactions.data.rename(
             {
                 "transaction_date": "date",
                 "transaction_category": "category",
@@ -146,12 +140,21 @@ class UserData:
             }
         )
 
+        # Add contributor on user request
+        if self.config.add_contributor:
+            transactions.data = map_contributors(data_df=transactions.data)
+        else:
+            transactions.data = transactions.data.with_columns(
+                pl.lit(None).alias("contributor")
+            )
+
         # Define a function to create summarized data
         def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
             return (
                 data_df.filter(filter_logic)
-                .group_by(["date", "category", "detail", "source"])
+                .group_by(["date", "type", "category", "detail", "source"])
                 .agg(pl.col("amount").sum().alias("amount"))
+                .select(["date", "type", "category", "detail", "amount", "source"])
             )
 
         # Create summarized datasets

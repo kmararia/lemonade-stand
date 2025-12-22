@@ -2,6 +2,7 @@
 Scrapping transactions from pdf file texts
 """
 
+import logging
 import re
 from datetime import datetime
 from decimal import Decimal as PyDecimal
@@ -13,7 +14,7 @@ from dateutil.parser import parse
 
 from lemonade_stand.utils import set_up_logger
 
-LOGGER = set_up_logger(Path(__file__).stem)
+LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
 
 
 def get_transactions(pdf_text: str) -> pl.DataFrame:
@@ -95,15 +96,6 @@ def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
     Filters out transactions that are most likely invalid
     """
 
-    LOGGER.info("Filtering out bad transactions")
-
-    # Filter out transactions with dollar values in description
-    clean_df = data_df.filter(
-        (
-            pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
-        ).is_null()
-    )
-
     def save_popular_block(data_df: pl.DataFrame) -> pl.DataFrame:
         """ """
 
@@ -141,8 +133,58 @@ def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
         else:
             return data_df
 
+    LOGGER.info("Filtering out bad transactions...")
+
+    # Filter out transactions with dollar values in description
+    clean_df = data_df.filter(
+        (
+            pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
+        ).is_null()
+    )
+
+    LOGGER.info("Adding missing fields...")
+
+    # Set up missing columns
+    clean_df = clean_df.with_columns(
+        pl.lit("Category").alias("transaction_category"),
+        (
+            pl.when(pl.col("transaction_amount") < 0)
+            .then(pl.lit("expenses"))
+            .otherwise(pl.lit("income"))
+        ).alias("transaction_type"),
+    )
+
     # # Filter out unnecessary data tables
-    # save_popular_block(data_df=data_df)
+    # clean_df = save_popular_block(data_df=clean_df)
 
     # Return clean dataframe
     return clean_df
+
+
+def map_contributors(data_df: pl.DataFrame) -> pl.DataFrame:
+    """
+    A function to map contributors into the data
+
+    Arguments:
+        data_df: The transactions dataframe
+    """
+
+    LOGGER.info("Adding contributors to dataset")
+
+    # Maybe process the mapping config here??
+    contributor_mappings = {
+        # User : Mapping str
+    }
+
+    # Assuming we iterate through a dictionary
+    contributor_expr = pl.lit(None).alias("contributors")
+    for user, mapping in contributor_mappings.items():
+        contributor_expr = (
+            pl.when(
+                pl.col("transaction_desc").str.to_lowercase() == mapping.lower()
+            )  # TODO: Probably need to do some regex to check for the mapping in the description
+            .then(user)
+            .otherwise(contributor_expr)
+        )
+
+    return data_df.with_columns(contributor_expr)

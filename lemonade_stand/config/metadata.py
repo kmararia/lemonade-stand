@@ -12,6 +12,7 @@ USER_CONFIG = {
     "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     "refresh-flag": False,
     "export-flag": False,
+    "add-contributor": False,
     "statement-directory": None,
 }
 
