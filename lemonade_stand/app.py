@@ -20,6 +20,8 @@ from lemonade_stand.shiny import savings_server
 from lemonade_stand.shiny import savings_ui
 from lemonade_stand.shiny import settings_server
 from lemonade_stand.shiny import settings_ui
+from lemonade_stand.shiny import user_guide_server
+from lemonade_stand.shiny import user_guide_ui
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
@@ -43,7 +45,10 @@ app_ui = ui.page_navbar(
     ui.nav_control(ui.input_dark_mode(id="view_mode")),
     # Add Side bar
     sidebar=ui.sidebar(
-        settings_ui("my_settings"), title="User Options", style="font-weight: bold;"
+        user_guide_ui("user_docs"),
+        settings_ui("my_settings"),
+        title="Options",
+        style="font-weight: bold;",
     ),
     title="Lemonade Stand",
     id="pages",
@@ -57,6 +62,9 @@ def server(input, output, session):  # noqa: ARG001
 
     # Catch the returned reactive values
     user_prefs = settings_server("my_settings")  # noqa: F841
+
+    # Initialize application documentation
+    user_guide_server("user_docs")
 
     # Pull the user data
     user_data = get_data()

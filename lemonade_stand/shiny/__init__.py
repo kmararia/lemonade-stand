@@ -12,6 +12,8 @@ from .pages.savings import savings_server
 from .pages.savings import savings_ui
 from .pages.settings import settings_server
 from .pages.settings import settings_ui
+from .pages.user_guide import user_guide_server
+from .pages.user_guide import user_guide_ui
 
 __all__ = [
     "expense_server",
@@ -24,4 +26,6 @@ __all__ = [
     "savings_ui",
     "settings_server",
     "settings_ui",
+    "user_guide_server",
+    "user_guide_ui",
 ]
