@@ -121,8 +121,7 @@ class AppDir:
         Returns the home directory of the user's operating system
         """
 
-        # return "~/" if os.name == "posix" else "C:\\"
-        return Path.cwd()
+        return Path("~/") if os.name == "posix" else Path("C:\\")
 
 
 @dataclass
@@ -133,9 +132,6 @@ class ModelConfig:
 
     category: str
     refresh_flag: bool = field(init=False)
-    dict_data: dict = field(
-        init=False
-    )  ## NOTE: MAYBE NEED TO GET RID OF DICT FOR EFFICIENCY
     dot_data: SimpleNamespace = field(init=False)
 
     def __post_init__(self):
@@ -146,15 +142,13 @@ class ModelConfig:
         dirs = AppDir()
 
         if self.category == "model":
-            self.dict_data = metadata.MODEL_CONFIG
-
             self.refresh_flag = check_version(
                 config_path=dirs.metadata_path,
                 config_dict=metadata.MODEL_CONFIG,
             )
 
         # Save dict as simple-namespace
-        self.dot_data = SimpleNamespace(**self.dict_data)
+        self.dot_data = SimpleNamespace(**metadata.MODEL_CONFIG)
 
     def __str__(self):
         """
