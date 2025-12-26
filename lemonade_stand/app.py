@@ -23,12 +23,15 @@ from lemonade_stand.shiny import settings_ui
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-CSS_PATH = Path(__file__).parent / "shiny" / "assets" / "css" / "custom.css"
+CSS_DIR = Path(__file__).parent / "shiny" / "assets" / "css"
 
 # Define the application UI and Server using Shiny
 app_ui = ui.page_navbar(
     # Inject the custom configuration files
-    ui.head_content(ui.include_css(CSS_PATH)),
+    ui.head_content(
+        ui.include_css(CSS_DIR / "global.css"),
+        ui.include_css(CSS_DIR / "settings.css"),
+    ),
     ui.nav_spacer(),
     # Main content page
     home_ui("Home"),
@@ -39,7 +42,9 @@ app_ui = ui.page_navbar(
     ui.nav_spacer(),
     ui.nav_control(ui.input_dark_mode(id="view_mode")),
     # Add Side bar
-    sidebar=ui.sidebar(settings_ui("my_settings"), title="User Options"),
+    sidebar=ui.sidebar(
+        settings_ui("my_settings"), title="User Options", style="font-weight: bold;"
+    ),
     title="Lemonade Stand",
     id="pages",
 )
