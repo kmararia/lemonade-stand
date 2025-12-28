@@ -6,8 +6,10 @@ from pathlib import Path
 
 import polars as pl
 from shiny import App
+from shiny import render
 from shiny import run_app
 from shiny import ui
+from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.data import get_data
@@ -27,16 +29,16 @@ from lemonade_stand.shiny import user_guide_ui
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-CSS_DIR = Path(lemonade_stand.__file__).parent / "shiny" / "assets" / "css"
+ASSETS_DIR = Path(lemonade_stand.__file__).parent / "shiny" / "assets"
 
 
 # Define the application UI and Server using Shiny
 app_ui = ui.page_navbar(
     # Inject the custom configuration files
     ui.head_content(
-        ui.include_css(CSS_DIR / "global.css"),
-        ui.include_css(CSS_DIR / "login.css"),
-        ui.include_css(CSS_DIR / "settings.css"),
+        ui.include_css(ASSETS_DIR / "css" / "global.css"),
+        ui.include_css(ASSETS_DIR / "css" / "login.css"),
+        ui.include_css(ASSETS_DIR / "css" / "settings.css"),
     ),
     ui.nav_spacer(),
     # Main content page
@@ -54,7 +56,14 @@ app_ui = ui.page_navbar(
         title="Options",
         style="font-weight: bold;",
     ),
-    title="Lemonade Stand",
+    title=ui.div(
+        ui.output_image("logo_svg", inline=True),
+        ui.h5(
+            "Lemonade Stand",
+            style="font-style: italic; letter-spacing: 0.02rem; margin-bottom: 0;",
+        ),
+        style="display: flex; justify-content: flex-start; align-items: flex-end; width: 100%; max-width: 28%;",
+    ),
     lang="en",
     id="pages",
 )
@@ -93,6 +102,15 @@ def server(input, output, session):  # noqa: ARG001
     income_server("Income", user_data.income)
     savings_server("Savings", user_data.savings)
     expense_server("Expense", user_data.expenses)
+
+    @render.image
+    def logo_svg():
+        img: ImgData = {
+            "src": str(ASSETS_DIR / "images" / "app_logo.svg"),
+            "width": "100%",
+            "height": "100%",
+        }
+        return img
 
 
 def initialize_app() -> None:
