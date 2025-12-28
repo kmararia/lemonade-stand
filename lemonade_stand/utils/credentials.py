@@ -1,4 +1,6 @@
-""" """
+"""
+A module user credential validation
+"""
 
 from dataclasses import dataclass
 from dataclasses import field
