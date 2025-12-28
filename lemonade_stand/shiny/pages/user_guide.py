@@ -34,7 +34,7 @@ def user_guide_server(input, output, session):  # noqa: ARG001
     @reactive.event(input.open_user_guide)
     def _():
         # Set up the modal
-        settings_modal = ui.modal(
+        user_guide_modal = ui.modal(
             ui.h5("How to Run"),
             ui.br(),
             ui.output_text_verbatim(id="documentation", placeholder=False),
@@ -46,4 +46,4 @@ def user_guide_server(input, output, session):  # noqa: ARG001
         )
 
         # Unhide the modal
-        ui.modal_show(settings_modal)
+        ui.modal_show(user_guide_modal)
