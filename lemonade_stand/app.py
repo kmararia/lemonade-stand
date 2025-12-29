@@ -13,13 +13,13 @@ from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.data import get_data
+from lemonade_stand.shiny import auth_server
 from lemonade_stand.shiny import expense_server
 from lemonade_stand.shiny import expense_ui
 from lemonade_stand.shiny import home_server
 from lemonade_stand.shiny import home_ui
 from lemonade_stand.shiny import income_server
 from lemonade_stand.shiny import income_ui
-from lemonade_stand.shiny import login_server
 from lemonade_stand.shiny import savings_server
 from lemonade_stand.shiny import savings_ui
 from lemonade_stand.shiny import settings_server
@@ -75,7 +75,7 @@ def server(input, output, session):  # noqa: ARG001
     """
 
     # Initialize login page
-    login_server("user_login")
+    auth_server("user_login")
 
     # Catch the returned reactive values
     user_prefs = settings_server("user_settings")  # noqa: F841

@@ -28,17 +28,8 @@ APP_LOGO = (
 APP_DIR = AppDir()
 
 
-@module.ui
-def login_ui():
-    """
-    A UI module for the settings page
-    """
-
-    return None
-
-
 @module.server
-def login_server(input, output, session):  # noqa: ARG001
+def auth_server(input, output, session):  # noqa: ARG001
     """
     A server module for the settings page
     """
