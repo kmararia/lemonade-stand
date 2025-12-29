@@ -99,9 +99,9 @@ def server(input, output, session):  # noqa: ARG001
 
     # Call the page servers
     home_server("Home", input.view_mode, stacked_df)
-    income_server("Income", user_data.income)
-    savings_server("Savings", user_data.savings)
-    expense_server("Expense", user_data.expenses)
+    income_server("Income", input.view_mode, user_data.income)
+    savings_server("Savings", input.view_mode, user_data.savings)
+    expense_server("Expense", input.view_mode, user_data.expenses)
 
     @render.image
     def logo_svg():
