@@ -52,12 +52,14 @@ def auth_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         login_modal = ui.modal(
             ui.div(
-                ui.div(
-                    ui.output_image("logo_svg"),
-                    style="max-width: 40%; max-height: 35%;",
+                ui.span(
+                    ui.output_image("logo_svg", inline=True),
+                    style="width: 35%; display: block; margin: 10% auto 10% auto;",
                 ),
-                ui.h5("Sign in with your Account", style="font-weight: bold;"),
-                ui.br(),
+                ui.h5(
+                    "Sign in with your Account",
+                    style="font-weight: bold; margin-bottom: 5%",
+                ),
                 ui.div(
                     ui.input_text_area(
                         id="user_name",
@@ -91,7 +93,7 @@ def auth_server(input, output, session):  # noqa: ARG001
             footer=ui.div(
                 ui.p("No account? "),
                 ui.input_action_link("open_signup", "Sign up", class_="general-link"),
-                style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px;",
+                style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; font-size: .9375rem",
             ),
             easy_close=False,
             class_="modal-content",
@@ -117,7 +119,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                 style="display: flex; justify-content: center; align-items: flex-end; width: 100%;",
             ),
             ui.h5(
-                "Create your Lemonade-Stand Account",
+                "Create your Account",
                 style="font-weight: bold; margin-top: 10%; margin-bottom: 5%;",
             ),
             ui.input_text(
@@ -238,7 +240,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                 )
 
                 for i in range(0, 10):
-                    p.set(i, message="Computing")
+                    p.set(i, message="Logging in...")
                     time.sleep(0.1)
 
             ui.modal_remove()
