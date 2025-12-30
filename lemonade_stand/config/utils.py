@@ -66,7 +66,7 @@ class AppDir:
     session_dir: Path = field(init=False)
     metadata_path: Path = field(init=False)
     user_config_path: Path = field(init=False)
-    database_path: Path = field(init=False)
+    database_dir: Path = field(init=False)
 
     def __post_init__(self):
         """
@@ -78,7 +78,7 @@ class AppDir:
 
         self.metadata_path = self.root_dir / "shared" / "schema" / "metadata.json"
         self.user_config_path = self.root_dir / "shared" / "config" / "user_config.json"
-        self.database_path = self.root_dir / "shared" / "user_data" / "database.duckdb"
+        self.database_dir = self.root_dir / "shared" / "data"
 
     def get_app_root_dir(self) -> Path:
         """
