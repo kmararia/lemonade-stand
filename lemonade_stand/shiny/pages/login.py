@@ -15,7 +15,8 @@ from shiny.types import ImgData
 import lemonade_stand
 from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
-from lemonade_stand.utils import validate_user_credentials
+from lemonade_stand.utils.credentials import add_user_credentials
+from lemonade_stand.utils.credentials import validate_user_credentials
 
 LOGGER = set_up_logger(Path(__file__).stem)
 APP_LOGO = (
@@ -166,6 +167,12 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ),
                 style="margin-top: 5%",
             ),
+            ui.div(
+                ui.input_action_button(
+                    id="confirm_signup", label="Create Account", style="margin: auto;"
+                ),
+                style="margin-top: 20px; width: 100%; display: flex; justify-content: center;",
+            ),
             size="m",
             easy_close=False,
             footer=ui.div(
@@ -193,6 +200,19 @@ def auth_server(input, output, session):  # noqa: ARG001
     @reactive.event(input.open_signup)
     def _():
         show_signup_modal()
+
+    ## **** USER CREDENTIAL ADDITIONS ****
+    @reactive.Calc
+    @reactive.event(input.confirm_signup)
+    def credential_add():
+        # Save the user information
+        add_user_credentials(
+            username=input.signup_user_name(),
+            userpassword=input.signup_user_password(),
+            first_name=input.signup_first_name(),
+            last_name=input.signup_last_name(),
+            gender=input.signup_gender(),
+        )
 
     ## **** USER CREDENTIAL VALIDATIONS ****
     @reactive.Calc
