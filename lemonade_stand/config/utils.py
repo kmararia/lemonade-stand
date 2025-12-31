@@ -42,9 +42,12 @@ class UserConfig:
         self.refresh_flag = bool(config_dict["refresh-flag"])
         self.add_contributor = bool(config_dict["add-contributor"])
         self.statement_dir = (
-            self.statement_dir
-            if "statement-directory" not in config_dict
-            else Path(config_dict["statement-directory"])
+            Path(config_dict["statement-directory"])
+            if (
+                "statement-directory" in config_dict
+                and isinstance(self.statement_dir, MissingType)
+            )
+            else self.statement_dir
         )
 
     def __str__(self):
