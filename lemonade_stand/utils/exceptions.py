@@ -12,3 +12,14 @@ class VersionMismatchError(Exception):
         """Class initialization method"""
         self.message = message
         super().__init__(self.message)
+
+
+class MissingDatabaseError(Exception):
+    """
+    A custom exception for missing databases
+    """
+
+    def __init__(self, message):
+        """Class initialization method"""
+        self.message = message
+        super().__init__(self.message)

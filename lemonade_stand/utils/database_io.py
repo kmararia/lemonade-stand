@@ -9,19 +9,27 @@ from typing import overload
 import duckdb
 import polars as pl
 
+from .exceptions import MissingDatabaseError
+
 
 @overload
 def read_from_database(database_path: Path, table_name: str) -> pl.DataFrame: ...
 
 
 @overload
-def read_from_database(database_path: Path, table_name: None) -> SimpleNamespace: ...
+def read_from_database(
+    database_path: Path, table_name: None = None
+) -> SimpleNamespace: ...
 
 
 def read_from_database(
     database_path: Path, table_name: str | None = None
 ) -> SimpleNamespace | pl.DataFrame:
     """ """
+
+    # Raise error if the database does not exist
+    if not database_path.exists():
+        raise MissingDatabaseError(f"Missing database: {database_path.name}")
 
     # Create a DuckDB connection
     with duckdb.connect(database=str(database_path)) as con:
