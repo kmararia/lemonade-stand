@@ -85,7 +85,7 @@ def home_server(input, output, session, view_mode_setting, data_df):  # noqa: AR
     @reactive.effect
     def _():
         min_max_dates = data_df.select(
-            pl.min("date").alias("min"),
+            pl.max("date").dt.offset_by("-1y").alias("min"),
             pl.max("date").alias("max"),
         )
 
