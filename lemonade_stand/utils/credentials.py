@@ -2,8 +2,10 @@
 A module user credential validation
 """
 
+import re
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import fields
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -43,6 +45,88 @@ class LoginCredentials:
             if x is not None
         ]
 
+    def __str__(self):
+        """
+        Returns a string representation of the dataclass
+        """
+
+        field_str = ",\n".join(
+            f"\t{field.name} = {getattr(self, field.name)!r}" for field in fields(self)
+        )
+
+        return f"{type(self).__name__}: \n{field_str}"
+
+
+@dataclass
+class PasswordChecks:
+    """"""
+
+    password_ok: bool
+    length_error: bool
+    digit_error: bool
+    uppercase_error: bool
+    lowercase_error: bool
+    symbol_error: bool
+
+    def __str__(self):
+        """
+        Returns a string representation of the dataclass
+        """
+
+        field_str = ",\n".join(
+            f"\t{field.name} = {getattr(self, field.name)!r}" for field in fields(self)
+        )
+
+        return f"{type(self).__name__}: \n{field_str}"
+
+
+def password_check(password) -> PasswordChecks:
+    """
+    A function to verify the strength of 'password'
+
+    Returns:
+        PasswordChecks class indicating the boolean criterias
+        A password is considered strong if:
+            8 characters length or more
+            1 digit or more
+            1 symbol or more
+            1 uppercase letter or more
+            1 lowercase letter or more
+    """
+
+    # calculating the length
+    length_error = len(password) < 8
+
+    # searching for digits
+    digit_error = re.search(r"\d", password) is None
+
+    # searching for uppercase
+    uppercase_error = re.search(r"[A-Z]", password) is None
+
+    # searching for lowercase
+    lowercase_error = re.search(r"[a-z]", password) is None
+
+    # searching for symbols
+    symbol_error = re.search(r"[ !#$%&'()*+,-./[\\\]^_`{|}~" + r'"]', password) is None
+
+    # overall result
+    password_ok = not (
+        length_error
+        or digit_error
+        or uppercase_error
+        or lowercase_error
+        or symbol_error
+    )
+
+    return PasswordChecks(
+        password_ok=password_ok,
+        length_error=length_error,
+        digit_error=digit_error,
+        uppercase_error=uppercase_error,
+        lowercase_error=lowercase_error,
+        symbol_error=symbol_error,
+    )
+
 
 def add_user_credentials(
     username: str,
@@ -50,7 +134,7 @@ def add_user_credentials(
     first_name: str | None = None,
     last_name: str | None = None,
     gender: str | None = None,
-) -> None:
+) -> LoginCredentials:
     """
     A function to store user authentication information
 
@@ -73,8 +157,10 @@ def add_user_credentials(
 
     schema_user_keys = {
         "account_id": pl.Int64,
-        "my_string_col": pl.String,
+        "user_password": pl.String,
     }
+
+    LOGGER.info("Adding user credentials...")
 
     # Read in the credentials data
     try:
@@ -134,8 +220,13 @@ def add_user_credentials(
         },
     )
 
+    return LoginCredentials(
+        username=True,
+        password=True,
+    )
 
-def validate_user_credentials(username: str, userpassword: bytes):
+
+def validate_user_credentials(username: str, userpassword: bytes) -> LoginCredentials:
     """
     A function to store user authentication information
 
@@ -143,6 +234,8 @@ def validate_user_credentials(username: str, userpassword: bytes):
         username: The login username
         userpassword: The user's password
     """
+
+    LOGGER.info("Validating user credentials...")
 
     # Read in the credentials data
     try:
@@ -159,7 +252,7 @@ def validate_user_credentials(username: str, userpassword: bytes):
             ).item(0, "user_password")
 
             # Convert both passwords to bytes and run the check
-            if bcrypt.checkpw(userpassword, stored_hash.encode("utf-8")):
+            if bcrypt.checkpw(userpassword, stored_hash):
                 LOGGER.info("User credentials matched. Login successful!")
                 return LoginCredentials(
                     username=True,
