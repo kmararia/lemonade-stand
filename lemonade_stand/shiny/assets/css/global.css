@@ -21,6 +21,20 @@
     color: #00d1b2;
 }
 
+/* ***** GENERAL LINKS ***** */
+.general-link {
+    text-decoration: none !important;
+    color: rgb(0, 94, 255);
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+}
+
+.general-link:hover {
+    text-decoration: none !important;
+    opacity: 0.7;
+    color: #00d1b2;
+}
+
 /* ***** TABLE DATA CONFIGURATIONS ****** */
 [id$="data_table"] .shiny-data-frame {
     --shiny-datagrid-grid-header-bgcolor: #f8f9fa !important;

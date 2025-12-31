@@ -11,21 +11,20 @@ from lemonade_stand.utils import read_from_database
 
 from .utils import UserData
 
+DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
-def get_data() -> UserData | SimpleNamespace:
+
+def get_data(run_config: UserConfig) -> UserData | SimpleNamespace:
     """
     A function to read data from database if exists otherwise process from start
     """
 
-    dirs = AppDir()
-    run_config = UserConfig()
-
-    if (dirs.database_path).exists() and (not run_config.refresh_flag):
+    if (DATABASE_PATH).exists() and (not run_config.refresh_flag):
         return SimpleNamespace(
-            income=read_from_database(dirs.database_path, "income"),
-            savings=read_from_database(dirs.database_path, "savings"),
-            expenses=read_from_database(dirs.database_path, "expenses"),
-            unknown=read_from_database(dirs.database_path, "unknown"),
+            income=read_from_database(DATABASE_PATH, "income"),
+            savings=read_from_database(DATABASE_PATH, "savings"),
+            expenses=read_from_database(DATABASE_PATH, "expenses"),
+            unknown=read_from_database(DATABASE_PATH, "unknown"),
         )
 
     else:
@@ -33,6 +32,4 @@ def get_data() -> UserData | SimpleNamespace:
 
 
 # Expose only the user data
-__all__ = [
-    "get_data",
-]
+__all__ = ["get_data", "UserData"]

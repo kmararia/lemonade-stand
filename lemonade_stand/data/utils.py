@@ -21,6 +21,7 @@ from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils import write_to_database
 
 LOGGER = set_up_logger(Path(__file__).stem)
+DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 
 @dataclass
@@ -172,8 +173,8 @@ class UserData:
         object.__setattr__(self, "unknown", unknown_df)
 
         # Write out the tables to a database
-        database_path = write_to_database(
-            database_path=AppDir().database_path,
+        write_path = write_to_database(
+            database_path=DATABASE_PATH,
             write_info_dict={
                 "income": income_df,
                 "savings": savings_df,
@@ -182,4 +183,4 @@ class UserData:
             },
         )
 
-        LOGGER.info("Written tables to database path:\n\t%s", database_path)
+        LOGGER.info("Written tables to database path:\n\t%s", write_path)

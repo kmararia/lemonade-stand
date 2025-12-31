@@ -8,8 +8,7 @@ from .pages.home import home_server
 from .pages.home import home_ui
 from .pages.income import income_server
 from .pages.income import income_ui
-from .pages.login import login_server
-from .pages.login import login_ui
+from .pages.login import auth_server
 from .pages.savings import savings_server
 from .pages.savings import savings_ui
 from .pages.settings import settings_server
@@ -24,8 +23,7 @@ __all__ = [
     "home_ui",
     "income_server",
     "income_ui",
-    "login_server",
-    "login_ui",
+    "auth_server",
     "savings_server",
     "savings_ui",
     "settings_server",

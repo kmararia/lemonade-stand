@@ -6,20 +6,20 @@ from pathlib import Path
 
 import polars as pl
 from shiny import App
+from shiny import reactive
 from shiny import render
 from shiny import run_app
 from shiny import ui
 from shiny.types import ImgData
 
 import lemonade_stand
-from lemonade_stand.data import get_data
+from lemonade_stand.shiny import auth_server
 from lemonade_stand.shiny import expense_server
 from lemonade_stand.shiny import expense_ui
 from lemonade_stand.shiny import home_server
 from lemonade_stand.shiny import home_ui
 from lemonade_stand.shiny import income_server
 from lemonade_stand.shiny import income_ui
-from lemonade_stand.shiny import login_server
 from lemonade_stand.shiny import savings_server
 from lemonade_stand.shiny import savings_ui
 from lemonade_stand.shiny import settings_server
@@ -74,8 +74,8 @@ def server(input, output, session):  # noqa: ARG001
     The main application server
     """
 
-    # Initialize login page
-    login_server("user_login")
+    # Initialize login page to get the data
+    authentication_status = auth_server("user_login")
 
     # Catch the returned reactive values
     user_prefs = settings_server("user_settings")  # noqa: F841
@@ -83,25 +83,26 @@ def server(input, output, session):  # noqa: ARG001
     # Initialize application documentation
     user_guide_server("user_guide")
 
-    # Pull the user data
-    user_data = get_data()
+    @reactive.effect
+    def _():
+        user_data = authentication_status()
 
-    # Stack all the datasets for the home-page
-    stacked_df = pl.union(
-        [
-            user_data.income,
-            user_data.savings,
-            user_data.expenses,
-            user_data.unknown,
-        ],
-        how="diagonal",
-    )
+        # Stack all the datasets for the home-page
+        stacked_df = pl.union(
+            [
+                user_data.income,
+                user_data.savings,
+                user_data.expenses,
+                user_data.unknown,
+            ],
+            how="diagonal",
+        )
 
-    # Call the page servers
-    home_server("Home", input.view_mode, stacked_df)
-    income_server("Income", input.view_mode, user_data.income)
-    savings_server("Savings", input.view_mode, user_data.savings)
-    expense_server("Expense", input.view_mode, user_data.expenses)
+        # Call the page servers
+        home_server("Home", input.view_mode, stacked_df)
+        income_server("Income", input.view_mode, user_data.income)
+        savings_server("Savings", input.view_mode, user_data.savings)
+        expense_server("Expense", input.view_mode, user_data.expenses)
 
     @render.image
     def logo_svg():
