@@ -1,0 +1,44 @@
+/* LOGIN MODULE STYLES */
+.login-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 2px;
+}
+
+.login-modal-input {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    gap: 10px;
+}
+
+/* Login notes to the user */
+.login-valid-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    text-align: center !important;
+    opacity: 0.8;
+    color: #408301;
+}
+
+/* Specific color for dark mode to ensure readability */
+[data-bs-theme="dark"] .login-valid-note {
+    color: #00ff0d !important;
+}
+
+
+.login-invalid-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    text-align: center !important;
+    opacity: 0.8;
+    color: #ff0000;
+}
+
+/* Specific color for dark mode to ensure readability */
+[data-bs-theme="dark"] .login-invalid-note {
+    color: #ff0000 !important;
+}

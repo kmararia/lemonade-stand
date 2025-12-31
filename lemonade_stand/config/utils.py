@@ -15,21 +15,6 @@ from lemonade_stand.config.setup import get_user_configs
 
 
 @dataclass
-class WebConfigs:  ## NOTE: Need to give user ability to update this through web app. Save configs to app dir
-    """
-    A dataclass to hold default images to be display on the web application
-    """
-
-    theme: str = "dark"  ## NOTE: NEED TO ADD A LIGHT THEME
-    img_home: str = "/assets/images/income2.jpg"
-    img_header: str = "/assets/images/income2.jpg"
-
-    img_income: str = "/assets/images/income2.jpg"
-    img_savings: str = "/assets/images/savings2.jpg"
-    img_expenses: str = "/assets/images/expenses2.jpg"
-
-
-@dataclass
 class UserConfig:
     """
     A dataclass for the applicaton configs
@@ -38,7 +23,6 @@ class UserConfig:
     app_version: str = field(init=False)
     refresh_flag: bool = field(init=False)
     add_contributor: bool = field(init=False)
-    export_data: bool = field(init=False)
     statement_dir: Path = field(init=False)
 
     def __post_init__(self):
@@ -57,7 +41,6 @@ class UserConfig:
         self.app_version = config_dict["app-version"]
         self.refresh_flag = bool(config_dict["refresh-flag"])
         self.add_contributor = bool(config_dict["add-contributor"])
-        self.export_data = bool(config_dict["export-flag"])
         self.statement_dir = Path(config_dict["statement-directory"])
 
     def __str__(self):
@@ -121,8 +104,7 @@ class AppDir:
         Returns the home directory of the user's operating system
         """
 
-        # return "~/" if os.name == "posix" else "C:\\"
-        return Path.cwd()
+        return Path("~/") if os.name == "posix" else Path("C:\\")
 
 
 @dataclass
@@ -133,9 +115,6 @@ class ModelConfig:
 
     category: str
     refresh_flag: bool = field(init=False)
-    dict_data: dict = field(
-        init=False
-    )  ## NOTE: MAYBE NEED TO GET RID OF DICT FOR EFFICIENCY
     dot_data: SimpleNamespace = field(init=False)
 
     def __post_init__(self):
@@ -146,15 +125,13 @@ class ModelConfig:
         dirs = AppDir()
 
         if self.category == "model":
-            self.dict_data = metadata.MODEL_CONFIG
-
             self.refresh_flag = check_version(
                 config_path=dirs.metadata_path,
                 config_dict=metadata.MODEL_CONFIG,
             )
 
         # Save dict as simple-namespace
-        self.dot_data = SimpleNamespace(**self.dict_data)
+        self.dot_data = SimpleNamespace(**metadata.MODEL_CONFIG)
 
     def __str__(self):
         """

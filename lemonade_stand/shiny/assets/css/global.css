@@ -1,8 +1,17 @@
-/* ***** SETTINGS CONFIGURATION (MODAL) ***** */
-.modal-content {
-    border-radius: 25px !important;
-    border: none;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+/* ***** MAIN NAVBAR PAGE ***** */
+.navbar .navbar-brand {
+    font-style: italic !important;
+    letter-spacing: 0.02rem; /* Optional: adds a modern feel to italic text */
+}
+
+
+/* ***** SIDEBAR CONFIGURATIONS ***** */
+.sidebar {
+    border-right: 1px solid #eee;
+}
+
+[data-bs-theme="dark"] .sidebar {
+    border-right: 1px solid #333;
 }
 
 /* Custom class for sidebar links */
@@ -18,17 +27,6 @@
     opacity: 0.7;
     color: #00d1b2;
 }
-
-
-/* ***** SIDEBAR CONFIGURATIONS ***** */
-.sidebar {
-    border-right: 1px solid #eee;
-}
-
-[data-bs-theme="dark"] .sidebar {
-    border-right: 1px solid #333;
-}
-
 
 /* ***** TABLE DATA CONFIGURATIONS ****** */
 [id$="table_data"] .shiny-data-frame {

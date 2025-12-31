@@ -9,6 +9,7 @@ from shiny import App
 from shiny import run_app
 from shiny import ui
 
+import lemonade_stand
 from lemonade_stand.data import get_data
 from lemonade_stand.shiny import expense_server
 from lemonade_stand.shiny import expense_ui
@@ -16,19 +17,27 @@ from lemonade_stand.shiny import home_server
 from lemonade_stand.shiny import home_ui
 from lemonade_stand.shiny import income_server
 from lemonade_stand.shiny import income_ui
+from lemonade_stand.shiny import login_server
 from lemonade_stand.shiny import savings_server
 from lemonade_stand.shiny import savings_ui
 from lemonade_stand.shiny import settings_server
 from lemonade_stand.shiny import settings_ui
+from lemonade_stand.shiny import user_guide_server
+from lemonade_stand.shiny import user_guide_ui
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-CSS_PATH = Path(__file__).parent / "shiny" / "assets" / "css" / "custom.css"
+CSS_DIR = Path(lemonade_stand.__file__).parent / "shiny" / "assets" / "css"
+
 
 # Define the application UI and Server using Shiny
 app_ui = ui.page_navbar(
     # Inject the custom configuration files
-    ui.head_content(ui.include_css(CSS_PATH)),
+    ui.head_content(
+        ui.include_css(CSS_DIR / "global.css"),
+        ui.include_css(CSS_DIR / "login.css"),
+        ui.include_css(CSS_DIR / "settings.css"),
+    ),
     ui.nav_spacer(),
     # Main content page
     home_ui("Home"),
@@ -39,8 +48,14 @@ app_ui = ui.page_navbar(
     ui.nav_spacer(),
     ui.nav_control(ui.input_dark_mode(id="view_mode")),
     # Add Side bar
-    sidebar=ui.sidebar(settings_ui("my_settings"), title="User Options"),
+    sidebar=ui.sidebar(
+        user_guide_ui("user_guide"),
+        settings_ui("user_settings"),
+        title="Options",
+        style="font-weight: bold;",
+    ),
     title="Lemonade Stand",
+    lang="en",
     id="pages",
 )
 
@@ -50,8 +65,14 @@ def server(input, output, session):  # noqa: ARG001
     The main application server
     """
 
+    # Initialize login page
+    login_server("user_login")
+
     # Catch the returned reactive values
-    user_prefs = settings_server("my_settings")  # noqa: F841
+    user_prefs = settings_server("user_settings")  # noqa: F841
+
+    # Initialize application documentation
+    user_guide_server("user_guide")
 
     # Pull the user data
     user_data = get_data()
