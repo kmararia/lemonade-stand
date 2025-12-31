@@ -2,6 +2,7 @@
 Main application module
 """
 
+import argparse
 from pathlib import Path
 
 import polars as pl
@@ -13,6 +14,8 @@ from shiny import ui
 from shiny.types import ImgData
 
 import lemonade_stand
+from lemonade_stand.config import UserConfig
+from lemonade_stand.data import get_data
 from lemonade_stand.shiny import auth_server
 from lemonade_stand.shiny import expense_server
 from lemonade_stand.shiny import expense_ui
@@ -74,15 +77,37 @@ def server(input, output, session):  # noqa: ARG001
     The main application server
     """
 
-    # Initialize login page to get the data
-    authentication_status = auth_server("user_login")
+    # Create argparse object instance
+    parser = argparse.ArgumentParser(description="Lemonade Stand application")
+    parser.add_argument(
+        "--run", type=str, default="user", help="The run option (optional)."
+    )
 
-    # Catch the returned reactive values
+    # Save parsed arguments
+    args = parser.parse_args()
+
+    # Check whether to initialize login page
+    if args.run == "dev":
+        dev_statements_dir = (
+            Path(lemonade_stand.__file__).parent / "tests" / "statements"
+        )
+        static_data = get_data(run_config=UserConfig(dev_statements_dir))
+
+        # Set up the data as reactive
+        authentication_status = reactive.Value(static_data)
+
+        LOGGER.info(
+            "Initialized application in developer mode. Using statement path: \n\t'%s'",
+            str(dev_statements_dir),
+        )
+    else:
+        authentication_status = auth_server("user_login")
+
+    # Initialize application settings and documentation
     user_prefs = settings_server("user_settings")  # noqa: F841
-
-    # Initialize application documentation
     user_guide_server("user_guide")
 
+    # Reactively set up the user data and build tab pages
     @reactive.effect
     def _():
         user_data = authentication_status()
