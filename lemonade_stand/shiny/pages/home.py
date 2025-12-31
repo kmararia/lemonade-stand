@@ -26,7 +26,7 @@ def home_ui():
 
     return ui.nav_panel(
         "Home",
-        # Data distribution container
+        # Data plot container
         ui.tags.div(
             ui.div(
                 ui.h3("Transaction Summary", style="font-weight: bold;"),
@@ -53,7 +53,7 @@ def home_ui():
                 ),
                 style="display: flex; justify-content: space-between; align-items: center;",
             ),
-            ui.output_data_frame("table_data"),
+            ui.output_data_frame("home_data_table"),
             id="table-container",
         ),
         # Add loader spinners
@@ -82,7 +82,7 @@ def home_server(input, output, session, view_mode_setting, data_df):  # noqa: AR
         ui.update_select(
             "year_select",
             choices=year_choices,
-            selected=year_choices[0],
+            selected=year_choices,
         )
 
     @reactive.Calc
@@ -163,7 +163,7 @@ def home_server(input, output, session, view_mode_setting, data_df):  # noqa: AR
 
     # Table logic
     @render.data_frame
-    def table_data():
+    def home_data_table():
         # Pull dataframe
         data_df = data()
 

@@ -24,7 +24,7 @@ def expense_ui():
 
 
 @module.server
-def expense_server(input, output, session, data_df):  # noqa: ARG001
+def expense_server(input, output, session, view_mode_setting, data_df):  # noqa: ARG001
     """
     A server module for the expense page
     """

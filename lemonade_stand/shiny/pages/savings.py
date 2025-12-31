@@ -24,7 +24,7 @@ def savings_ui():
 
 
 @module.server
-def savings_server(input, output, session, data_df):  # noqa: ARG001
+def savings_server(input, output, session, view_mode_setting, data_df):  # noqa: ARG001
     """
     A server module for the savings page
     """

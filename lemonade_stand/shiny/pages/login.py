@@ -10,6 +10,7 @@ from shiny import module
 from shiny import reactive
 from shiny import render
 from shiny import ui
+from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import AppDir
@@ -17,8 +18,12 @@ from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils import validate_user_credentials
 
 LOGGER = set_up_logger(Path(__file__).stem)
-CSS_FILE = (
-    Path(lemonade_stand.__file__).parent / "shiny" / "assets" / "css" / "login.css"
+APP_LOGO = (
+    Path(lemonade_stand.__file__).parent
+    / "shiny"
+    / "assets"
+    / "images"
+    / "app_logo.svg"
 )
 APP_DIR = AppDir()
 
@@ -43,6 +48,12 @@ def login_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         login_modal = ui.modal(
             ui.div(
+                ui.div(
+                    ui.output_image("logo_svg"),
+                    style="max-width: 40%; max-height: 35%;",
+                ),
+                ui.h5("Sign in with Account", style="font-weight: bold;"),
+                ui.br(),
                 ui.div(
                     ui.input_text_area(
                         id="user_name",
@@ -75,12 +86,20 @@ def login_server(input, output, session):  # noqa: ARG001
             size="m",
             footer=None,
             easy_close=False,
-            title="Login or Sign up",
             class_="modal-content",
         )
 
         # Unhide the modal
         ui.modal_show(login_modal)
+
+    @render.image
+    def logo_svg():
+        img: ImgData = {
+            "src": str(APP_LOGO),
+            "width": "100%",
+            "height": "100%",
+        }
+        return img
 
     @reactive.Calc
     @reactive.event(input.confirm_login)
