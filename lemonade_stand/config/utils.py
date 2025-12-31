@@ -12,6 +12,8 @@ from types import SimpleNamespace
 from lemonade_stand.config import metadata
 from lemonade_stand.config.setup import check_version
 from lemonade_stand.config.setup import get_user_configs
+from lemonade_stand.utils import MISSING
+from lemonade_stand.utils import MissingType
 
 
 @dataclass
@@ -23,7 +25,7 @@ class UserConfig:
     app_version: str = field(init=False)
     refresh_flag: bool = field(init=False)
     add_contributor: bool = field(init=False)
-    statement_dir: Path = field(init=False)
+    statement_dir: Path | MissingType = field(default=MISSING)
 
     def __post_init__(self):
         """
@@ -33,15 +35,17 @@ class UserConfig:
         dirs = AppDir()
 
         # Set up the configurations
-        config_dict = get_user_configs(
-            user_config=dirs.user_config_path, session_dir=dirs.session_dir
-        )
+        config_dict = get_user_configs(user_config=dirs.user_config_path)
 
         # Update object fields variables
         self.app_version = config_dict["app-version"]
         self.refresh_flag = bool(config_dict["refresh-flag"])
         self.add_contributor = bool(config_dict["add-contributor"])
-        self.statement_dir = Path(config_dict["statement-directory"])
+        self.statement_dir = (
+            self.statement_dir
+            if "statement-directory" not in config_dict
+            else Path(config_dict["statement-directory"])
+        )
 
     def __str__(self):
         """
