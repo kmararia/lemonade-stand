@@ -5,7 +5,6 @@ Income page layout configurations
 from datetime import datetime
 from pathlib import Path
 
-import plotly.express as px
 import polars as pl
 from shiny import module
 from shiny import reactive
@@ -14,6 +13,8 @@ from shiny import ui
 from shinywidgets import output_widget
 from shinywidgets import render_widget
 
+from lemonade_stand.shiny.shared import build_bar_chart
+from lemonade_stand.shiny.shared import build_line_chart
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
@@ -30,11 +31,23 @@ def income_ui():
         # Data distribution container
         ui.tags.div(
             ui.div(
-                ui.h3("Transaction Summary", style="font-weight: bold;"),
-                ui.input_selectize(
-                    id="graph_select",
-                    label="Graph:",
-                    choices=["line graph", "bar graph"],
+                ui.h3("Transaction Summary", style="font-weight: bold; width: 100%"),
+                ui.div(
+                    ui.input_date_range(
+                        id="daterange_select",
+                        label=None,
+                        format="mm/dd/yyyy",
+                        separator="→",
+                        width="100%",
+                    ),
+                    ui.input_select(
+                        id="graph_type",
+                        label=None,
+                        choices={"bar": "bar graph", "line": "line graph"},
+                        selected="bar",
+                        width="50%",
+                    ),
+                    style="display: flex; justify-content: flex-end; align-items: flex-end;  gap: 20px;",
                 ),
                 style="display: flex; justify-content: space-between; align-items: center;",
             ),
@@ -69,20 +82,33 @@ def income_server(input, output, session, view_mode_setting, data_df):  # noqa: 
     A server module for the income page
     """
 
+    # Update date selectors
+    @reactive.effect
+    def _():
+        min_max_dates = data_df.select(
+            pl.min("date").alias("min"),
+            pl.max("date").alias("max"),
+        )
+
+        ui.update_date_range(
+            "daterange_select",
+            start=min_max_dates.item(0, "min"),
+            end=min_max_dates.item(0, "max"),
+        )
+
     @reactive.Calc
-    def data():
-        # Prepare the used dataset
+    def data() -> pl.DataFrame:
+        # Filter and summarize the income data
+        selected_dates = input.daterange_select()
+
         clean_df = (
-            data_df
-            # .filter(
-            #     pl.col("date").is_between(
-            #         pl.lit("2024-01-01").str.to_date(),
-            #         pl.lit("2024-12-01").str.to_date(),
-            #     )
-            # )
-            .group_by([pl.col("date"), pl.col("category")]).agg(
-                pl.sum("amount").alias("amount")
+            data_df.filter(
+                pl.col("date").is_between(
+                    lower_bound=selected_dates[0], upper_bound=selected_dates[1]
+                )
             )
+            .group_by([pl.col("date"), pl.col("category")])
+            .agg(pl.sum("amount").alias("amount"))
         )
 
         return clean_df
@@ -90,65 +116,27 @@ def income_server(input, output, session, view_mode_setting, data_df):  # noqa: 
     # Chart logic
     @render_widget  # type: ignore
     def plot_data():
-        # Set theme-specific colors
-        if view_mode_setting() == "light":
-            theme = "plotly_white"
-            font_color = "black"
-            hover_bg_color = "white"
+        if not input.daterange_select() or input.graph_type() is None:
+            return None
 
+        user_data = data()
+
+        if input.graph_type() == "line":
+            return build_line_chart(
+                data_df=user_data,
+                x_var="date",
+                y_var="amount",
+                color_var="category",
+                view_mode=view_mode_setting(),
+            )
         else:
-            theme = "plotly_dark"
-            font_color = "white"
-            hover_bg_color = "#333"
-
-        # Create the figure
-        fig = px.line(
-            data_frame=data(),
-            x="date",
-            y="amount",
-            color="category",
-            template=theme,
-        )
-
-        # Update the x-axis vertical line
-        fig.update_xaxes(
-            showspikes=True,
-            spikemode="across",
-            spikecolor="#f91414",
-            spikethickness=1,
-            spikedash="solid",
-            showline=True,
-        )
-
-        # Fine-tune the the plot layout
-        fig.update_traces(
-            hovertemplate="<b>%{fullData.name}</b>: $%{y:.2f}<extra></extra>"
-        )
-
-        fig.update_layout(
-            title="<b>Cash Flow by Category<b>",
-            title_x=0.5,
-            font_color=font_color,
-            plot_bgcolor="rgba(0,0,0,0)",
-            paper_bgcolor="rgba(0,0,0,0)",
-            margin={"l": 0, "r": 0, "t": 40, "b": 0},
-            hovermode="x unified",
-            hoverlabel={
-                "bgcolor": hover_bg_color,
-                "bordercolor": "black",
-            },
-            xaxis={
-                "title_text": "Date",
-                "hoverformat": "<b>%A, %B %d, %Y<b>",
-                "tickformat": "%b %Y",
-                "nticks": 10,
-                "tickangle": 0,
-                "dtick": "M2",
-            },
-            yaxis={"title_text": "Amount (USD)", "tickprefix": "$"},
-        )
-
-        return fig
+            return build_bar_chart(
+                data_df=user_data,
+                x_var="date",
+                y_var="amount",
+                color_var="category",
+                view_mode=view_mode_setting(),
+            )
 
     # Table logic
     @render.data_frame
