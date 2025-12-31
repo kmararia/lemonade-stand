@@ -80,14 +80,14 @@ def server(input, output, session):  # noqa: ARG001
     # Create argparse object instance
     parser = argparse.ArgumentParser(description="Lemonade Stand application")
     parser.add_argument(
-        "--run", type=str, default="user", help="The run option (optional)."
+        "--as", type=str, dest="as_", default="user", help="The run option (optional)."
     )
 
     # Save parsed arguments
     args = parser.parse_args()
 
     # Check whether to initialize login page
-    if args.run == "dev":
+    if args.as_ == "dev":
         dev_statements_dir = (
             Path(lemonade_stand.__file__).parent / "tests" / "statements"
         )
