@@ -88,19 +88,21 @@ def server(input, output, session):  # noqa: ARG001
 
     # Check whether to initialize login page
     if args.as_ == "dev":
-        dev_statements_dir = (
-            Path(lemonade_stand.__file__).parent / "tests" / "statements"
-        )
-        static_data = get_data(run_config=UserConfig(dev_statements_dir))
+        LOGGER.info("Initializing application in developer mode")
 
         # Set up the data as reactive
+        static_data = get_data(
+            run_config=UserConfig(
+                Path(lemonade_stand.__file__).parents[1]
+                / "tests"
+                / "data"
+                / "statements"
+            )
+        )
         authentication_status = reactive.Value(static_data)
 
-        LOGGER.info(
-            "Initialized application in developer mode. Using statement path: \n\t'%s'",
-            str(dev_statements_dir),
-        )
     else:
+        LOGGER.info("Initializing application in user mode")
         authentication_status = auth_server("user_login")
 
     # Initialize application settings and documentation
@@ -123,11 +125,29 @@ def server(input, output, session):  # noqa: ARG001
             how="diagonal",
         )
 
-        # Call the page servers
-        home_server("Home", input.view_mode, stacked_df)
-        income_server("Income", input.view_mode, user_data.income)
-        savings_server("Savings", input.view_mode, user_data.savings)
-        expense_server("Expense", input.view_mode, user_data.expenses)
+        if stacked_df.shape[0] > 0:
+            # Call the page servers
+            home_server("Home", input.view_mode, stacked_df)
+            income_server("Income", input.view_mode, user_data.income)
+            savings_server("Savings", input.view_mode, user_data.savings)
+            expense_server("Expense", input.view_mode, user_data.expenses)
+        else:
+            # Read in markdown contents
+            no_data_md = ASSETS_DIR / "markdown" / "no_data.md"
+
+            with no_data_md.open("r", encoding="utf-8") as file:
+                no_data_text = file.read()
+
+            # Display modal with message
+            ui.modal_show(
+                ui.modal(
+                    ui.markdown(no_data_text),
+                    size="l",
+                    easy_close=True,
+                    footer=ui.modal_button("Close"),
+                    style="padding-left: 5rem;",
+                )
+            )
 
     @render.image
     def logo_svg():
