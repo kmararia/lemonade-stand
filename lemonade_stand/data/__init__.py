@@ -14,12 +14,10 @@ from .utils import UserData
 DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 
-def get_data() -> UserData | SimpleNamespace:
+def get_data(run_config: UserConfig) -> UserData | SimpleNamespace:
     """
     A function to read data from database if exists otherwise process from start
     """
-
-    run_config = UserConfig()
 
     if (DATABASE_PATH).exists() and (not run_config.refresh_flag):
         return SimpleNamespace(
@@ -34,6 +32,4 @@ def get_data() -> UserData | SimpleNamespace:
 
 
 # Expose only the user data
-__all__ = [
-    "get_data",
-]
+__all__ = ["get_data", "UserData"]
