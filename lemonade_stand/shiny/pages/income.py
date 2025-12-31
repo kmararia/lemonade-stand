@@ -120,21 +120,22 @@ def income_server(input, output, session, view_mode_setting, data_df):  # noqa: 
             return None
 
         user_data = data()
+        user_data = user_data.rename({x: x.capitalize() for x in user_data.columns})
 
         if input.graph_type() == "line":
             return build_line_chart(
                 data_df=user_data,
-                x_var="date",
-                y_var="amount",
-                color_var="category",
+                x_var="Date",
+                y_var="Amount",
+                color_var="Category",
                 view_mode=view_mode_setting(),
             )
         else:
             return build_bar_chart(
                 data_df=user_data,
-                x_var="date",
-                y_var="amount",
-                color_var="category",
+                x_var="Date",
+                y_var="Amount",
+                color_var="Category",
                 view_mode=view_mode_setting(),
             )
 
