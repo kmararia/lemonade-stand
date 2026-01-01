@@ -3,6 +3,7 @@ Holds dataclasses for the application configuration set up
 """
 
 import os
+from dataclasses import InitVar
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
@@ -25,9 +26,10 @@ class UserConfig:
     app_version: str = field(init=False)
     refresh_flag: bool = field(init=False)
     add_contributor: bool = field(init=False)
-    statement_dir: Path | MissingType = field(default=MISSING)
+    statement_dir: Path = field(init=False)
+    statement_dir_overide: InitVar[Path | MissingType] = field(default=MISSING)
 
-    def __post_init__(self):
+    def __post_init__(self, statement_dir_overide: Path | MissingType):
         """
         Post initialization variables set up
         """
@@ -42,9 +44,16 @@ class UserConfig:
         self.refresh_flag = bool(config_dict["refresh-flag"])
         self.add_contributor = bool(config_dict["add-contributor"])
         self.statement_dir = (
-            self.statement_dir
-            if "statement-directory" not in config_dict
-            else Path(config_dict["statement-directory"])
+            Path(config_dict["statement-directory"])
+            if (
+                "statement-directory" in config_dict
+                and isinstance(statement_dir_overide, MissingType)
+            )
+            else (
+                Path.cwd()
+                if isinstance(statement_dir_overide, MissingType)
+                else statement_dir_overide
+            )
         )
 
     def __str__(self):

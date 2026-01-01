@@ -2,6 +2,7 @@
 Main application module
 """
 
+import argparse
 from pathlib import Path
 
 import polars as pl
@@ -13,6 +14,8 @@ from shiny import ui
 from shiny.types import ImgData
 
 import lemonade_stand
+from lemonade_stand.config import UserConfig
+from lemonade_stand.data import get_data
 from lemonade_stand.shiny import auth_server
 from lemonade_stand.shiny import expense_server
 from lemonade_stand.shiny import expense_ui
@@ -74,15 +77,39 @@ def server(input, output, session):  # noqa: ARG001
     The main application server
     """
 
-    # Initialize login page to get the data
-    authentication_status = auth_server("user_login")
+    # Create argparse object instance
+    parser = argparse.ArgumentParser(description="Lemonade Stand application")
+    parser.add_argument(
+        "--as", type=str, dest="as_", default="user", help="The run option (optional)."
+    )
 
-    # Catch the returned reactive values
+    # Save parsed arguments
+    args = parser.parse_args()
+
+    # Check whether to initialize login page
+    if args.as_ == "dev":
+        LOGGER.info("Initializing application in developer mode")
+
+        # Set up the data as reactive
+        static_data = get_data(
+            run_config=UserConfig(
+                Path(lemonade_stand.__file__).parents[1]
+                / "tests"
+                / "data"
+                / "statements"
+            )
+        )
+        authentication_status = reactive.Value(static_data)
+
+    else:
+        LOGGER.info("Initializing application in user mode")
+        authentication_status = auth_server("user_login")
+
+    # Initialize application settings and documentation
     user_prefs = settings_server("user_settings")  # noqa: F841
-
-    # Initialize application documentation
     user_guide_server("user_guide")
 
+    # Reactively set up the user data and build tab pages
     @reactive.effect
     def _():
         user_data = authentication_status()
@@ -98,11 +125,29 @@ def server(input, output, session):  # noqa: ARG001
             how="diagonal",
         )
 
-        # Call the page servers
-        home_server("Home", input.view_mode, stacked_df)
-        income_server("Income", input.view_mode, user_data.income)
-        savings_server("Savings", input.view_mode, user_data.savings)
-        expense_server("Expense", input.view_mode, user_data.expenses)
+        if stacked_df.shape[0] > 0:
+            # Call the page servers
+            home_server("Home", input.view_mode, stacked_df)
+            income_server("Income", input.view_mode, user_data.income)
+            savings_server("Savings", input.view_mode, user_data.savings)
+            expense_server("Expense", input.view_mode, user_data.expenses)
+        else:
+            # Read in markdown contents
+            no_data_md = ASSETS_DIR / "markdown" / "no_data.md"
+
+            with no_data_md.open("r", encoding="utf-8") as file:
+                no_data_text = file.read()
+
+            # Display modal with message
+            ui.modal_show(
+                ui.modal(
+                    ui.markdown(no_data_text),
+                    size="l",
+                    easy_close=True,
+                    footer=ui.modal_button("Close"),
+                    style="padding-left: 5rem;",
+                )
+            )
 
     @render.image
     def logo_svg():

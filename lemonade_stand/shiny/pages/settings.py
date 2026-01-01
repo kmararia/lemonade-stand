@@ -91,28 +91,48 @@ def settings_server(input, output, session):  # noqa: ARG001
     @render.ui
     def confirm_purge():
         if input.purge_app():
-            return ui.input_text(
-                id="user_confirm_purge",
-                label=ui.span(
-                    "Type 'purge' to confirm action:  This action cannot be undone",
-                    class_="switch-note",
+            return ui.div(
+                ui.input_text(
+                    id="user_type_purge",
+                    label=ui.span(
+                        "Type 'purge' to confirm action:  This action cannot be undone",
+                        class_="switch-note",
+                    ),
+                    width="50%",
                 ),
-                width="50%",
+                ui.input_action_button(
+                    id="user_confirm_purge",
+                    label="confirm",
+                    style="height: 2.2rem; width: 5rem; margin: auto 0 1rem 0; display: inline-flex; justify-content: center; align-items: center;",
+                ),
+                style="display: flex; justify-content: flex-start; align-items: flex-end; gap: 20px;",
             )
         return None
 
     # Purge application if user confirmed
-    @reactive.effect
+    @render.ui
+    @reactive.event(input.user_confirm_purge)
     def _():
-        if (input.purge_app()) and (input.user_confirm_purge().lower()):
+        if (input.purge_app()) and (input.user_type_purge().lower() == "purge"):
             LOGGER.info(
-                "User confirmed application purge: '%s'", input.user_confirm_purge()
+                "User confirmed application purge: '%s'", input.user_type_purge()
             )
 
             # Confirm that the directory is indeed the application dir
             remove_path = APP_DIR.root_dir
-            if remove_path.name == "lemonade_stand":
+            if remove_path.name == "lemonade-stand":
                 shutil.rmtree(remove_path)
+
+                LOGGER.info("Application directory cleared! \n\t'%s'", str(remove_path))
+
+                return ui.input_text(
+                    id="purge_confirmation",
+                    label=ui.span(
+                        "Application purged! All saved data has been removed",
+                        class_="login-invalid-note",
+                    ),
+                    width="50%",
+                )
 
     # Return the inputs as a dictionary of reactive values
     return SimpleNamespace(
