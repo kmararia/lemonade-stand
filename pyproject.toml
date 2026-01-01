@@ -30,7 +30,7 @@
     tests      = ["pyright>=1.1.407", "pytest>=9.0.2"]
 
 [project.scripts]
-    view = "lemonade_stand.app:initialize_app"
+    budget = "lemonade_stand.app:initialize_app"
 
 [tool.uv]
     link-mode = "copy"

@@ -70,6 +70,8 @@ class Transactions:
             self.data = pl.concat(
                 [x.transactions for x in self.statements_list], how="vertical"
             )
+        else:
+            LOGGER.info("No statements pdfs were found! No data was read in")
 
     def __iter__(self):
         """
@@ -120,6 +122,10 @@ class UserData:
         """
         Post initialization variables set up
         """
+
+        LOGGER.info(
+            "Loading statements from path: \n\t'%s'", str(self.config.statement_dir)
+        )
 
         # Load all user transactions
         statements = [
