@@ -61,10 +61,7 @@ class UserConfig:
         String representation of the class
         """
 
-        print_str = [
-            (f"{x.name} ({x.type}) \n\t--> {getattr(self, x.name)}")
-            for x in fields(self)
-        ]
+        print_str = [(f"\t{x.name}: --> {getattr(self, x.name)}") for x in fields(self)]
         return "\n".join(print_str)
 
 
