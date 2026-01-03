@@ -37,23 +37,44 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
     # Define variables
     transaction_matches = []
-    date_patterns = [
-        r"""
-            (?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|
-            Apr(?:il)?|May|Jun(?:e)?|
-            Jul(?:y)?|Aug(?:ust)?|Sept(?:ember)?|
-            Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+
-        """,
-        r"\b\d{2,4}/",
-    ]
+    month_patterns = {
+        "Jan/January": (
+            r"(?:"
+            r"Jan(?:uary)?"
+            r"|Feb(?:ruary)?"
+            r"|Mar(?:ch)?"
+            r"|Apr(?:il)?"
+            r"|May"
+            r"|Jun(?:e)?"
+            r"|Jul(?:y)?"
+            r"|Aug(?:ust)?"
+            r"|Sept(?:ember)?"
+            r"|Oct(?:ober)?"
+            r"|Nov(?:ember)?"
+            r"|Dec(?:ember)?"
+            r")"
+        ),
+        "01": r"\d{2}",
+    }
 
     LOGGER.info("Scraping transaction lines")
 
     # Iterate through all the potentail patterns
-    for pattern in date_patterns:
+    for date_format, pattern in month_patterns.items():
+        # Build the full date pattern conditionally
+        if date_format == "Jan/January":
+            date_pattern = rf"(?:\d{{2}}\s+{pattern})|(?:{pattern}\s+\d{{2}})"
+        else:
+            date_pattern = rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"
+
+        # Find matches iteratively
+        LOGGER.debug(
+            "Checking date-format %s using pattern: \n\t%s", date_format, date_pattern
+        )
+
         transactions = re.finditer(
             re.compile(
-                rf"({pattern}\d{{2}})\s+(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
+                rf"({date_pattern})\s+(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
                 re.IGNORECASE | re.VERBOSE,
             ),
             pdf_text,
