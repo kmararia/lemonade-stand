@@ -12,9 +12,11 @@ from shiny import render
 from shiny import ui
 
 from lemonade_stand.config import AppDir
+from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
+RUN_CONFIG = UserConfig()
 APP_DIR = AppDir()
 
 
@@ -46,17 +48,25 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_text(
                 "statement_path",
                 "Statements directory path:",
-                placeholder=str(APP_DIR.current_dir),
+                placeholder=str(RUN_CONFIG.statement_dir),
                 width="80%",
             ),
             ui.div(
                 ui.input_switch(
-                    id="full_data_refresh",
+                    id="always_refresh_data",
                     label="Always refresh full data",
-                    value=False,
+                    value=RUN_CONFIG.always_refresh_data,
+                    width="15rem",
                 ),
-                ui.output_ui(id="note_data_refresh"),
-                style="display: flex; align-items: center; gap: 10px; margin-top: 20px;",
+                ui.span(
+                    ui.output_ui(id="note_data_refresh"), style="margin-bottom: 1.2rem;"
+                ),
+                style="display: flex; align-items: center; gap: 1rem; margin-top: 2rem;",
+            ),
+            ui.input_switch(
+                id="always_skip_login",
+                label="Always skip login",
+                value=RUN_CONFIG.always_skip_login,
             ),
             ui.br(),
             # User experience settings
@@ -79,13 +89,24 @@ def settings_server(input, output, session):  # noqa: ARG001
         # Unhide the modal
         ui.modal_show(settings_modal)
 
+    # Reactively update the ui and config object
+    @reactive.effect
+    def _():
+        RUN_CONFIG.update_attribute(
+            mappings={
+                "statement_dir": str(input.statement_path()),
+                "always_refresh_data": input.always_refresh_data(),
+                "always_skip_login": input.always_skip_login(),
+            }
+        )
+
     # Display full data refresh disclaimer
     @render.ui
     def note_data_refresh():
         # Only show if the switch is True
-        if input.full_data_refresh():
+        if input.always_refresh_data():
             return ui.span(
-                "Note: A full data refresh might slow down your application depending on how much data you have.",
+                "Note: A full data refresh might slow down your application depending on your data size.",
                 class_="switch-note",
             )
         return None
