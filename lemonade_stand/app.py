@@ -91,15 +91,12 @@ def server(input, output, session):  # noqa: ARG001
         LOGGER.info("Initializing application in developer mode")
 
         # Set up the data as reactive
-        static_data = get_data(
-            run_config=UserConfig(
-                Path(lemonade_stand.__file__).parents[1]
-                / "tests"
-                / "data"
-                / "statements"
-            )
+        dev_config = UserConfig(
+            Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
         )
-        authentication_status = reactive.Value(static_data)
+        authentication_status = reactive.Value(get_data(run_config=dev_config))
+
+        LOGGER.info("Using configuration: \n%s", str(dev_config))
 
     else:
         LOGGER.info("Initializing application in user mode")
