@@ -69,7 +69,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ),
                 ui.h5(
                     "Sign in with your Account",
-                    style="font-weight: bold; margin-bottom: 5%",
+                    style="font-weight: bold; margin-bottom: 1.8rem",
                 ),
                 ui.div(
                     ui.input_text_area(
@@ -98,14 +98,24 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ui.input_action_button(
                     id="confirm_login", label="Login", style="margin: auto;"
                 ),
-                style="margin-top: 20px; width: 100%; display: flex; justify-content: center;",
+                style="margin: 0.5rem auto 2rem auto; width: 100%; display: flex; justify-content: center;",
+            ),
+            ui.div(
+                ui.p("New here? "),
+                ui.input_action_link(
+                    "open_signup", "Create an account", class_="general-link"
+                ),
+                style="display: flex; justify-content: center; gap: 4px; font-size: .9375rem",
+            ),
+            ui.div(
+                ui.input_checkbox(
+                    id="skip_login", label="always skip login", value=False
+                ),
+                style="display: flex; justify-content: flex-start; margin-top: 1rem;",
+                class_="checkbox-desciption",
             ),
             size="m",
-            footer=ui.div(
-                ui.p("No account? "),
-                ui.input_action_link("open_signup", "Sign up", class_="general-link"),
-                style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; font-size: .9375rem",
-            ),
+            footer=None,
             easy_close=False,
             class_="modal-content",
         )
@@ -321,6 +331,11 @@ def auth_server(input, output, session):  # noqa: ARG001
 
         if login_result.username and login_result.password:
             LOGGER.info("Login successful!")
+
+            # Update statement directory
+            RUN_CONFIG.update_attribute(
+                mappings={"always_skip_login": input.skip_login()}
+            )
 
             unlock_app(user_run_config=RUN_CONFIG)
         else:
