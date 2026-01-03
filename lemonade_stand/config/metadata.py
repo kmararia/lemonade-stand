@@ -4,12 +4,18 @@ Holds metadata configurations for different module steps
 
 import importlib.metadata
 from datetime import datetime
+from pathlib import Path
+
+import lemonade_stand
 
 __version__ = importlib.metadata.version("lemonade-stand")
 
 USER_CONFIG = {
     "app-version": __version__,
     "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    "statement-directory": str(
+        Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
+    ),
     "always-refresh-data": False,
     "always-request-login": True,
 }
