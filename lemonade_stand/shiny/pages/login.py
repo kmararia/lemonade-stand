@@ -331,10 +331,15 @@ def auth_server(input, output, session):  # noqa: ARG001
         signup_result = process_signup()
         auth_feedback.set(signup_result)
 
+        # Validate that the path exists
+        user_statements_dir = Path(input.statement_path())
+        if not user_statements_dir.exists():
+            raise Exception
+
         if signup_result.username and signup_result.password:
             LOGGER.info("Signup successful.")
 
-            unlock_app(user_run_config=UserConfig(Path(input.statement_path())))
+            unlock_app(user_run_config=UserConfig(user_statements_dir))
         else:
             pass
 
