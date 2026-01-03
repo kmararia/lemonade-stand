@@ -2,6 +2,7 @@
 Holds dataclasses for the application configuration set up
 """
 
+import json
 import os
 from dataclasses import InitVar
 from dataclasses import dataclass
@@ -62,8 +63,31 @@ class UserConfig:
         String representation of the class
         """
 
-        print_str = [(f"\t{x.name}: --> {getattr(self, x.name)}") for x in fields(self)]
+        print_str = [f"\t{x.name}: --> {getattr(self, x.name)}" for x in fields(self)]
+
         return "\n".join(print_str)
+
+    def update_attribute(self, mappings: dict) -> None:
+        """
+        Class method to update the object attributes
+
+        Arguments:
+            mappings: A dictionary of new mappings e.g. {"my_attribute": "new_value"}
+        Returns:
+            None
+        """
+
+        # Update the object variables
+        for attr, new_val in mappings.items():
+            object.__setattr__(self, attr, new_val)
+
+        # Write out new mappings to json file
+        config_dict = {
+            (x.name).replace("_", "-"): getattr(self, x.name) for x in fields(self)
+        }
+
+        with AppDir().user_config_path.open("w") as file:
+            json.dump(config_dict, file, indent=4)
 
 
 @dataclass
