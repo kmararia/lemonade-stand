@@ -16,7 +16,6 @@ from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-RUN_CONFIG = UserConfig()
 APP_DIR = AppDir()
 
 
@@ -37,6 +36,7 @@ def settings_server(input, output, session):  # noqa: ARG001
 
     # Create reactive values to track events
     is_purged = reactive.Value(False)
+    run_config = reactive.Value(UserConfig())
 
     @reactive.effect
     @reactive.event(input.open_settings)
@@ -46,16 +46,17 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.h5("Transaction statements"),
             ui.br(),
             ui.input_text(
-                "statement_path",
-                "Statements directory path:",
-                placeholder=str(RUN_CONFIG.statement_dir),
+                id="statement_path",
+                label="Statements directory path:",
+                placeholder=str(run_config().statement_dir),
+                autocomplete="on",
                 width="80%",
             ),
             ui.div(
                 ui.input_switch(
                     id="always_refresh_data",
                     label="Always refresh full data",
-                    value=RUN_CONFIG.always_refresh_data,
+                    value=run_config().always_refresh_data,
                     width="15rem",
                 ),
                 ui.span(
@@ -66,7 +67,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_switch(
                 id="always_skip_login",
                 label="Always skip login",
-                value=RUN_CONFIG.always_skip_login,
+                value=run_config().always_skip_login,
             ),
             ui.br(),
             # User experience settings
@@ -92,13 +93,15 @@ def settings_server(input, output, session):  # noqa: ARG001
     # Reactively update the ui and config object
     @reactive.effect
     def _():
-        RUN_CONFIG.update_attribute(
+        run_config().update_attribute(
             mappings={
                 "statement_dir": str(input.statement_path()),
                 "always_refresh_data": input.always_refresh_data(),
                 "always_skip_login": input.always_skip_login(),
             }
         )
+
+        LOGGER.info("Using configuration: \n%s", str(run_config()))
 
     # Display full data refresh disclaimer
     @render.ui
