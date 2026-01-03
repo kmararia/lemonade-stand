@@ -23,7 +23,7 @@ class UserConfig:
 
     app_version: str = field(init=False)
     always_refresh_data: bool = field(init=False)
-    always_request_login: bool = field(init=False)
+    always_skip_login: bool = field(init=False)
     statement_dir: Path = field(init=False)
     dev_mode: bool = field(default=False)
 
@@ -40,8 +40,8 @@ class UserConfig:
         # Update object fields variables
         self.app_version = config_dict["app-version"]
         self.always_refresh_data = bool(config_dict["always-refresh-data"])
-        self.always_request_login = bool(config_dict["always-request-login"])
-        self.statement_dir = Path(config_dict["statement-directory"])
+        self.always_skip_login = bool(config_dict["always-skip-login"])
+        self.statement_dir = Path(config_dict["statement-dir"])
 
     def __str__(self):
         """
@@ -69,12 +69,15 @@ class UserConfig:
         # Write out new mappings to json file
         if not self.dev_mode:
             config_dict = {
-                (x.name).replace("_", "-"): getattr(self, x.name)
+                x.name.replace("_", "-"): (
+                    str(getattr(self, x.name))
+                    if x.name == "statement_dir"
+                    else getattr(self, x.name)
+                )
                 for x in fields(self)
                 if x.name != "dev_mode"
             }
 
-            print(config_dict)
             with AppDir().user_config_path.open("w") as file:
                 json.dump(config_dict, file, indent=4)
 
