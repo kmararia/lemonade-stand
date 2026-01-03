@@ -39,6 +39,7 @@ def auth_server(input, output, session):  # noqa: ARG001
     """
 
     # Define reactive containers to track execution and hold the information
+    valid_statement_path = reactive.Value(False)
     login_initialized = reactive.Value(False)
     transaction_data = reactive.Value()
     auth_feedback = reactive.Value()
@@ -187,6 +188,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                     placeholder="A folder that contains your statement pdfs",
                     width="75%",
                 ),
+                ui.output_ui(id="confirm_valid_path"),
                 style="margin-top: 5%",
             ),
             ui.div(
@@ -323,6 +325,37 @@ def auth_server(input, output, session):  # noqa: ARG001
         else:
             return None
 
+    @render.ui
+    def confirm_valid_path():
+        user_statements_dir = Path(input.statement_path())
+
+        # Start displays only when user has an input
+        if input.statement_path() == "":
+            return None
+
+        # Validate that the path exists
+        elif user_statements_dir.exists():
+            pdf_files = list(user_statements_dir.glob("*.pdf"))
+
+            # Update statement directory containers if dir has files
+            if len(pdf_files) > 0:
+                valid_statement_path.set(True)
+                RUN_CONFIG.update_attribute(
+                    mappings={"statement_dir": user_statements_dir}
+                )
+
+                return None
+            else:
+                return ui.div(
+                    "Statement folder does not contain any statement files. Please confirm that '.pdf' files exist",
+                    class_="login-invalid-note",
+                )
+        else:
+            return ui.div(
+                "Invalid statement path! Path does not exist",
+                class_="login-invalid-note",
+            )
+
     @reactive.effect
     @reactive.event(input.confirm_login)
     def handle_login():
@@ -347,20 +380,14 @@ def auth_server(input, output, session):  # noqa: ARG001
         signup_result = process_signup()
         auth_feedback.set(signup_result)
 
-        # Validate that the path exists
-        user_statements_dir = Path(input.statement_path())
-        if not user_statements_dir.exists():
-            raise Exception
+        # Move forward if a valid statement path was given
+        if valid_statement_path():
+            if signup_result.username and signup_result.password:
+                LOGGER.info("Signup successful.")
 
-        if signup_result.username and signup_result.password:
-            LOGGER.info("Signup successful.")
-
-            # Update statement directory
-            RUN_CONFIG.update_attribute(mappings={"statement_dir": user_statements_dir})
-
-            unlock_app(user_run_config=RUN_CONFIG)
-        else:
-            pass
+                unlock_app(user_run_config=RUN_CONFIG)
+            else:
+                pass
 
     # Process the statements
     return transaction_data
