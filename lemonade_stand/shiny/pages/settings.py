@@ -33,6 +33,9 @@ def settings_server(input, output, session):  # noqa: ARG001
     A server module for the settings page
     """
 
+    # Create reactive values to track events
+    is_purged = reactive.Value(False)
+
     @reactive.effect
     @reactive.event(input.open_settings)
     def _():
@@ -90,6 +93,16 @@ def settings_server(input, output, session):  # noqa: ARG001
     # Display and request confirmation to purge application
     @render.ui
     def confirm_purge():
+        if is_purged():
+            return ui.input_text(
+                id="purge_confirmation",
+                label=ui.span(
+                    "Application purged! All saved data has been removed",
+                    class_="login-invalid-note",
+                ),
+                width="50%",
+            )
+
         if input.purge_app():
             return ui.div(
                 ui.input_text(
@@ -110,7 +123,7 @@ def settings_server(input, output, session):  # noqa: ARG001
         return None
 
     # Purge application if user confirmed
-    @render.ui
+    @reactive.effect
     @reactive.event(input.user_confirm_purge)
     def _():
         if (input.purge_app()) and (input.user_type_purge().lower() == "purge"):
@@ -123,16 +136,9 @@ def settings_server(input, output, session):  # noqa: ARG001
             if remove_path.name == "lemonade-stand":
                 shutil.rmtree(remove_path)
 
+                # Ouput log info and update the reactive state
                 LOGGER.info("Application directory cleared! \n\t'%s'", str(remove_path))
-
-                return ui.input_text(
-                    id="purge_confirmation",
-                    label=ui.span(
-                        "Application purged! All saved data has been removed",
-                        class_="login-invalid-note",
-                    ),
-                    width="50%",
-                )
+                is_purged.set(True)
 
     # Return the inputs as a dictionary of reactive values
     return SimpleNamespace(
