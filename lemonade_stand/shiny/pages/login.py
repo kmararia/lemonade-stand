@@ -271,7 +271,7 @@ def auth_server(input, output, session):  # noqa: ARG001
     # Reactively show the modals
     @reactive.effect
     def _():
-        if not login_initialized():
+        if (not login_initialized()) and (not RUN_CONFIG.always_skip_login):
             show_login_modal()
             login_initialized.set(True)
 
