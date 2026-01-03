@@ -22,6 +22,7 @@ from lemonade_stand.utils.credentials import add_user_credentials
 from lemonade_stand.utils.credentials import validate_user_credentials
 
 LOGGER = set_up_logger(Path(__file__).stem)
+RUN_CONFIG = UserConfig()
 APP_LOGO = (
     Path(lemonade_stand.__file__).parent
     / "shiny"
@@ -321,7 +322,7 @@ def auth_server(input, output, session):  # noqa: ARG001
         if login_result.username and login_result.password:
             LOGGER.info("Login successful!")
 
-            unlock_app(user_run_config=UserConfig())
+            unlock_app(user_run_config=RUN_CONFIG)
         else:
             pass
 
@@ -339,7 +340,10 @@ def auth_server(input, output, session):  # noqa: ARG001
         if signup_result.username and signup_result.password:
             LOGGER.info("Signup successful.")
 
-            unlock_app(user_run_config=UserConfig(user_statements_dir))
+            # Update statement directory
+            RUN_CONFIG.update_attribute(mappings={"statement_dir": user_statements_dir})
+
+            unlock_app(user_run_config=RUN_CONFIG)
         else:
             pass
 

@@ -4,7 +4,6 @@ Holds dataclasses for the application configuration set up
 
 import json
 import os
-from dataclasses import InitVar
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
@@ -14,8 +13,6 @@ from types import SimpleNamespace
 from lemonade_stand.config import metadata
 from lemonade_stand.config.setup import check_version
 from lemonade_stand.config.setup import get_user_configs
-from lemonade_stand.utils import MISSING
-from lemonade_stand.utils import MissingType
 
 
 @dataclass
@@ -28,10 +25,9 @@ class UserConfig:
     always_refresh_data: bool = field(init=False)
     always_request_login: bool = field(init=False)
     statement_dir: Path = field(init=False)
-    # -------------------------------------------
-    statement_dir_overide: InitVar[Path | MissingType] = field(default=MISSING)
+    dev_mode: bool = field(default=False)
 
-    def __post_init__(self, statement_dir_overide: Path | MissingType):
+    def __post_init__(self):
         """
         Post initialization variables set up
         """
@@ -45,18 +41,7 @@ class UserConfig:
         self.app_version = config_dict["app-version"]
         self.always_refresh_data = bool(config_dict["always-refresh-data"])
         self.always_request_login = bool(config_dict["always-request-login"])
-        self.statement_dir = (
-            Path(config_dict["statement-directory"])
-            if (
-                "statement-directory" in config_dict
-                and isinstance(statement_dir_overide, MissingType)
-            )
-            else (
-                Path.cwd()
-                if isinstance(statement_dir_overide, MissingType)
-                else statement_dir_overide
-            )
-        )
+        self.statement_dir = Path(config_dict["statement-directory"])
 
     def __str__(self):
         """
@@ -82,12 +67,16 @@ class UserConfig:
             object.__setattr__(self, attr, new_val)
 
         # Write out new mappings to json file
-        config_dict = {
-            (x.name).replace("_", "-"): getattr(self, x.name) for x in fields(self)
-        }
+        if not self.dev_mode:
+            config_dict = {
+                (x.name).replace("_", "-"): getattr(self, x.name)
+                for x in fields(self)
+                if x.name != "dev_mode"
+            }
 
-        with AppDir().user_config_path.open("w") as file:
-            json.dump(config_dict, file, indent=4)
+            print(config_dict)
+            with AppDir().user_config_path.open("w") as file:
+                json.dump(config_dict, file, indent=4)
 
 
 @dataclass
