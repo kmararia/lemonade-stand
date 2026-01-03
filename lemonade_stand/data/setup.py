@@ -180,32 +180,3 @@ def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
 
     # Return clean dataframe
     return clean_df
-
-
-def map_contributors(data_df: pl.DataFrame) -> pl.DataFrame:
-    """
-    A function to map contributors into the data
-
-    Arguments:
-        data_df: The transactions dataframe
-    """
-
-    LOGGER.info("Adding contributors to dataset")
-
-    # Maybe process the mapping config here??
-    contributor_mappings = {
-        # User : Mapping str
-    }
-
-    # Assuming we iterate through a dictionary
-    contributor_expr = pl.lit(None).alias("contributors")
-    for user, mapping in contributor_mappings.items():
-        contributor_expr = (
-            pl.when(
-                pl.col("transaction_desc").str.to_lowercase() == mapping.lower()
-            )  # TODO: Probably need to do some regex to check for the mapping in the description
-            .then(user)
-            .otherwise(contributor_expr)
-        )
-
-    return data_df.with_columns(contributor_expr)

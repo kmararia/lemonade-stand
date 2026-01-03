@@ -24,9 +24,10 @@ class UserConfig:
     """
 
     app_version: str = field(init=False)
-    refresh_flag: bool = field(init=False)
-    add_contributor: bool = field(init=False)
+    always_refresh_data: bool = field(init=False)
+    always_request_login: bool = field(init=False)
     statement_dir: Path = field(init=False)
+    # -------------------------------------------
     statement_dir_overide: InitVar[Path | MissingType] = field(default=MISSING)
 
     def __post_init__(self, statement_dir_overide: Path | MissingType):
@@ -41,8 +42,8 @@ class UserConfig:
 
         # Update object fields variables
         self.app_version = config_dict["app-version"]
-        self.refresh_flag = bool(config_dict["refresh-flag"])
-        self.add_contributor = bool(config_dict["add-contributor"])
+        self.always_refresh_data = bool(config_dict["always-refresh-data"])
+        self.always_request_login = bool(config_dict["always-request-login"])
         self.statement_dir = (
             Path(config_dict["statement-directory"])
             if (

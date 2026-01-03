@@ -10,8 +10,8 @@ __version__ = importlib.metadata.version("lemonade-stand")
 USER_CONFIG = {
     "app-version": __version__,
     "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    "refresh-flag": False,
-    "add-contributor": False,
+    "always-refresh-data": False,
+    "always-request-login": True,
 }
 
 MODEL_CONFIG = {

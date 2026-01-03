@@ -19,7 +19,7 @@ def get_data(run_config: UserConfig) -> UserData | SimpleNamespace:
     A function to read data from database if exists otherwise process from start
     """
 
-    if (DATABASE_PATH).exists() and (not run_config.refresh_flag):
+    if (DATABASE_PATH).exists() and (not run_config.always_refresh_data):
         return SimpleNamespace(
             income=read_from_database(DATABASE_PATH, "income"),
             savings=read_from_database(DATABASE_PATH, "savings"),
