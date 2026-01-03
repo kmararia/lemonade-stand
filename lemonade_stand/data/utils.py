@@ -14,6 +14,7 @@ from lemonade_stand.config import AppDir
 from lemonade_stand.config import UserConfig
 from lemonade_stand.data.read import read_pdfplumber
 from lemonade_stand.data.read import read_pymullm  # noqa: F401
+from lemonade_stand.data.setup import DATA_SCHEMA
 from lemonade_stand.data.setup import clean_transactions
 from lemonade_stand.data.setup import get_transactions
 from lemonade_stand.utils import set_up_logger
@@ -44,9 +45,12 @@ class Statement:
         self.pages = self.read_func(Path(self.file_path))
 
         full_transactions = get_transactions(
-            pdf_text="\n".join(self.pages)
-        ).with_columns(pl.lit(self.file_path.name).alias("source_file"))
-        self.transactions = clean_transactions(data_df=full_transactions)
+            pdf_text="\n".join(self.pages),
+        )
+        self.transactions = clean_transactions(
+            data_df=full_transactions,
+            file_name=self.file_path.name,
+        )
 
 
 @dataclass
@@ -70,7 +74,9 @@ class Transactions:
                 [x.transactions for x in self.statements_list], how="vertical"
             )
         else:
-            LOGGER.info("No statements pdfs were found! No data was read in")
+            LOGGER.error("No statements pdfs were found! Setting up empty dataset...")
+
+            self.data = pl.DataFrame(data=[], schema=DATA_SCHEMA)
 
     def __iter__(self):
         """
