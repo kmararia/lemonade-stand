@@ -15,6 +15,7 @@ from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
+RUN_CONFIG = UserConfig()
 APP_DIR = AppDir()
 
 
@@ -28,13 +29,12 @@ def settings_ui():
 
 
 @module.server
-def settings_server(input, output, session):  # noqa: ARG001
+def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]:  # noqa: ARG001
     """
     A server module for the settings page
     """
 
     # Create reactive values to track events
-    reactive_config = reactive.Value(UserConfig())
     is_purged = reactive.Value(False)
 
     @reactive.effect
@@ -47,7 +47,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_text(
                 id="statement_path",
                 label="Statements directory path:",
-                value=str(reactive_config().statement_dir),
+                value=str(RUN_CONFIG.statement_dir),
                 autocomplete="on",
                 width="80%",
             ),
@@ -55,7 +55,7 @@ def settings_server(input, output, session):  # noqa: ARG001
                 ui.input_switch(
                     id="always_refresh_data",
                     label="Always refresh full data",
-                    value=reactive_config().always_refresh_data,
+                    value=RUN_CONFIG.always_refresh_data,
                     width="15rem",
                 ),
                 ui.span(
@@ -66,7 +66,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_switch(
                 id="always_skip_login",
                 label="Always skip login",
-                value=reactive_config().always_skip_login,
+                value=RUN_CONFIG.always_skip_login,
             ),
             ui.br(),
             # User experience settings
@@ -81,7 +81,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ),
             size="l",
             easy_close=True,
-            footer=ui.modal_button("Dismiss"),
+            footer=ui.input_action_button(id="close_settings", label="Close"),
             title="Main Application Settings",
             class_="modal-content",
         )
@@ -95,15 +95,13 @@ def settings_server(input, output, session):  # noqa: ARG001
         input.statement_path, input.always_refresh_data, input.always_skip_login
     )
     def _():
-        reactive_config().update_attribute(
+        RUN_CONFIG.update_attribute(
             mappings={
-                "statement_dir": str(input.statement_path()),
+                "statement_dir": Path(input.statement_path()),
                 "always_refresh_data": input.always_refresh_data(),
                 "always_skip_login": input.always_skip_login(),
             }
         )
-
-        LOGGER.info("Settings configuration: \n%s", str(reactive_config()))
 
     # Display full data refresh disclaimer
     @render.ui
@@ -166,5 +164,14 @@ def settings_server(input, output, session):  # noqa: ARG001
                 LOGGER.info("Application directory cleared! \n\t'%s'", str(remove_path))
                 is_purged.set(True)
 
-    # Return a reactive user configuration object
-    return reactive_config
+    # **** CLOSE MODAL ON CLICK ****
+    @reactive.effect
+    @reactive.event(input.close_settings)
+    def _():
+        ui.modal_remove()
+
+    # Return user configuration and reactive object (Allows for the parent app to react specifically to the close event)
+    return (
+        RUN_CONFIG,
+        input.close_settings,
+    )
