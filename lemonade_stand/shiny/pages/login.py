@@ -2,8 +2,6 @@
 User settings page layout configurations
 """
 
-import time
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from faicons import icon_svg
@@ -15,7 +13,6 @@ from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
-from lemonade_stand.data import get_data
 from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils.credentials import LoginCredentials
 from lemonade_stand.utils.credentials import add_user_credentials
@@ -41,7 +38,6 @@ def auth_server(input, output, session):  # noqa: ARG001
     # Define reactive containers to track execution and hold the information
     valid_statement_path = reactive.Value(False)
     login_initialized = reactive.Value(False)
-    transaction_data = reactive.Value()
     auth_feedback = reactive.Value()
 
     @render.image
@@ -247,29 +243,6 @@ def auth_server(input, output, session):  # noqa: ARG001
 
         return add_result
 
-    ## **** CLEAR ACTIVE MODALS ****
-    def unlock_app(user_run_config: UserConfig):
-        """ """
-
-        # Initialize a thread-pool executor
-        with ThreadPoolExecutor() as executor:
-            # Submit the task
-            future = executor.submit(get_data, run_config=user_run_config)
-
-            with ui.Progress(min=0, max=1) as p:
-                counter = 0
-
-                # Update UI as long as the thread is still alive
-                while not future.done():
-                    counter += 1
-                    p.set(value=None, message=f"Processing... ({counter}s)")
-                    time.sleep(1)
-
-            # Retrieve the resulting user-data and save it in the reactive value
-            transaction_data.set(future.result())
-
-        ui.modal_remove()
-
     # Reactively show the modals
     @reactive.effect
     def _():
@@ -370,7 +343,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                 mappings={"always_skip_login": input.skip_login()}
             )
 
-            unlock_app(user_run_config=RUN_CONFIG)
+            ui.modal_remove()
         else:
             pass
 
@@ -385,9 +358,9 @@ def auth_server(input, output, session):  # noqa: ARG001
             if signup_result.username and signup_result.password:
                 LOGGER.info("Signup successful.")
 
-                unlock_app(user_run_config=RUN_CONFIG)
+                ui.modal_remove()
             else:
                 pass
 
     # Process the statements
-    return transaction_data
+    return RUN_CONFIG

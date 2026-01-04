@@ -3,7 +3,10 @@ Main application module
 """
 
 import argparse
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from types import SimpleNamespace
 
 import polars as pl
 from shiny import App
@@ -15,6 +18,7 @@ from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
+from lemonade_stand.data import UserData
 from lemonade_stand.data import get_data
 from lemonade_stand.shiny import auth_server
 from lemonade_stand.shiny import expense_server
@@ -90,24 +94,48 @@ def server(input, output, session):  # noqa: ARG001
     if args.as_ == "dev":
         LOGGER.info("Initializing application in developer mode")
 
-        # Set up the data as reactive
+        # Set up a reactive run config
         dev_config = UserConfig(dev_mode=True)
-        authentication_status = reactive.Value(get_data(run_config=dev_config))
+        authentication_build: reactive.Value[UserConfig] = reactive.Value(dev_config)
 
         LOGGER.info("Using configuration: \n%s", str(dev_config))
 
     else:
         LOGGER.info("Initializing application in user mode")
-        authentication_status = auth_server("user_login")
 
-    # Initialize application settings and documentation
-    user_prefs = settings_server("user_settings")  # noqa: F841
-    user_guide_server("user_guide")
+        # Set up a reactive run config
+        login_config = auth_server("user_login")
+        authentication_build: reactive.Value[UserConfig] = reactive.Value(login_config)
 
-    # Reactively set up the user data and build tab pages
+    # Initialize application documentation and settings
+    @reactive.Effect
+    def _():
+        user_guide_server("user_guide")
+        settings_config = settings_server("user_settings")
+        authentication_build.set(settings_config())
+
+    # Reactively set up the user data
+    @reactive.Calc
+    def dataset() -> UserData | SimpleNamespace:
+        with ThreadPoolExecutor() as executor:
+            # Submit the task
+            future = executor.submit(get_data, run_config=authentication_build())
+
+            with ui.Progress(min=0, max=1) as p:
+                counter = 0
+
+                while not future.done():
+                    counter += 1
+                    p.set(message=f"Processing data... ({counter}s)")
+                    time.sleep(1)
+
+            # Retrieve the resulting user-data and save it in the reactive value
+            return future.result()
+
+    # Build tab pages
     @reactive.effect
     def _():
-        user_data = authentication_status()
+        user_data = dataset()
 
         # Stack all the datasets for the home-page
         stacked_df = pl.union(
