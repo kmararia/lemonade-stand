@@ -95,31 +95,32 @@ def server(input, output, session):  # noqa: ARG001
         LOGGER.info("Initializing application in developer mode")
 
         # Set up a reactive run config
-        dev_config = UserConfig(dev_mode=True)
-        authentication_build: reactive.Value[UserConfig] = reactive.Value(dev_config)
-
-        LOGGER.info("Using configuration: \n%s", str(dev_config))
+        build_params = UserConfig(dev_mode=True)
+        data_path: reactive.Value[Path] = reactive.Value(build_params.statement_dir)
 
     else:
         LOGGER.info("Initializing application in user mode")
 
         # Set up a reactive run config
-        login_config = auth_server("user_login")
-        authentication_build: reactive.Value[UserConfig] = reactive.Value(login_config)
+        build_params = auth_server("user_login")
+        data_path: reactive.Value[Path] = reactive.Value(build_params.statement_dir)
 
     # Initialize application documentation and settings
     @reactive.Effect
     def _():
         user_guide_server("user_guide")
-        settings_config = settings_server("user_settings")
-        authentication_build.set(settings_config())
+        build_params = settings_server("user_settings")()
+        data_path.set(build_params.statement_dir)
+
+    LOGGER.info("Using configuration: \n%s", str(build_params))
 
     # Reactively set up the user data
     @reactive.Calc
+    @reactive.event(data_path)
     def dataset() -> UserData | SimpleNamespace:
         with ThreadPoolExecutor() as executor:
             # Submit the task
-            future = executor.submit(get_data, run_config=authentication_build())
+            future = executor.submit(get_data, run_config=build_params)
 
             with ui.Progress(min=0, max=1) as p:
                 counter = 0
@@ -134,6 +135,7 @@ def server(input, output, session):  # noqa: ARG001
 
     # Build tab pages
     @reactive.effect
+    @reactive.event(data_path, dataset)
     def _():
         user_data = dataset()
 
