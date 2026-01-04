@@ -4,7 +4,6 @@ User settings page layout configurations
 
 import shutil
 from pathlib import Path
-from types import SimpleNamespace
 
 from shiny import module
 from shiny import reactive
@@ -35,8 +34,8 @@ def settings_server(input, output, session):  # noqa: ARG001
     """
 
     # Create reactive values to track events
+    reactive_config = reactive.Value(UserConfig())
     is_purged = reactive.Value(False)
-    run_config = reactive.Value(UserConfig())
 
     @reactive.effect
     @reactive.event(input.open_settings)
@@ -48,7 +47,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_text(
                 id="statement_path",
                 label="Statements directory path:",
-                placeholder=str(run_config().statement_dir),
+                placeholder=str(reactive_config().statement_dir),
                 autocomplete="on",
                 width="80%",
             ),
@@ -56,7 +55,7 @@ def settings_server(input, output, session):  # noqa: ARG001
                 ui.input_switch(
                     id="always_refresh_data",
                     label="Always refresh full data",
-                    value=run_config().always_refresh_data,
+                    value=reactive_config().always_refresh_data,
                     width="15rem",
                 ),
                 ui.span(
@@ -67,7 +66,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_switch(
                 id="always_skip_login",
                 label="Always skip login",
-                value=run_config().always_skip_login,
+                value=reactive_config().always_skip_login,
             ),
             ui.br(),
             # User experience settings
@@ -92,8 +91,11 @@ def settings_server(input, output, session):  # noqa: ARG001
 
     # Reactively update the ui and config object
     @reactive.effect
+    @reactive.event(
+        input.statement_path, input.always_refresh_data, input.always_skip_login
+    )
     def _():
-        run_config().update_attribute(
+        reactive_config().update_attribute(
             mappings={
                 "statement_dir": str(input.statement_path()),
                 "always_refresh_data": input.always_refresh_data(),
@@ -101,7 +103,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             }
         )
 
-        LOGGER.info("Using configuration: \n%s", str(run_config()))
+        LOGGER.info("Settings configuration: \n%s", str(reactive_config()))
 
     # Display full data refresh disclaimer
     @render.ui
@@ -164,8 +166,5 @@ def settings_server(input, output, session):  # noqa: ARG001
                 LOGGER.info("Application directory cleared! \n\t'%s'", str(remove_path))
                 is_purged.set(True)
 
-    # Return the inputs as a dictionary of reactive values
-    return SimpleNamespace(
-        accent=lambda: input.theme_accent(),
-        decimals=lambda: input.show_decimals(),
-    )
+    # Return a reactive user configuration object
+    return reactive_config
