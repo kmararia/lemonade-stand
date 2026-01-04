@@ -55,7 +55,7 @@ def auth_server(input, output, session):  # noqa: ARG001
         A function that sets up the log-in modal ui
         """
 
-        LOGGER.info("Initializing Log-in page...")
+        LOGGER.info("Building Log-in page...")
 
         # Set up the modal
         login_modal = ui.modal(

@@ -47,7 +47,7 @@ def settings_server(input, output, session):  # noqa: ARG001
             ui.input_text(
                 id="statement_path",
                 label="Statements directory path:",
-                placeholder=str(reactive_config().statement_dir),
+                value=str(reactive_config().statement_dir),
                 autocomplete="on",
                 width="80%",
             ),
