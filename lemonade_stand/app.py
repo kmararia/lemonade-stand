@@ -81,6 +81,10 @@ def server(input, output, session):  # noqa: ARG001
     The main application server
     """
 
+    # Define reactive values to track execution
+    build_params: reactive.Value[UserConfig] = reactive.Value()
+    data_path: reactive.Value[Path] = reactive.Value()
+
     # Create argparse object instance
     parser = argparse.ArgumentParser(description="Lemonade Stand application")
     parser.add_argument(
@@ -90,44 +94,46 @@ def server(input, output, session):  # noqa: ARG001
     # Save parsed arguments
     args = parser.parse_args()
 
+    LOGGER.info("Initializing application in '%s' mode", str(args.as_))
+
     # Check whether to initialize login page
-    if args.as_ == "dev":
-        LOGGER.info("Initializing application in developer mode")
+    run_config = (
+        UserConfig(dev_mode=True) if args.as_ == "dev" else auth_server("user_login")
+    )
 
-        # Set up a reactive run config
-        build_params = UserConfig(dev_mode=True)
-        data_path: reactive.Value[Path] = reactive.Value(build_params.statement_dir)
+    # Build app documentation and settings page
+    user_guide_server("user_guide")
+    settings_config, settings_trigger = settings_server("user_settings")
 
-    else:
-        LOGGER.info("Initializing application in user mode")
+    # Update the reactive values
+    build_params.set(run_config)
+    data_path.set(run_config.statement_dir)
 
-        # Set up a reactive run config
-        build_params = auth_server("user_login")
-        data_path: reactive.Value[Path] = reactive.Value(build_params.statement_dir)
-
-    # Initialize application documentation and settings
+    # Update build configurations on settings close
     @reactive.Effect
+    @reactive.event(settings_trigger)
     def _():
-        user_guide_server("user_guide")
-        build_params = settings_server("user_settings")()
-        data_path.set(build_params.statement_dir)
+        build_params.set(settings_config)
+        data_path.set(settings_config.statement_dir)
 
-    LOGGER.info("Using configuration: \n%s", str(build_params))
+        LOGGER.info("Using configuration: \n%s", str(build_params()))
 
     # Reactively set up the user data
     @reactive.Calc
     @reactive.event(data_path)
     def dataset() -> UserData | SimpleNamespace:
+        current_config = build_params()
+
         with ThreadPoolExecutor() as executor:
             # Submit the task
-            future = executor.submit(get_data, run_config=build_params)
+            future = executor.submit(get_data, run_config=current_config)
 
             with ui.Progress(min=0, max=1) as p:
                 counter = 0
 
                 while not future.done():
                     counter += 1
-                    p.set(message=f"Processing data... ({counter}s)")
+                    p.set(message=f"Processing your data... ({counter}s)")
                     time.sleep(1)
 
             # Retrieve the resulting user-data and save it in the reactive value
@@ -135,7 +141,6 @@ def server(input, output, session):  # noqa: ARG001
 
     # Build tab pages
     @reactive.effect
-    @reactive.event(data_path, dataset)
     def _():
         user_data = dataset()
 
