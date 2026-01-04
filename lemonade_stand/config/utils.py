@@ -40,7 +40,9 @@ class UserConfig:
         # Update object fields variables
         self.app_version = config_dict["app-version"]
         self.always_refresh_data = bool(config_dict["always-refresh-data"])
-        self.always_skip_login = bool(config_dict["always-skip-login"])
+        self.always_skip_login = (
+            True if self.dev_mode else bool(config_dict["always-skip-login"])
+        )
         self.statement_dir = Path(config_dict["statement-dir"])
 
     def __str__(self):
