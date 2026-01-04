@@ -102,7 +102,7 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
             None,  # Placeholder for transaction_category
             None,  # Placeholder for transaction_type
             None,  # Placeholder for source_file
-            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            datetime.now(),
         )
         for row in transaction_matches[
             np.argmax(
