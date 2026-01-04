@@ -13,10 +13,10 @@ from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
+from lemonade_stand.shiny.shared import LoginCredentials
+from lemonade_stand.shiny.shared import add_user_credentials
+from lemonade_stand.shiny.shared import validate_user_credentials
 from lemonade_stand.utils import set_up_logger
-from lemonade_stand.utils.credentials import LoginCredentials
-from lemonade_stand.utils.credentials import add_user_credentials
-from lemonade_stand.utils.credentials import validate_user_credentials
 
 LOGGER = set_up_logger(Path(__file__).stem)
 RUN_CONFIG = UserConfig()
