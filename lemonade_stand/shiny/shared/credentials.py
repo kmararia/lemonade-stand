@@ -13,11 +13,10 @@ import bcrypt
 import polars as pl
 
 from lemonade_stand.config import AppDir
-
-from .database_io import read_from_database
-from .database_io import write_to_database
-from .exceptions import MissingDatabaseError
-from .logging_utils import set_up_logger
+from lemonade_stand.utils.database_io import read_from_database
+from lemonade_stand.utils.database_io import write_to_database
+from lemonade_stand.utils.exceptions import MissingDatabaseError
+from lemonade_stand.utils.logging_utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
 DATABASE_PATH = AppDir().database_dir / "credentials.duckdb"

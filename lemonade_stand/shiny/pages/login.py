@@ -2,8 +2,6 @@
 User settings page layout configurations
 """
 
-import time
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from faicons import icon_svg
@@ -15,11 +13,10 @@ from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
-from lemonade_stand.data import get_data
+from lemonade_stand.shiny.shared import LoginCredentials
+from lemonade_stand.shiny.shared import add_user_credentials
+from lemonade_stand.shiny.shared import validate_user_credentials
 from lemonade_stand.utils import set_up_logger
-from lemonade_stand.utils.credentials import LoginCredentials
-from lemonade_stand.utils.credentials import add_user_credentials
-from lemonade_stand.utils.credentials import validate_user_credentials
 
 LOGGER = set_up_logger(Path(__file__).stem)
 RUN_CONFIG = UserConfig()
@@ -39,8 +36,8 @@ def auth_server(input, output, session):  # noqa: ARG001
     """
 
     # Define reactive containers to track execution and hold the information
+    valid_statement_path = reactive.Value(False)
     login_initialized = reactive.Value(False)
-    transaction_data = reactive.Value()
     auth_feedback = reactive.Value()
 
     @render.image
@@ -58,7 +55,7 @@ def auth_server(input, output, session):  # noqa: ARG001
         A function that sets up the log-in modal ui
         """
 
-        LOGGER.info("Initializing Log-in page...")
+        LOGGER.info("Building Log-in page...")
 
         # Set up the modal
         login_modal = ui.modal(
@@ -69,7 +66,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ),
                 ui.h5(
                     "Sign in with your Account",
-                    style="font-weight: bold; margin-bottom: 5%",
+                    style="font-weight: bold; margin-bottom: 1.8rem",
                 ),
                 ui.div(
                     ui.input_text_area(
@@ -98,14 +95,24 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ui.input_action_button(
                     id="confirm_login", label="Login", style="margin: auto;"
                 ),
-                style="margin-top: 20px; width: 100%; display: flex; justify-content: center;",
+                style="margin: 0.5rem auto 2rem auto; width: 100%; display: flex; justify-content: center;",
+            ),
+            ui.div(
+                ui.p("New here? "),
+                ui.input_action_link(
+                    "open_signup", "Create an account", class_="general-link"
+                ),
+                style="display: flex; justify-content: center; gap: 4px; font-size: .9375rem",
+            ),
+            ui.div(
+                ui.input_checkbox(
+                    id="skip_login", label="always skip login", value=False
+                ),
+                style="display: flex; justify-content: flex-start; margin-top: 1rem;",
+                class_="checkbox-desciption",
             ),
             size="m",
-            footer=ui.div(
-                ui.p("No account? "),
-                ui.input_action_link("open_signup", "Sign up", class_="general-link"),
-                style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px; font-size: .9375rem",
-            ),
+            footer=None,
             easy_close=False,
             class_="modal-content",
         )
@@ -177,6 +184,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                     placeholder="A folder that contains your statement pdfs",
                     width="75%",
                 ),
+                ui.output_ui(id="confirm_valid_path"),
                 style="margin-top: 5%",
             ),
             ui.div(
@@ -235,33 +243,10 @@ def auth_server(input, output, session):  # noqa: ARG001
 
         return add_result
 
-    ## **** CLEAR ACTIVE MODALS ****
-    def unlock_app(user_run_config: UserConfig):
-        """ """
-
-        # Initialize a thread-pool executor
-        with ThreadPoolExecutor() as executor:
-            # Submit the task
-            future = executor.submit(get_data, run_config=user_run_config)
-
-            with ui.Progress(min=0, max=1) as p:
-                counter = 0
-
-                # Update UI as long as the thread is still alive
-                while not future.done():
-                    counter += 1
-                    p.set(value=None, message=f"Processing... ({counter}s)")
-                    time.sleep(1)
-
-            # Retrieve the resulting user-data and save it in the reactive value
-            transaction_data.set(future.result())
-
-        ui.modal_remove()
-
     # Reactively show the modals
     @reactive.effect
     def _():
-        if not login_initialized():
+        if (not login_initialized()) and (not RUN_CONFIG.always_skip_login):
             show_login_modal()
             login_initialized.set(True)
 
@@ -313,6 +298,37 @@ def auth_server(input, output, session):  # noqa: ARG001
         else:
             return None
 
+    @render.ui
+    def confirm_valid_path():
+        user_statements_dir = Path(input.statement_path())
+
+        # Start displays only when user has an input
+        if input.statement_path() == "":
+            return None
+
+        # Validate that the path exists
+        elif user_statements_dir.exists():
+            pdf_files = list(user_statements_dir.glob("*.pdf"))
+
+            # Update statement directory containers if dir has files
+            if len(pdf_files) > 0:
+                valid_statement_path.set(True)
+                RUN_CONFIG.update_attribute(
+                    mappings={"statement_dir": user_statements_dir}
+                )
+
+                return None
+            else:
+                return ui.div(
+                    "Statement folder does not contain any statement files. Please confirm that '.pdf' files exist",
+                    class_="login-invalid-note",
+                )
+        else:
+            return ui.div(
+                "Invalid statement path! Path does not exist",
+                class_="login-invalid-note",
+            )
+
     @reactive.effect
     @reactive.event(input.confirm_login)
     def handle_login():
@@ -322,7 +338,12 @@ def auth_server(input, output, session):  # noqa: ARG001
         if login_result.username and login_result.password:
             LOGGER.info("Login successful!")
 
-            unlock_app(user_run_config=RUN_CONFIG)
+            # Update statement directory
+            RUN_CONFIG.update_attribute(
+                mappings={"always_skip_login": input.skip_login()}
+            )
+
+            ui.modal_remove()
         else:
             pass
 
@@ -332,20 +353,14 @@ def auth_server(input, output, session):  # noqa: ARG001
         signup_result = process_signup()
         auth_feedback.set(signup_result)
 
-        # Validate that the path exists
-        user_statements_dir = Path(input.statement_path())
-        if not user_statements_dir.exists():
-            raise Exception
+        # Move forward if a valid statement path was given
+        if valid_statement_path():
+            if signup_result.username and signup_result.password:
+                LOGGER.info("Signup successful.")
 
-        if signup_result.username and signup_result.password:
-            LOGGER.info("Signup successful.")
-
-            # Update statement directory
-            RUN_CONFIG.update_attribute(mappings={"statement_dir": user_statements_dir})
-
-            unlock_app(user_run_config=RUN_CONFIG)
-        else:
-            pass
+                ui.modal_remove()
+            else:
+                pass
 
     # Process the statements
-    return transaction_data
+    return RUN_CONFIG

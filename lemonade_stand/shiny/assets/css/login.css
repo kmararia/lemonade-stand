@@ -38,7 +38,15 @@
     color: #ff0000;
 }
 
-/* Specific color for dark mode to ensure readability */
-[data-bs-theme="dark"] .login-invalid-note {
-    color: #ff0000 !important;
+
+/* Checkbox descriptions for the user */
+.checkbox-desciption {
+    font-size: 0.85rem;
+    font-style: italic;
+    opacity: 0.9;
+    color: #555555;
+}
+
+[data-bs-theme="dark"] .checkbox-desciption {
+    color: #7b7b7b !important;
 }

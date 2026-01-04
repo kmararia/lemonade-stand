@@ -112,3 +112,13 @@
     color: #fff;
     border: 1px solid #870101;
 }
+
+
+
+/* ***** NOTE DISPLAYS ***** */
+.invalid-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    opacity: 0.8;
+    color: #ff0000;
+}

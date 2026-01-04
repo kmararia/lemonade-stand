@@ -15,6 +15,17 @@ from dateutil.parser import parse
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
+DATA_SCHEMA = pl.Schema(
+    {
+        "transaction_date": pl.Date(),
+        "transaction_desc": pl.String(),
+        "transaction_amount": pl.Decimal(None, 2),
+        "transaction_category": pl.String(),
+        "transaction_type": pl.String(),
+        "source_file": pl.String(),
+        "extract_date": pl.Datetime(),
+    }
+)
 
 
 def get_transactions(pdf_text: str) -> pl.DataFrame:
@@ -82,37 +93,35 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
         transaction_matches.append([line.groups() for line in transactions])
 
-    # Set up the final schema and data
-    schema = pl.Schema(
-        {
-            "transaction_date": pl.Date(),
-            "transaction_desc": pl.String(),
-            "transaction_amount": pl.Decimal(None, 2),
-        }
-    )
-
+    # Set up the data rows
     data = [
         (
             parse(row[0], default=datetime(int(file_year), 1, 1)).date(),
             row[1],
             PyDecimal(row[2].replace(",", "")),
+            None,  # Placeholder for transaction_category
+            None,  # Placeholder for transaction_type
+            None,  # Placeholder for source_file
+            datetime.now(),
         )
         for row in transaction_matches[
             np.argmax(
                 [len(x) for x in transaction_matches]
-            )  # Get list with most transactions captured
+            )  # Get list with most transactions captured. Doing this to make sure the optimal date-pattern was captured
         ]
     ]
 
     # Return a polars dataframe
     return pl.DataFrame(
         data=data,
-        schema=schema,
+        schema=DATA_SCHEMA,
         orient="row",
     )
 
 
-def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
+def clean_transactions(
+    data_df: pl.DataFrame, file_name: str | None = None
+) -> pl.DataFrame:
     """
     Filters out transactions that are most likely invalid
     """
@@ -165,8 +174,9 @@ def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
 
     LOGGER.info("Adding missing fields...")
 
-    # Set up missing columns
+    # Set up empty columns
     clean_df = clean_df.with_columns(
+        pl.lit(file_name).alias("source_file"),
         pl.lit("Category").alias("transaction_category"),
         (
             pl.when(pl.col("transaction_amount") < 0)
@@ -178,5 +188,4 @@ def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
     # # Filter out unnecessary data tables
     # clean_df = save_popular_block(data_df=clean_df)
 
-    # Return clean dataframe
     return clean_df
