@@ -22,7 +22,7 @@ def build_chart(
     A function to build a plotly bar graph
     """
 
-    LOGGER.info("Building home page bar graph...")
+    LOGGER.info("Building page graph...")
 
     # Set theme-specific colors
     if view_mode == "light":
