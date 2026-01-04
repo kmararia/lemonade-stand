@@ -38,11 +38,6 @@
     color: #ff0000;
 }
 
-/* Specific color for dark mode to ensure readability */
-[data-bs-theme="dark"] .login-invalid-note {
-    color: #ff0000 !important;
-}
-
 
 /* Checkbox descriptions for the user */
 .checkbox-desciption {

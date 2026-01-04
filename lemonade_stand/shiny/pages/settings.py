@@ -25,7 +25,9 @@ def settings_ui():
     A UI module for the settings page
     """
 
-    return ui.input_action_link("open_settings", "⚙️ Settings", class_="sidebar-link")
+    return ui.input_action_link(
+        "open_settings", "⚙️ User Preferences", class_="sidebar-link"
+    )
 
 
 @module.server
@@ -34,7 +36,8 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
     A server module for the settings page
     """
 
-    # Create reactive values to track events
+    # Create reactive containers to track events
+    valid_statement_path = reactive.Value(False)
     is_purged = reactive.Value(False)
 
     @reactive.effect
@@ -44,12 +47,16 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
         settings_modal = ui.modal(
             ui.h5("Transaction statements"),
             ui.br(),
-            ui.input_text(
-                id="statement_path",
-                label="Statements directory path:",
-                value=str(RUN_CONFIG.statement_dir),
-                autocomplete="on",
-                width="80%",
+            ui.div(
+                ui.input_text(
+                    id="statement_path",
+                    label="Statements directory path:",
+                    value=str(RUN_CONFIG.statement_dir),
+                    autocomplete="on",
+                    width="80%",
+                ),
+                ui.output_ui(id="confirm_valid_path"),
+                style="margin-top: 5%",
             ),
             ui.div(
                 ui.input_switch(
@@ -113,6 +120,37 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
                 class_="switch-note",
             )
         return None
+
+    @render.ui
+    def confirm_valid_path():
+        user_statements_dir = Path(input.statement_path())
+
+        # Start displays only when user has an input
+        if input.statement_path() == "":
+            return None
+
+        # Validate that the path exists
+        elif user_statements_dir.exists():
+            pdf_files = list(user_statements_dir.glob("*.pdf"))
+
+            # Update statement directory containers if dir has files
+            if len(pdf_files) > 0:
+                valid_statement_path.set(True)
+                RUN_CONFIG.update_attribute(
+                    mappings={"statement_dir": user_statements_dir}
+                )
+
+                return None
+            else:
+                return ui.div(
+                    "Statement folder does not contain any statement files. Please confirm that '.pdf' files exist",
+                    class_="invalid-note",
+                )
+        else:
+            return ui.div(
+                "Invalid statement path! Path does not exist",
+                class_="invalid-note",
+            )
 
     # Display and request confirmation to purge application
     @render.ui
