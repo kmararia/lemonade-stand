@@ -15,6 +15,8 @@ from .pages.settings import settings_server
 from .pages.settings import settings_ui
 from .pages.user_guide import user_guide_server
 from .pages.user_guide import user_guide_ui
+from .pages.user_mappings import mappings_server
+from .pages.user_mappings import mappings_ui
 
 __all__ = [
     "expense_server",
@@ -30,4 +32,6 @@ __all__ = [
     "settings_ui",
     "user_guide_server",
     "user_guide_ui",
+    "mappings_server",
+    "mappings_ui",
 ]

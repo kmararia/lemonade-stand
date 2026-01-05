@@ -27,6 +27,8 @@ from lemonade_stand.shiny import home_server
 from lemonade_stand.shiny import home_ui
 from lemonade_stand.shiny import income_server
 from lemonade_stand.shiny import income_ui
+from lemonade_stand.shiny import mappings_server
+from lemonade_stand.shiny import mappings_ui
 from lemonade_stand.shiny import savings_server
 from lemonade_stand.shiny import savings_ui
 from lemonade_stand.shiny import settings_server
@@ -59,6 +61,7 @@ app_ui = ui.page_navbar(
     # Add Side bar
     sidebar=ui.sidebar(
         user_guide_ui("user_guide"),
+        mappings_ui("user_mappings"),
         settings_ui("user_settings"),
         title="Options",
         style="font-weight: bold;",
@@ -103,6 +106,7 @@ def server(input, output, session):  # noqa: ARG001
 
     # Build app documentation and settings page
     user_guide_server("user_guide")
+    mappings_server("user_mappings")
     settings_config, settings_trigger = settings_server("user_settings")
 
     # Update the reactive values
@@ -155,12 +159,13 @@ def server(input, output, session):  # noqa: ARG001
             how="diagonal",
         )
 
+        # Call the page servers
         if stacked_df.shape[0] > 0:
-            # Call the page servers
             home_server("Home", input.view_mode, stacked_df)
             income_server("Income", input.view_mode, user_data.income)
             savings_server("Savings", input.view_mode, user_data.savings)
             expense_server("Expense", input.view_mode, user_data.expenses)
+
         else:
             # Read in markdown contents
             no_data_md = ASSETS_DIR / "markdown" / "no_data.md"
