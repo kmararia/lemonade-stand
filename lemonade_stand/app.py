@@ -107,7 +107,7 @@ def server(input, output, session):  # noqa: ARG001
     # Build app documentation and settings page
     user_guide_server("user_guide")
     mappings_server("user_mappings")
-    settings_config, settings_trigger = settings_server("user_settings")
+    settings_config = settings_server("user_settings")
 
     # Update the reactive values
     build_params.set(run_config)
@@ -115,10 +115,21 @@ def server(input, output, session):  # noqa: ARG001
 
     # Update build configurations on settings close
     @reactive.Effect
-    @reactive.event(settings_trigger)
+    @reactive.event(settings_config.trigger)
     def _():
-        build_params.set(settings_config)
-        data_path.set(settings_config.statement_dir)
+        # Log out if the user purged the application
+        if settings_config.log_out:
+            LOGGER.info("Initializing login after purge...")
+
+            login_config = auth_server("user_login")
+            build_params.set(login_config)
+            data_path.set(login_config.statement_dir)
+        else:
+            new_settings = settings_config.user_config
+            build_params.set(new_settings)
+
+            if new_settings.statement_dir != data_path():
+                data_path.set(new_settings.statement_dir)
 
         LOGGER.info("Using configuration: \n%s", str(build_params()))
 
