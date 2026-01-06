@@ -89,21 +89,29 @@ def mappings_server(input, output, session):  # noqa: ARG001
         ui.modal_show(mappings_modal)
 
     @render.ui
-    @reactive.event(input.add_mapping, input.confirm_add_mapping)
+    @reactive.event(input.add_mapping)
     def confirm_override():
+        category_input = input.key_mapping()
         substring_input = input.value_mapping()
-        current_key = [
+        mappings_data = category_mappings.get()
+        current_keys = [
             x for x, y in category_mappings().items() if substring_input in y
         ]
 
-        if len(current_key) > 0:
+        # Clear if the current mapping already exists
+        if (category_input in current_keys) and (
+            substring_input in mappings_data.get(category_input, [])
+        ):
+            return ui.div()
+
+        if len(current_keys) > 0:
             LOGGER.info(
                 "There exist a mapping with the provided substring value. Requesting confirmation..."
             )
 
             return ui.div(
                 ui.p(
-                    f"Substring '{substring_input}' already exists in '{current_key[0]}' category. Would you like to override the current mapping? ",
+                    f"Substring '{substring_input}' already exists in '{current_keys[0]}' category. Would you like to override the current mapping? ",
                     class_="login-invalid-note",
                 ),
                 ui.input_action_button(
@@ -144,14 +152,14 @@ def mappings_server(input, output, session):  # noqa: ARG001
         substring_input = input.value_mapping()
         new_data = category_mappings.get().copy()
 
-        current_key = [x for x, y in new_data.items() if substring_input in y]
+        current_keys = [x for x, y in new_data.items() if substring_input in y]
 
         # Add redundancy check incase the current key-category doesn't exist
-        if len(current_key) > 0:
+        if len(current_keys) > 0:
             LOGGER.info("Overriding old mapping")
 
-            new_data[current_key[0]] = [
-                x for x in new_data[current_key[0]] if x != substring_input
+            new_data[current_keys[0]] = [
+                x for x in new_data[current_keys[0]] if x != substring_input
             ]
             new_data[category_input] = new_data.get(category_input, []) + [
                 substring_input
