@@ -1,9 +1,8 @@
 """
-A user guide configurations
+A user mapping configurations for the category
 """
 
 import json
-import pprint
 from pathlib import Path
 
 from shiny import module
@@ -49,26 +48,36 @@ def mappings_server(input, output, session):  # noqa: ARG001
         mappings_modal = ui.modal(
             ui.input_file(
                 id="input_json",
-                label="Upload mapping file",
+                label="File upload mappings",
                 accept=[".json", ".csv"],
                 multiple=False,
             ),
             ui.p("Manual input mappings"),
             ui.div(
-                ui.input_text(
-                    id="key_mapping", label=None, placeholder="Key substring"
-                ),
-                ui.input_text(
-                    id="value_mapping", label=None, placeholder="Category to map to"
+                ui.span(
+                    ui.input_text(
+                        id="key_mapping", label=None, placeholder="Key substring"
+                    ),
+                    ui.input_text(
+                        id="value_mapping", label=None, placeholder="Category to map to"
+                    ),
+                    style="display: flex; justify-content: flex-start; gap: 0.5rem;",
                 ),
                 ui.input_action_button(
                     id="add_mapping",
                     label="Add",
                     style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; margin-left: 0.5rem;",
                 ),
-                style="display: flex; justify-content: flex-start; gap: 0.5rem; margin-bottom: 1rem;",
+                style="display: flex; justify-content: space-between; margin-bottom: 1rem;",
             ),
+            ui.output_ui(id="confirm_override"),
             ui.output_text_verbatim(id="display_json", placeholder=False),
+            ui.div(
+                ui.download_button(
+                    "download_json", "Download json", class_="download-button"
+                ),
+                style="display: flex; justify-content: flex-end; align-items: center;",
+            ),
             size="l",
             easy_close=True,
             footer=ui.modal_button("Close"),
@@ -79,15 +88,59 @@ def mappings_server(input, output, session):  # noqa: ARG001
         # Unhide the modal
         ui.modal_show(mappings_modal)
 
-    @render.text
-    @reactive.event(category_mappings)
-    def display_json():
-        # Save into a dict
-        mapping_dict = category_mappings()
+    @render.ui
+    @reactive.event(input.add_mapping)
+    def confirm_override():
+        key_value = input.key_mapping()
 
-        # Dump configurations into file
+        if key_value in category_mappings():
+            return ui.div(
+                ui.p(
+                    f"Key '{key_value}' already exists. Would you like to override the current key-value mapping? ",
+                    class_="login-invalid-note",
+                ),
+                ui.input_action_button(
+                    id="confirm_add_mapping",
+                    label="Yes",
+                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; margin-left: 0.5rem;",
+                ),
+                style="display: flex; justify-content: space-between; margin-bottom: 1rem;",
+            )
+        else:
+            return ui.div()
+
+    @reactive.effect
+    @reactive.event(input.add_mapping)
+    def _():
+        key_input = input.key_mapping()
+        value_input = input.value_mapping()
+
+        # If it's a new key, update immediately
+        if key_input not in category_mappings():
+            new_data = {**category_mappings(), key_input: value_input}
+            category_mappings.set(new_data)
+
+            # Save to file
+            with CONFIG_PATH.open("w") as file:
+                json.dump(new_data, file, indent=4)
+
+    @reactive.effect
+    @reactive.event(input.confirm_add_mapping)
+    def _():
+        # Update after user confirms
+        new_data = {**category_mappings(), input.key_mapping(): input.value_mapping()}
+        category_mappings.set(new_data)
+
+        # Save to file
         with CONFIG_PATH.open("w") as file:
-            json.dump(mapping_dict, file, indent=4)
+            json.dump(new_data, file, indent=4)
 
-        # Return a pretty the dictionary string
-        return pprint.pformat(mapping_dict)
+    # Download the json file of the data
+    @render.download(filename="category_mappings.json")
+    def download_json():
+        yield json.dumps(category_mappings(), indent=4, sort_keys=True)
+
+    @render.text
+    def display_json():
+        # Return a pretty dictionary string
+        return json.dumps(category_mappings(), indent=4, sort_keys=True)
