@@ -41,9 +41,11 @@ def mappings_server(input, output, session):  # noqa: ARG001
     else:
         category_mappings: reactive.Value[dict] = reactive.Value({})
 
-    @reactive.effect
+    @reactive.Effect(priority=2)
     @reactive.event(input.open_mappings)
     def _():
+        LOGGER.info("Displaying mappings modal...")
+
         # Set up the modal
         mappings_modal = ui.modal(
             ui.input_file(
@@ -55,11 +57,9 @@ def mappings_server(input, output, session):  # noqa: ARG001
             ui.p("Manual input mappings"),
             ui.div(
                 ui.span(
+                    ui.input_text(id="key_mapping", label=None, placeholder="Category"),
                     ui.input_text(
-                        id="key_mapping", label=None, placeholder="Key substring"
-                    ),
-                    ui.input_text(
-                        id="value_mapping", label=None, placeholder="Category to map to"
+                        id="value_mapping", label=None, placeholder="Value substring"
                     ),
                     style="display: flex; justify-content: flex-start; gap: 0.5rem;",
                 ),
@@ -71,7 +71,7 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 style="display: flex; justify-content: space-between; margin-bottom: 1rem;",
             ),
             ui.output_ui(id="confirm_override"),
-            ui.output_text_verbatim(id="display_json", placeholder=False),
+            ui.output_text_verbatim(id="display_json", placeholder=True),
             ui.div(
                 ui.download_button(
                     "download_json", "Download json", class_="download-button"
@@ -89,14 +89,21 @@ def mappings_server(input, output, session):  # noqa: ARG001
         ui.modal_show(mappings_modal)
 
     @render.ui
-    @reactive.event(input.add_mapping)
+    @reactive.event(input.add_mapping, input.confirm_add_mapping)
     def confirm_override():
-        key_value = input.key_mapping()
+        substring_input = input.value_mapping()
+        current_key = [
+            x for x, y in category_mappings().items() if substring_input in y
+        ]
 
-        if key_value in category_mappings():
+        if len(current_key) > 0:
+            LOGGER.info(
+                "There exist a mapping with the provided substring value. Requesting confirmation..."
+            )
+
             return ui.div(
                 ui.p(
-                    f"Key '{key_value}' already exists. Would you like to override the current key-value mapping? ",
+                    f"Substring '{substring_input}' already exists in '{current_key[0]}' category. Would you like to override the current mapping? ",
                     class_="login-invalid-note",
                 ),
                 ui.input_action_button(
@@ -109,38 +116,62 @@ def mappings_server(input, output, session):  # noqa: ARG001
         else:
             return ui.div()
 
-    @reactive.effect
+    @reactive.Effect(priority=-1)
     @reactive.event(input.add_mapping)
     def _():
-        key_input = input.key_mapping()
-        value_input = input.value_mapping()
+        category_input = input.key_mapping()
+        substring_input = input.value_mapping()
+        new_data = category_mappings.get().copy()
 
         # If it's a new key, update immediately
-        if key_input not in category_mappings():
-            new_data = {**category_mappings(), key_input: value_input}
+        if not any(substring_input in y for _, y in new_data.items()):
+            LOGGER.info("Adding new category mapping...")
+
+            new_data[category_input] = new_data.get(category_input, []) + [
+                substring_input
+            ]
             category_mappings.set(new_data)
 
             # Save to file
             with CONFIG_PATH.open("w") as file:
                 json.dump(new_data, file, indent=4)
 
-    @reactive.effect
+    @reactive.Effect(priority=-1)
     @reactive.event(input.confirm_add_mapping)
     def _():
         # Update after user confirms
-        new_data = {**category_mappings(), input.key_mapping(): input.value_mapping()}
-        category_mappings.set(new_data)
+        category_input = input.key_mapping()
+        substring_input = input.value_mapping()
+        new_data = category_mappings.get().copy()
 
-        # Save to file
-        with CONFIG_PATH.open("w") as file:
-            json.dump(new_data, file, indent=4)
+        current_key = [x for x, y in new_data.items() if substring_input in y]
+
+        # Add redundancy check incase the current key-category doesn't exist
+        if len(current_key) > 0:
+            LOGGER.info("Overriding old mapping")
+
+            new_data[current_key[0]] = [
+                x for x in new_data[current_key[0]] if x != substring_input
+            ]
+            new_data[category_input] = new_data.get(category_input, []) + [
+                substring_input
+            ]
+            category_mappings.set(new_data)
+
+            # Save to file
+            with CONFIG_PATH.open("w") as file:
+                json.dump(new_data, file, indent=4)
 
     # Download the json file of the data
     @render.download(filename="category_mappings.json")
     def download_json():
+        LOGGER.info("Downloading mapping json file...")
+
         yield json.dumps(category_mappings(), indent=4, sort_keys=True)
 
     @render.text
     def display_json():
+        LOGGER.info("Displaying json...")
+
         # Return a pretty dictionary string
-        return json.dumps(category_mappings(), indent=4, sort_keys=True)
+        return json.dumps(category_mappings.get(), indent=4, sort_keys=True)
