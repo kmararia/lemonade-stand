@@ -11,12 +11,12 @@ from .pages.income import income_ui
 from .pages.login import auth_server
 from .pages.savings import savings_server
 from .pages.savings import savings_ui
-from .pages.settings import settings_server
-from .pages.settings import settings_ui
-from .pages.user_guide import user_guide_server
-from .pages.user_guide import user_guide_ui
-from .pages.user_mappings import mappings_server
-from .pages.user_mappings import mappings_ui
+from .sidebar.settings import settings_server
+from .sidebar.settings import settings_ui
+from .sidebar.user_guide import user_guide_server
+from .sidebar.user_guide import user_guide_ui
+from .sidebar.user_mappings import mappings_server
+from .sidebar.user_mappings import mappings_ui
 
 __all__ = [
     "expense_server",
