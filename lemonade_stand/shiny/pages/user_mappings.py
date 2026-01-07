@@ -89,13 +89,13 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 style="display: flex; justify-content: space-between;",
             ),
             ui.output_ui(id="confirm_deletion"),
-            ui.output_text_verbatim(id="display_json", placeholder=True),
             ui.div(
                 ui.download_button(
                     "download_json", "Download json", class_="download-button"
                 ),
                 style="display: flex; justify-content: flex-end; align-items: center;",
             ),
+            ui.output_text_verbatim(id="display_json", placeholder=True),
             size="l",
             easy_close=True,
             footer=ui.modal_button("Close"),
