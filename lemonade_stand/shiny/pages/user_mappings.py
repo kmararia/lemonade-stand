@@ -5,10 +5,12 @@ A user mapping configurations for the category
 import json
 from pathlib import Path
 
+import polars as pl
 from shiny import module
 from shiny import reactive
 from shiny import render
 from shiny import ui
+from shiny.types import FileInfo
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
@@ -49,11 +51,12 @@ def mappings_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         mappings_modal = ui.modal(
             ui.input_file(
-                id="input_json",
+                id="user_upload",
                 label="File upload mappings",
                 accept=[".json", ".csv"],
                 multiple=False,
             ),
+            ui.output_ui(id="confirm_upload"),
             ui.p("Manual input mappings"),
             ui.div(
                 ui.input_action_button(
@@ -151,11 +154,9 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 new_data[category_input] = new_data.get(category_input, []) + [
                     substring_input
                 ]
-                category_mappings.set(new_data)
 
-                # Save to file
-                with CONFIG_PATH.open("w") as file:
-                    json.dump(new_data, file, indent=4)
+                # Update reactive value
+                category_mappings.set(new_data)
 
             return ui.span(
                 "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
@@ -182,11 +183,9 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 new_data[category_input] = new_data.get(category_input, []) + [
                     substring_input
                 ]
-                category_mappings.set(new_data)
 
-                # Save to file
-                with CONFIG_PATH.open("w") as file:
-                    json.dump(new_data, file, indent=4)
+                # Update reactive value
+                category_mappings.set(new_data)
 
     @render.ui
     @reactive.event(input.delete_mapping)
@@ -218,11 +217,8 @@ def mappings_server(input, output, session):  # noqa: ARG001
                         x: y for x, y in new_data.items() if x != delete_category
                     }
 
-                # Update the reactive value and save file
+                # Update the reactive value
                 category_mappings.set(new_data)
-
-                with CONFIG_PATH.open("w") as file:
-                    json.dump(new_data, file, indent=4)
 
                 return ui.span(
                     "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
@@ -241,6 +237,73 @@ def mappings_server(input, output, session):  # noqa: ARG001
             return ui.span(
                 f"Category '{delete_category}' does not exist",
                 class_="login-invalid-note",
+            )
+
+    # A function to reactively update the local config file
+    @reactive.Effect
+    @reactive.event(category_mappings)
+    def _():
+        new_data = category_mappings()
+
+        # Save current mappings to file
+        with CONFIG_PATH.open("w") as file:
+            json.dump(new_data, file, indent=4)
+
+    # File upload confirmation
+    @render.ui
+    @reactive.event(input.user_upload)
+    def confirm_upload():
+        # Get the uploaded file list
+        upload_files: list[FileInfo] | None = input.user_upload()
+
+        # Conditionally process the files
+        if upload_files is None:
+            LOGGER.info("No user uploaded file uploaded. Skipping processing...")
+            return ui.div()
+
+        else:
+            upload_path = Path(str(upload_files[0]["datapath"]))
+
+            # Check the file type
+            if upload_path.suffix == ".json":
+                LOGGER.info("Reading user uploaded json file")
+
+                with upload_path.open("r") as file:
+                    uploaded_mappings = json.load(file)
+
+            elif upload_path.suffix == ".csv":
+                LOGGER.info("Reading user uploaded csv file")
+
+                uploaded_df = pl.read_csv(
+                    source=upload_path,
+                    has_header=False,
+                    separator=",",
+                )
+                uploaded_mappings = dict(uploaded_df.iter_rows())
+
+            else:
+                ui.span(
+                    f"Application does not support files with extension '{upload_path.suffix}'. Please upload '.json' or '.csv' files.",
+                    class_="login-invalid-note",
+                    style="margin-bottom: 1rem;",
+                )
+
+            LOGGER.info("Setting up user mappings into mapping config")
+
+            # Clean up the data and update reactive value
+            uploaded_mappings = {
+                x: (y if isinstance(y, list) else [y])
+                for x, y in uploaded_mappings.items()
+                if not isinstance(y, dict)  # Filter out nested dicts
+            }
+
+            category_mappings.set({**category_mappings(), **uploaded_mappings})
+
+            # Return success message
+            return ui.span(
+                "Success! File mappings have been imported!",
+                class_="login-valid-note",
+                style="margin-bottom: 1rem;",
             )
 
     # Download the json file of the data
