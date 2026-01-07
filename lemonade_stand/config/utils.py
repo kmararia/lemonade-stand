@@ -68,7 +68,10 @@ class UserConfig:
         for attr, new_val in mappings.items():
             object.__setattr__(self, attr, new_val)
 
-        # Write out new mappings to json file
+        # Initialize application directory object
+        dirs = AppDir()
+
+        # Write out new mappings to json file conditionally
         if not self.dev_mode:
             config_dict = {
                 x.name.replace("_", "-"): (
@@ -77,10 +80,11 @@ class UserConfig:
                     else getattr(self, x.name)
                 )
                 for x in fields(self)
-                if x.name != "dev_mode"
+                if x.name not in ["dev_mode", "category_mappings"]
             }
 
-            with AppDir().user_config_path.open("w") as file:
+            # Dump user configurations into file
+            with (dirs.user_config_path).open("w") as file:
                 json.dump(config_dict, file, indent=4)
 
 
@@ -95,6 +99,7 @@ class AppDir:
     session_dir: Path = field(init=False)
     metadata_path: Path = field(init=False)
     user_config_path: Path = field(init=False)
+    category_config_path: Path = field(init=False)
     database_dir: Path = field(init=False)
 
     def __post_init__(self):
@@ -107,6 +112,9 @@ class AppDir:
 
         self.metadata_path = self.root_dir / "shared" / "schema" / "metadata.json"
         self.user_config_path = self.root_dir / "shared" / "config" / "user_config.json"
+        self.category_config_path = (
+            self.root_dir / "shared" / "config" / "category_config.json"
+        )
         self.database_dir = self.root_dir / "shared" / "data"
 
     def get_app_root_dir(self) -> Path:

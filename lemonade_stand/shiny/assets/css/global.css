@@ -75,6 +75,7 @@
     width: 120px;
     height: 30px;
     padding: 0 5px;
+    margin-bottom: 0.5rem;
 
     /* Flexbox to center the text perfectly */
     display: inline-flex;

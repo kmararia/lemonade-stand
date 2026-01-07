@@ -4,6 +4,7 @@ User settings page layout configurations
 
 import shutil
 from pathlib import Path
+from types import SimpleNamespace
 
 from shiny import module
 from shiny import reactive
@@ -15,7 +16,6 @@ from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-RUN_CONFIG = UserConfig()
 APP_DIR = AppDir()
 
 
@@ -31,7 +31,7 @@ def settings_ui():
 
 
 @module.server
-def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]:  # noqa: ARG001
+def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
     """
     A server module for the settings page
     """
@@ -39,6 +39,10 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
     # Create reactive containers to track events
     valid_statement_path = reactive.Value(False)
     is_purged = reactive.Value(False)
+
+    return_namespace = SimpleNamespace(
+        user_config=UserConfig(), trigger=input.close_settings, log_out=False
+    )
 
     @reactive.effect
     @reactive.event(input.open_settings)
@@ -51,7 +55,7 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
                 ui.input_text(
                     id="statement_path",
                     label="Statements directory path:",
-                    value=str(RUN_CONFIG.statement_dir),
+                    value=str((return_namespace.user_config).statement_dir),
                     autocomplete="on",
                     width="80%",
                 ),
@@ -62,7 +66,7 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
                 ui.input_switch(
                     id="always_refresh_data",
                     label="Always refresh full data",
-                    value=RUN_CONFIG.always_refresh_data,
+                    value=(return_namespace.user_config).always_refresh_data,
                     width="15rem",
                 ),
                 ui.span(
@@ -73,7 +77,7 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
             ui.input_switch(
                 id="always_skip_login",
                 label="Always skip login",
-                value=RUN_CONFIG.always_skip_login,
+                value=(return_namespace.user_config).always_skip_login,
             ),
             ui.br(),
             # User experience settings
@@ -102,7 +106,7 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
         input.statement_path, input.always_refresh_data, input.always_skip_login
     )
     def _():
-        RUN_CONFIG.update_attribute(
+        (return_namespace.user_config).update_attribute(
             mappings={
                 "statement_dir": Path(input.statement_path()),
                 "always_refresh_data": input.always_refresh_data(),
@@ -136,7 +140,7 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
             # Update statement directory containers if dir has files
             if len(pdf_files) > 0:
                 valid_statement_path.set(True)
-                RUN_CONFIG.update_attribute(
+                (return_namespace.user_config).update_attribute(
                     mappings={"statement_dir": user_statements_dir}
                 )
 
@@ -197,6 +201,9 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
             remove_path = APP_DIR.root_dir
             if remove_path.name == "lemonade-stand":
                 shutil.rmtree(remove_path)
+                return_namespace.user_config = UserConfig()
+                return_namespace.log_out = True
+                print(return_namespace.user_config)
 
                 # Ouput log info and update the reactive state
                 LOGGER.info("Application directory cleared! \n\t'%s'", str(remove_path))
@@ -209,7 +216,4 @@ def settings_server(input, output, session) -> tuple[UserConfig, reactive.Value]
         ui.modal_remove()
 
     # Return user configuration and reactive object (Allows for the parent app to react specifically to the close event)
-    return (
-        RUN_CONFIG,
-        input.close_settings,
-    )
+    return return_namespace
