@@ -56,6 +56,12 @@ def mappings_server(input, output, session):  # noqa: ARG001
             ),
             ui.p("Manual input mappings"),
             ui.div(
+                ui.input_action_button(
+                    id="add_mapping",
+                    label="Add",
+                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem;",
+                ),
+                ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
                 ui.span(
                     ui.input_text(id="key_mapping", label=None, placeholder="Category"),
                     ui.input_text(
@@ -63,14 +69,26 @@ def mappings_server(input, output, session):  # noqa: ARG001
                     ),
                     style="display: flex; justify-content: flex-start; gap: 0.5rem;",
                 ),
-                ui.input_action_button(
-                    id="add_mapping",
-                    label="Add",
-                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; margin-left: 0.5rem;",
-                ),
-                style="display: flex; justify-content: space-between; margin-bottom: 1rem;",
+                style="display: flex; justify-content: space-between;",
             ),
             ui.output_ui(id="confirm_override"),
+            ui.div(
+                ui.input_action_button(
+                    id="delete_mapping",
+                    label="Delete",
+                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; max-width: 5.6rem;",
+                ),
+                ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
+                ui.span(
+                    ui.input_text(id="key_delete", label=None, placeholder="Category"),
+                    ui.input_text(
+                        id="value_delete", label=None, placeholder="Value substring"
+                    ),
+                    style="display: flex; justify-content: flex-start; gap: 0.5rem;",
+                ),
+                style="display: flex; justify-content: space-between;",
+            ),
+            ui.output_ui(id="confirm_deletion"),
             ui.output_text_verbatim(id="display_json", placeholder=True),
             ui.div(
                 ui.download_button(
@@ -93,14 +111,14 @@ def mappings_server(input, output, session):  # noqa: ARG001
     def confirm_override():
         category_input = input.key_mapping()
         substring_input = input.value_mapping()
-        mappings_data = category_mappings.get()
+        new_data = category_mappings.get().copy()
         current_keys = [
             x for x, y in category_mappings().items() if substring_input in y
         ]
 
         # Clear if the current mapping already exists
-        if (category_input in current_keys) and (
-            substring_input in mappings_data.get(category_input, [])
+        if (category_input in current_keys) and substring_input in new_data.get(
+            category_input, []
         ):
             return ui.div()
 
@@ -114,35 +132,34 @@ def mappings_server(input, output, session):  # noqa: ARG001
                     f"Substring '{substring_input}' already exists in '{current_keys[0]}' category. Would you like to override the current mapping? ",
                     class_="login-invalid-note",
                 ),
-                ui.input_action_button(
+                ui.input_radio_buttons(
                     id="confirm_add_mapping",
-                    label="Yes",
-                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; margin-left: 0.5rem;",
+                    label=None,
+                    choices=["yes", "no"],
+                    selected="no",
+                    inline=True,
+                    # style="display: flex; justify-content: center; align-items: center; max-height: 2.1rem; margin-left: 0.5rem;",
                 ),
                 style="display: flex; justify-content: space-between; margin-bottom: 1rem;",
             )
+
         else:
-            return ui.div()
+            # If it's a new key, update immediately
+            if not any(substring_input in y for _, y in new_data.items()):
+                LOGGER.info("Adding new category mapping...")
 
-    @reactive.Effect(priority=-1)
-    @reactive.event(input.add_mapping)
-    def _():
-        category_input = input.key_mapping()
-        substring_input = input.value_mapping()
-        new_data = category_mappings.get().copy()
+                new_data[category_input] = new_data.get(category_input, []) + [
+                    substring_input
+                ]
+                category_mappings.set(new_data)
 
-        # If it's a new key, update immediately
-        if not any(substring_input in y for _, y in new_data.items()):
-            LOGGER.info("Adding new category mapping...")
+                # Save to file
+                with CONFIG_PATH.open("w") as file:
+                    json.dump(new_data, file, indent=4)
 
-            new_data[category_input] = new_data.get(category_input, []) + [
-                substring_input
-            ]
-            category_mappings.set(new_data)
-
-            # Save to file
-            with CONFIG_PATH.open("w") as file:
-                json.dump(new_data, file, indent=4)
+            return ui.span(
+                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
+            )
 
     @reactive.Effect(priority=-1)
     @reactive.event(input.confirm_add_mapping)
@@ -152,23 +169,79 @@ def mappings_server(input, output, session):  # noqa: ARG001
         substring_input = input.value_mapping()
         new_data = category_mappings.get().copy()
 
-        current_keys = [x for x, y in new_data.items() if substring_input in y]
+        if input.confirm_add_mapping() == "yes":
+            current_keys = [x for x, y in new_data.items() if substring_input in y]
 
-        # Add redundancy check incase the current key-category doesn't exist
-        if len(current_keys) > 0:
-            LOGGER.info("Overriding old mapping")
+            # Add redundancy check incase the current key-category doesn't exist
+            if len(current_keys) > 0:
+                LOGGER.info("Overriding old mapping")
 
-            new_data[current_keys[0]] = [
-                x for x in new_data[current_keys[0]] if x != substring_input
-            ]
-            new_data[category_input] = new_data.get(category_input, []) + [
-                substring_input
-            ]
-            category_mappings.set(new_data)
+                new_data[current_keys[0]] = [
+                    x for x in new_data[current_keys[0]] if x != substring_input
+                ]
+                new_data[category_input] = new_data.get(category_input, []) + [
+                    substring_input
+                ]
+                category_mappings.set(new_data)
 
-            # Save to file
-            with CONFIG_PATH.open("w") as file:
-                json.dump(new_data, file, indent=4)
+                # Save to file
+                with CONFIG_PATH.open("w") as file:
+                    json.dump(new_data, file, indent=4)
+
+    @render.ui
+    @reactive.event(input.delete_mapping)
+    def confirm_deletion():
+        delete_category = input.key_delete()
+        delete_substring = input.value_delete()
+        new_data = category_mappings.get().copy()
+
+        # Clear if the current mapping already exists
+        if (delete_category not in new_data) and (delete_substring == ""):
+            LOGGER.info("Category does not exist. Cleaning up deletion messages...")
+            return ui.div()
+
+        # Confirm that the category exists in the config
+        if delete_category in new_data:
+            category_list = new_data[delete_category]
+
+            # Confirm that the substring exists in the category list
+            if delete_substring in category_list:
+                LOGGER.info("Deleting category mapping...")
+
+                # If category has more than one in list then drop only one
+                if len(category_list) > 1:
+                    new_data[delete_category] = [
+                        x for x in category_list if x != delete_substring
+                    ]
+                else:
+                    new_data = {
+                        x: y for x, y in new_data.items() if x != delete_category
+                    }
+
+                # Update the reactive value and save file
+                category_mappings.set(new_data)
+
+                with CONFIG_PATH.open("w") as file:
+                    json.dump(new_data, file, indent=4)
+
+                return ui.span(
+                    "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
+                )
+            else:
+                LOGGER.info(
+                    "Substring does not exist in cateogory. Skipping category mapping deletion..."
+                )
+
+                return ui.span(
+                    f"Substring '{delete_substring}' does not exist in category '{delete_category}'",
+                    class_="login-invalid-note",
+                    style="margin-bottom: 1rem;",
+                )
+        else:
+            return ui.span(
+                f"Category '{delete_category}' does not exist",
+                class_="login-invalid-note",
+            )
 
     # Download the json file of the data
     @render.download(filename="category_mappings.json")
