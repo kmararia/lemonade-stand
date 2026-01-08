@@ -31,7 +31,7 @@ def income_ui():
         # Data distribution container
         ui.tags.div(
             ui.div(
-                ui.h3("Transaction Summary", style="font-weight: bold; width: 100%"),
+                ui.output_ui(id="total_income"),
                 ui.div(
                     ui.input_date_range(
                         id="daterange_select",
@@ -47,16 +47,14 @@ def income_ui():
                         selected="bar",
                         width="50%",
                     ),
-                    style="display: flex; justify-content: flex-end; align-items: flex-end;  gap: 20px;",
+                    style="display: flex; justify-content: flex-end; align-items: flex-end; gap: 20px;",
                 ),
-                style="display: flex; justify-content: space-between; align-items: center;",
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%;",
             ),
-            ui.br(),
             output_widget("plot_data"),
             id="plot-container",
+            style="margin-bottom: 2rem;",
         ),
-        ui.br(),
-        ui.br(),
         # Data container
         ui.tags.div(
             ui.div(
@@ -112,6 +110,20 @@ def income_server(input, output, session, view_mode_setting, data_df):  # noqa: 
         )
 
         return clean_df
+
+    # Total income render
+    @render.ui
+    def total_income():
+        summ_income = data().select(pl.sum("amount").alias("amount")).item(0, "amount")
+
+        return ui.span(
+            ui.h4(f"${summ_income:,.0f}", style="font-weight: bold;"),
+            ui.p(
+                "earned this period",
+                style="font-size: 0.9rem; font-style: italic; margin-bottom: 0rem;",
+            ),
+            style="display: flex; justify-content: flex-start; align-items: center; gap: 0.3rem;",
+        )
 
     # Chart logic
     @render_widget  # type: ignore
