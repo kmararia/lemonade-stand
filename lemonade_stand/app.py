@@ -128,7 +128,7 @@ def server(input, output, session):  # noqa: ARG001
         if settings_config.log_out:
             LOGGER.info("Initializing login after purge...")
 
-            login_config = auth_server("user_login")
+            login_config = auth_server("user_purge_login")
             build_params.set(login_config)
             data_path.set(login_config.statement_dir)
         else:
