@@ -70,12 +70,15 @@ app_ui = ui.page_navbar(
         style="font-weight: bold;",
     ),
     title=ui.div(
-        ui.output_image("logo_svg", inline=True),
+        ui.div(
+            ui.output_image("logo_svg", inline=True),
+            style="width: 2.5rem; flex-shrink: 0;",
+        ),
         ui.h5(
             "Lemonade Stand",
             style="font-style: italic; letter-spacing: 0.02rem; margin-bottom: 0;",
         ),
-        style="display: flex; justify-content: flex-start; align-items: flex-end; width: 100%; max-width: 28%;",
+        style="display: flex; justify-content: flex-start; align-items: flex-end; width: fit-content;",
     ),
     lang="en",
     id="pages",
