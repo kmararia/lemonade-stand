@@ -169,7 +169,7 @@ def generate_types() -> pl.Expr:
     """
 
     # Define the configuration file path
-    config_path = APP_PATHS.transaction_type_config_path
+    config_path = APP_PATHS.types_config_path
 
     # Read in the category config file if it exists
     if config_path.exists():
