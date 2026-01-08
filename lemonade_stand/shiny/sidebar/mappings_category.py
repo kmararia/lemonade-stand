@@ -20,18 +20,18 @@ CONFIG_PATH = AppDir().category_config_path
 
 
 @module.ui
-def mappings_ui():
+def mappings_category_ui():
     """
     A UI module for the user-guide page
     """
 
     return ui.input_action_link(
-        "open_mappings", "{ } User Mappings", class_="sidebar-link"
+        "open_mappings", "{ } Category Mappings", class_="sidebar-link"
     )
 
 
 @module.server
-def mappings_server(input, output, session):  # noqa: ARG001
+def mappings_category_server(input, output, session):  # noqa: ARG001
     """
     A server module for the user-guide page
     """
