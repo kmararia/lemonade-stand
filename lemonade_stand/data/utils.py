@@ -166,7 +166,10 @@ class UserData:
         savings_df = summarize(filter_logic=(pl.col("type") == "savings"))
         expenses_df = summarize(filter_logic=(pl.col("type") == "expenses"))
         unknown_df = summarize(
-            filter_logic=(~pl.col("type").is_in(["income", "savings", "expenses"]))
+            filter_logic=(
+                ~pl.col("type").is_in(["income", "savings", "expenses"])
+                | pl.col("type").is_null()
+            )
         )
 
         # Update the object variables
