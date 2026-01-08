@@ -29,6 +29,8 @@ from lemonade_stand.shiny import income_server
 from lemonade_stand.shiny import income_ui
 from lemonade_stand.shiny import mappings_category_server
 from lemonade_stand.shiny import mappings_category_ui
+from lemonade_stand.shiny import mappings_type_server
+from lemonade_stand.shiny import mappings_type_ui
 from lemonade_stand.shiny import savings_server
 from lemonade_stand.shiny import savings_ui
 from lemonade_stand.shiny import settings_server
@@ -62,6 +64,7 @@ app_ui = ui.page_navbar(
     sidebar=ui.sidebar(
         user_guide_ui("user_guide"),
         settings_ui("user_settings"),
+        mappings_type_ui("mappings_type"),
         mappings_category_ui("mappings_category"),
         title="Options",
         style="font-weight: bold;",
@@ -106,6 +109,7 @@ def server(input, output, session):  # noqa: ARG001
 
     # Build app documentation and settings page
     user_guide_server("user_guide")
+    mappings_type_server("mappings_type")
     mappings_category_server("mappings_category")
     settings_config = settings_server("user_settings")
 
