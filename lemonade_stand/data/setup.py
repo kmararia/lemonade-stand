@@ -2,6 +2,7 @@
 Scrapping transactions from pdf file texts
 """
 
+import json
 import logging
 import re
 from datetime import datetime
@@ -12,9 +13,12 @@ import numpy as np
 import polars as pl
 from dateutil.parser import parse
 
+from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
+
+APP_PATHS = AppDir()
 DATA_SCHEMA = pl.Schema(
     {
         "transaction_date": pl.Date(),
@@ -119,6 +123,76 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
     )
 
 
+def generate_categories() -> pl.Expr:
+    """
+    Generates a polars expression from the user category mappings
+
+    Arguments:
+        None
+    Returns:
+        A polars expression for the category field creation
+    """
+
+    # Define the configuration file path
+    config_path = APP_PATHS.category_config_path
+
+    # Read in the category config file if it exists
+    if config_path.exists():
+        with config_path.open("r") as file:
+            category_mappings: dict = json.load(file)
+    else:
+        category_mappings: dict = {}
+
+    # Generate category field expression
+    field_expr = pl.when(pl.lit(False)).then(pl.lit(None))
+
+    for category, substring_list in category_mappings.items():
+        lowercase_substring_list = [x.lower() for x in substring_list]
+
+        field_expr = field_expr.when(
+            pl.col("transaction_desc")
+            .str.to_lowercase()
+            .str.contains_any(lowercase_substring_list)
+        ).then(pl.lit(category))
+
+    return field_expr
+
+
+def generate_types() -> pl.Expr:
+    """
+    Generates a polars expression from the user type mappings
+
+    Arguments:
+        None
+    Returns:
+        A polars expression for the transaction-type field creation
+    """
+
+    # Define the configuration file path
+    config_path = APP_PATHS.transaction_type_config_path
+
+    # Read in the category config file if it exists
+    if config_path.exists():
+        with config_path.open("r") as file:
+            transctn_type_mappings: dict = json.load(file)
+    else:
+        transctn_type_mappings: dict = {}
+
+    # Generate category field expression
+    field_expr = pl.when(pl.col("transaction_amount") < 0).then(pl.lit("income"))
+
+    for transaction_type, category_list in transctn_type_mappings.items():
+        lowercase_category_list = [x.lower() for x in category_list]
+
+        field_expr = field_expr.when(
+            pl.col("transaction_category")
+            .str.to_lowercase()
+            .str.contains_any(lowercase_category_list)
+        ).then(pl.lit(transaction_type))
+
+    return field_expr
+
+
 def clean_transactions(
     data_df: pl.DataFrame, file_name: str | None = None
 ) -> pl.DataFrame:
@@ -167,22 +241,21 @@ def clean_transactions(
 
     # Filter out transactions with dollar values in description
     clean_df = data_df.filter(
-        (
-            pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
-        ).is_null()
+        pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_null()
     )
 
     LOGGER.info("Adding missing fields...")
 
+    # Pull the category and type field expressions
+    categories_expr = generate_categories()
+    transaction_type_expr = generate_types()
+
     # Set up empty columns
     clean_df = clean_df.with_columns(
+        categories_expr.alias("transaction_category")
+    ).with_columns(
+        transaction_type_expr.alias("transaction_type"),
         pl.lit(file_name).alias("source_file"),
-        pl.lit("Category").alias("transaction_category"),
-        (
-            pl.when(pl.col("transaction_amount") < 0)
-            .then(pl.lit("expenses"))
-            .otherwise(pl.lit("income"))
-        ).alias("transaction_type"),
     )
 
     # # Filter out unnecessary data tables
