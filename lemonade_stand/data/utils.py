@@ -12,7 +12,7 @@ import polars as pl
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.config import UserConfig
-from lemonade_stand.data.read import read_pdfplumber
+from lemonade_stand.data.read import read_pdfplumber  # noqa: F401
 from lemonade_stand.data.read import read_pymullm  # noqa: F401
 from lemonade_stand.data.setup import DATA_SCHEMA
 from lemonade_stand.data.setup import clean_transactions
@@ -67,7 +67,7 @@ class Transactions:
         Post initialization variables
         """
 
-        LOGGER.info("Setting up data structure for development transactions")
+        LOGGER.info("Creating transactions data-class...\n")
 
         if len(self.statements_list) > 0:
             self.data = pl.concat(
@@ -129,12 +129,12 @@ class UserData:
         """
 
         LOGGER.info(
-            "Loading statements from path: \n\t'%s'", str(self.config.statement_dir)
+            "Loading statements from path: \n\t'%s'\n", str(self.config.statement_dir)
         )
 
         # Load all user transactions
         statements = [
-            Statement(file_path=file, read_func=read_pdfplumber)
+            Statement(file_path=file, read_func=read_pymullm)
             for file in (self.config.statement_dir).glob("*.pdf")
         ]
 
