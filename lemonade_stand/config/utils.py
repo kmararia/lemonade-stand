@@ -14,6 +14,8 @@ from lemonade_stand.config import metadata
 from lemonade_stand.config.setup import check_version
 from lemonade_stand.config.setup import get_user_configs
 
+from .metadata import USER_CONFIG
+
 
 @dataclass
 class UserConfig:
@@ -40,10 +42,12 @@ class UserConfig:
         # Update object fields variables
         self.app_version = config_dict["app-version"]
         self.always_refresh_data = bool(config_dict["always-refresh-data"])
-        self.always_skip_login = (
-            True if self.dev_mode else bool(config_dict["always-skip-login"])
+        self.always_skip_login = self.dev_mode or bool(config_dict["always-skip-login"])
+        self.statement_dir = Path(
+            USER_CONFIG["statement-dir"]
+            if self.dev_mode
+            else config_dict["statement-dir"]
         )
-        self.statement_dir = Path(config_dict["statement-dir"])
 
     def __str__(self):
         """
