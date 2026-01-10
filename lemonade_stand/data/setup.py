@@ -42,16 +42,9 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
     LOGGER.info("Getting year of the statement")
 
-    # Set up the statement file year
-    file_year = re.search(
-        re.compile(r"([A-Za-z]{3,9})\s*(\d{2}),?\s*(\b\d{4}\b)", re.IGNORECASE),
-        pdf_text,
-    )
-
-    file_year = (file_year.group(3)) if file_year else (datetime.now().year)
-
     # Define variables
     transaction_matches = []
+    file_year = None
     month_patterns = {
         "Jan/January": (
             r"(?:"
@@ -76,11 +69,27 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
     # Iterate through all the potentail patterns
     for date_format, pattern in month_patterns.items():
+        space_patt = r"[^\S\r\n]"
+
+        # Build the statement year pattern
+        if date_format == "Jan/January":
+            year_pattern = rf"((?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}}),?{space_patt}*)(\b\d{{4}}\b)"  # Matches: January 31, 2024
+        else:
+            year_pattern = rf"({pattern}/\d{{2}}/?)(\d{{2}}|\d{{4}})"  # Matches: 04/01/24 or 04/01/2024
+
+        LOGGER.info("Getting year of the statement")
+
+        # Find the statement file year
+        year_search = re.search(re.compile(year_pattern, re.IGNORECASE), pdf_text)
+        file_year = year_search.group(2) if year_search else file_year
+
         # Build the full date pattern conditionally
         if date_format == "Jan/January":
-            date_pattern = rf"(?:\d{{2}}\s+{pattern})|(?:{pattern}\s+\d{{2}})"
+            date_pattern = rf"(?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}})"  # Matches: 31 January or January 31
         else:
-            date_pattern = rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"
+            date_pattern = (
+                rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"  # Matches: 01/31 or 01/31/2024
+            )
 
         # Find matches iteratively
         LOGGER.debug(
@@ -97,10 +106,17 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
         transaction_matches.append([line.groups() for line in transactions])
 
+    # Populate the file year with today's date if none
+    file_year = (
+        datetime.strptime(file_year, "%y" if len(file_year) == 2 else "%Y")
+        if file_year
+        else datetime.now()
+    )
+
     # Set up the data rows
     data = [
         (
-            parse(row[0], default=datetime(int(file_year), 1, 1)).date(),
+            parse(row[0], default=file_year).date(),
             row[1],
             PyDecimal(row[2].replace(",", "")),
             None,  # Placeholder for transaction_category
