@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import polars as pl
+from faicons import icon_svg
 from shiny import module
 from shiny import reactive
 from shiny import render
@@ -26,7 +27,10 @@ def mappings_type_ui():
     """
 
     return ui.input_action_link(
-        "open_mappings", "{ } Type Mappings", class_="sidebar-link"
+        id="open_mappings",
+        label=ui.p("Types", style="margin-left: 0.5rem;"),
+        class_="sidebar-link",
+        icon=icon_svg("layer-group"),
     )
 
 

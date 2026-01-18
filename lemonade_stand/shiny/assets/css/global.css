@@ -14,6 +14,7 @@
     font-size: 0.875rem;
     font-weight: 500;
     transition: opacity 0.2s ease;
+    display: flex;
 }
 
 .sidebar-link:hover {

@@ -9,6 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import polars as pl
+from faicons import icon_svg
 from shiny import App
 from shiny import reactive
 from shiny import render
@@ -66,9 +67,18 @@ app_ui = ui.page_navbar(
     sidebar=ui.sidebar(
         user_guide_ui("user_guide"),
         settings_ui("user_settings"),
-        mappings_type_ui("mappings_type"),
-        mappings_category_ui("mappings_category"),
         exclude_ui("mappings_exclude"),
+        ui.accordion(
+            ui.accordion_panel(
+                ui.span("Mappings", class_="sidebar-link"),
+                mappings_type_ui("mappings_type"),
+                mappings_category_ui("mappings_category"),
+                value="mappings_panel",
+                icon=icon_svg("code"),
+            ),
+            id="mapping_accordion",
+            open=False,
+        ),
         ui.input_switch(
             id="show_excluded",
             label=ui.p("Show excluded", class_="sidebar-link"),
