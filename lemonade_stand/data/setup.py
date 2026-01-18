@@ -28,6 +28,7 @@ DATA_SCHEMA = pl.Schema(
         "transaction_type": pl.String(),
         "source_file": pl.String(),
         "extract_date": pl.Datetime(),
+        "exclude_flag": pl.Boolean(),
     }
 )
 
@@ -122,7 +123,8 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
             None,  # Placeholder for transaction_category
             None,  # Placeholder for transaction_type
             None,  # Placeholder for source_file
-            datetime.now(),
+            datetime.now(),  # Placeholder for extract_date
+            False,  # Placeholder for exclude_flag
         )
         for row in transaction_matches[
             np.argmax(
@@ -209,6 +211,37 @@ def generate_types() -> pl.Expr:
     return field_expr
 
 
+def flag_exclusions() -> pl.Expr:
+    """
+    Filters out transactions listed in the user configuration file
+
+    Arguments:
+        data_df: A polars dadtaframe
+    Returns:
+        A polars dataframe without the listed records
+    """
+
+    # Define the configuration file path
+    config_path = APP_PATHS.exclusions_config_path
+
+    # Read in the category config file if it exists
+    if config_path.exists():
+        with config_path.open("r") as file:
+            exclude_transactions: dict = json.load(file)
+    else:
+        exclude_transactions: dict = {"exclude": []}
+
+    # Create the transactions filter flag
+    LOGGER.info("Creating and exclusion flag...")
+
+    final_exclude_list = [x.lower() for x in exclude_transactions.get("exclude", [])]
+    return (pl.col("transaction_desc").str.to_lowercase().is_in(final_exclude_list)) | (
+        pl.col("transaction_desc")
+        .str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
+        .is_not_null()
+    )
+
+
 def clean_transactions(
     data_df: pl.DataFrame, file_name: str | None = None
 ) -> pl.DataFrame:
@@ -260,17 +293,19 @@ def clean_transactions(
         pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_null()
     )
 
-    LOGGER.info("Adding missing fields...")
-
     # Pull the category and type field expressions
     categories_expr = generate_categories()
     transaction_type_expr = generate_types()
+    exclude_flag_expr = flag_exclusions()
 
-    # Set up empty columns
+    LOGGER.info("Adding missing fields...")
+
+    # Populate empty columns
     clean_df = clean_df.with_columns(
         categories_expr.alias("transaction_category")
     ).with_columns(
         transaction_type_expr.alias("transaction_type"),
+        exclude_flag_expr.alias("exclude_flag"),
         pl.lit(file_name).alias("source_file"),
     )
 

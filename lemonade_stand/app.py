@@ -21,6 +21,8 @@ from lemonade_stand.config import UserConfig
 from lemonade_stand.data import UserData
 from lemonade_stand.data import get_data
 from lemonade_stand.shiny import auth_server
+from lemonade_stand.shiny import exclude_server
+from lemonade_stand.shiny import exclude_ui
 from lemonade_stand.shiny import expense_server
 from lemonade_stand.shiny import expense_ui
 from lemonade_stand.shiny import home_server
@@ -66,6 +68,7 @@ app_ui = ui.page_navbar(
         settings_ui("user_settings"),
         mappings_type_ui("mappings_type"),
         mappings_category_ui("mappings_category"),
+        exclude_ui("mappings_exclude"),
         title="Options",
         style="font-weight: bold;",
     ),
@@ -114,6 +117,7 @@ def server(input, output, session):  # noqa: ARG001
     user_guide_server("user_guide")
     mappings_type_server("mappings_type")
     mappings_category_server("mappings_category")
+    exclude_server("mappings_exclude")
     settings_config = settings_server("user_settings")
 
     # Update the reactive values
@@ -169,10 +173,10 @@ def server(input, output, session):  # noqa: ARG001
         # Stack all the datasets for the home-page
         stacked_df = pl.union(
             [
-                user_data.income,
-                user_data.savings,
-                user_data.expenses,
-                user_data.unknown,
+                user_data.income.filter(~pl.col("exclude_flag")),
+                user_data.savings.filter(~pl.col("exclude_flag")),
+                user_data.expenses.filter(~pl.col("exclude_flag")),
+                user_data.unknown.filter(~pl.col("exclude_flag")),
             ],
             how="diagonal",
         )

@@ -11,6 +11,8 @@ from .pages.income import income_ui
 from .pages.login import auth_server
 from .pages.savings import savings_server
 from .pages.savings import savings_ui
+from .sidebar.exclude_transactions import exclude_server
+from .sidebar.exclude_transactions import exclude_ui
 from .sidebar.mappings_category import mappings_category_server
 from .sidebar.mappings_category import mappings_category_ui
 from .sidebar.mappings_type import mappings_type_server
@@ -21,6 +23,8 @@ from .sidebar.user_guide import user_guide_server
 from .sidebar.user_guide import user_guide_ui
 
 __all__ = [
+    "exclude_server",
+    "exclude_ui",
     "expense_server",
     "expense_ui",
     "home_server",

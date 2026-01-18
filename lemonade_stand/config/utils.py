@@ -105,6 +105,7 @@ class AppDir:
     user_config_path: Path = field(init=False)
     category_config_path: Path = field(init=False)
     types_config_path: Path = field(init=False)
+    exclusions_config_path: Path = field(init=False)
     database_dir: Path = field(init=False)
 
     def __post_init__(self):
@@ -122,6 +123,9 @@ class AppDir:
         )
         self.types_config_path = (
             self.root_dir / "shared" / "config" / "transaction_type_config.json"
+        )
+        self.exclusions_config_path = (
+            self.root_dir / "shared" / "config" / "exclusions_config.json"
         )
         self.database_dir = self.root_dir / "shared" / "data"
 
