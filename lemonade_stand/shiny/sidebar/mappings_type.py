@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import polars as pl
+from faicons import icon_svg
 from shiny import module
 from shiny import reactive
 from shiny import render
@@ -16,22 +17,25 @@ from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-CONFIG_PATH = AppDir().category_config_path
+CONFIG_PATH = AppDir().types_config_path
 
 
 @module.ui
-def mappings_ui():
+def mappings_type_ui():
     """
     A UI module for the user-guide page
     """
 
     return ui.input_action_link(
-        "open_mappings", "{ } User Mappings", class_="sidebar-link"
+        id="open_mappings",
+        label=ui.p("Types", style="margin-left: 0.5rem;"),
+        class_="sidebar-link",
+        icon=icon_svg("layer-group"),
     )
 
 
 @module.server
-def mappings_server(input, output, session):  # noqa: ARG001
+def mappings_type_server(input, output, session):  # noqa: ARG001
     """
     A server module for the user-guide page
     """
@@ -66,9 +70,9 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 ),
                 ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
                 ui.span(
-                    ui.input_text(id="key_mapping", label=None, placeholder="Category"),
+                    ui.input_text(id="key_mapping", label=None, placeholder="Type"),
                     ui.input_text(
-                        id="value_mapping", label=None, placeholder="Value substring"
+                        id="value_mapping", label=None, placeholder="Category"
                     ),
                     style="display: flex; justify-content: flex-start; gap: 0.5rem;",
                 ),
@@ -83,9 +87,9 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 ),
                 ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
                 ui.span(
-                    ui.input_text(id="key_delete", label=None, placeholder="Category"),
+                    ui.input_text(id="key_delete", label=None, placeholder="Type"),
                     ui.input_text(
-                        id="value_delete", label=None, placeholder="Value substring"
+                        id="value_delete", label=None, placeholder="Category"
                     ),
                     style="display: flex; justify-content: flex-start; gap: 0.5rem;",
                 ),
@@ -102,7 +106,7 @@ def mappings_server(input, output, session):  # noqa: ARG001
             size="l",
             easy_close=True,
             footer=ui.modal_button("Close"),
-            title="USER MAPPINGS",
+            title="CATEGORY-TYPE MAPPINGS",
             class_="modal-content",
         )
 
@@ -190,32 +194,32 @@ def mappings_server(input, output, session):  # noqa: ARG001
     @render.ui
     @reactive.event(input.delete_mapping)
     def confirm_deletion():
-        delete_category = input.key_delete()
-        delete_substring = input.value_delete()
+        delete_type = input.key_delete()
+        delete_category = input.value_delete()
         new_data = category_mappings.get().copy()
 
         # Clear if the current mapping already exists
-        if (delete_category not in new_data) and (delete_substring == ""):
-            LOGGER.info("Category does not exist. Cleaning up deletion messages...")
+        if (delete_type not in new_data) and (delete_category == ""):
+            LOGGER.info(
+                "Transaction-Type does not exist. Cleaning up deletion messages..."
+            )
             return ui.div()
 
         # Confirm that the category exists in the config
-        if delete_category in new_data:
-            category_list = new_data[delete_category]
+        if delete_type in new_data:
+            category_list = new_data[delete_type]
 
             # Confirm that the substring exists in the category list
-            if delete_substring in category_list:
+            if delete_category in category_list:
                 LOGGER.info("Deleting category mapping...")
 
                 # If category has more than one in list then drop only one
                 if len(category_list) > 1:
-                    new_data[delete_category] = [
-                        x for x in category_list if x != delete_substring
+                    new_data[delete_type] = [
+                        x for x in category_list if x != delete_category
                     ]
                 else:
-                    new_data = {
-                        x: y for x, y in new_data.items() if x != delete_category
-                    }
+                    new_data = {x: y for x, y in new_data.items() if x != delete_type}
 
                 # Update the reactive value
                 category_mappings.set(new_data)
@@ -225,17 +229,17 @@ def mappings_server(input, output, session):  # noqa: ARG001
                 )
             else:
                 LOGGER.info(
-                    "Substring does not exist in cateogory. Skipping category mapping deletion..."
+                    "Category does not exist in Transaction-Type. Skipping category mapping deletion..."
                 )
 
                 return ui.span(
-                    f"Substring '{delete_substring}' does not exist in category '{delete_category}'",
+                    f"Category '{delete_category}' does not exist in Transaction-Type '{delete_type}'",
                     class_="login-invalid-note",
                     style="margin-bottom: 1rem;",
                 )
         else:
             return ui.span(
-                f"Category '{delete_category}' does not exist",
+                f"Transaction-Type '{delete_type}' does not exist",
                 class_="login-invalid-note",
             )
 
@@ -307,7 +311,7 @@ def mappings_server(input, output, session):  # noqa: ARG001
             )
 
     # Download the json file of the data
-    @render.download(filename="category_mappings.json")
+    @render.download(filename="transaction_type_mappings.json")
     def download_json():
         LOGGER.info("Downloading mapping json file...")
 

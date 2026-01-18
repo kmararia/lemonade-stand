@@ -129,7 +129,7 @@ def auth_server(input, output, session):  # noqa: ARG001
         LOGGER.info("Initializing Sign-up page...")
 
         # Set up the modal
-        settings_modal = ui.modal(
+        signup_modal = ui.modal(
             ui.div(
                 ui.span(
                     ui.output_image("logo_svg", inline=True),
@@ -204,7 +204,7 @@ def auth_server(input, output, session):  # noqa: ARG001
         )
 
         # Unhide the modal
-        ui.modal_show(settings_modal)
+        ui.modal_show(signup_modal)
 
     ## **** USER CREDENTIAL VALIDATIONS ****
     def process_login() -> LoginCredentials:

@@ -203,7 +203,6 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                 shutil.rmtree(remove_path)
                 return_namespace.user_config = UserConfig()
                 return_namespace.log_out = True
-                print(return_namespace.user_config)
 
                 # Ouput log info and update the reactive state
                 LOGGER.info("Application directory cleared! \n\t'%s'", str(remove_path))

@@ -16,12 +16,12 @@ LOGGER = set_up_logger(Path(__file__).stem)
 DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 
-def get_data(run_config: UserConfig) -> UserData | SimpleNamespace:
+def get_data(config: UserConfig) -> UserData | SimpleNamespace:
     """
     A function to read data from database if exists otherwise process from start
     """
 
-    if (DATABASE_PATH).exists() and (not run_config.always_refresh_data):
+    if (DATABASE_PATH).exists() and (not config.always_refresh_data):
         LOGGER.info(
             "Reading pre-processed tables from database: \n\t%s", str(DATABASE_PATH)
         )
@@ -34,7 +34,7 @@ def get_data(run_config: UserConfig) -> UserData | SimpleNamespace:
         )
 
     else:
-        return UserData(config=run_config)
+        return UserData(config=config)
 
 
 # Expose only the user data

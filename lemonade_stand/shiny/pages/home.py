@@ -48,7 +48,7 @@ def home_ui():
                     ),
                     style="display: flex; justify-content: flex-end; align-items: flex-end;  gap: 20px;",
                 ),
-                style="display: flex; justify-content: space-between; width: 100%; align-items: center;",
+                style="display: flex; justify-content: space-between; align-items: center; width: 100%;",
             ),
             ui.br(),
             output_widget("plot_data"),

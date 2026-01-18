@@ -14,6 +14,8 @@ from lemonade_stand.config import metadata
 from lemonade_stand.config.setup import check_version
 from lemonade_stand.config.setup import get_user_configs
 
+from .metadata import USER_CONFIG
+
 
 @dataclass
 class UserConfig:
@@ -40,10 +42,12 @@ class UserConfig:
         # Update object fields variables
         self.app_version = config_dict["app-version"]
         self.always_refresh_data = bool(config_dict["always-refresh-data"])
-        self.always_skip_login = (
-            True if self.dev_mode else bool(config_dict["always-skip-login"])
+        self.always_skip_login = self.dev_mode or bool(config_dict["always-skip-login"])
+        self.statement_dir = Path(
+            USER_CONFIG["statement-dir"]
+            if self.dev_mode
+            else config_dict["statement-dir"]
         )
-        self.statement_dir = Path(config_dict["statement-dir"])
 
     def __str__(self):
         """
@@ -100,6 +104,8 @@ class AppDir:
     metadata_path: Path = field(init=False)
     user_config_path: Path = field(init=False)
     category_config_path: Path = field(init=False)
+    types_config_path: Path = field(init=False)
+    exclusions_config_path: Path = field(init=False)
     database_dir: Path = field(init=False)
 
     def __post_init__(self):
@@ -114,6 +120,12 @@ class AppDir:
         self.user_config_path = self.root_dir / "shared" / "config" / "user_config.json"
         self.category_config_path = (
             self.root_dir / "shared" / "config" / "category_config.json"
+        )
+        self.types_config_path = (
+            self.root_dir / "shared" / "config" / "transaction_type_config.json"
+        )
+        self.exclusions_config_path = (
+            self.root_dir / "shared" / "config" / "exclusions_config.json"
         )
         self.database_dir = self.root_dir / "shared" / "data"
 

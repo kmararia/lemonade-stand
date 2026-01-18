@@ -12,7 +12,7 @@ import polars as pl
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.config import UserConfig
-from lemonade_stand.data.read import read_pdfplumber
+from lemonade_stand.data.read import read_pdfplumber  # noqa: F401
 from lemonade_stand.data.read import read_pymullm  # noqa: F401
 from lemonade_stand.data.setup import DATA_SCHEMA
 from lemonade_stand.data.setup import clean_transactions
@@ -67,7 +67,7 @@ class Transactions:
         Post initialization variables
         """
 
-        LOGGER.info("Setting up data structure for development transactions")
+        LOGGER.info("Creating transactions data-class...\n")
 
         if len(self.statements_list) > 0:
             self.data = pl.concat(
@@ -129,36 +129,39 @@ class UserData:
         """
 
         LOGGER.info(
-            "Loading statements from path: \n\t'%s'", str(self.config.statement_dir)
+            "Loading statements from path: \n\t'%s'\n", str(self.config.statement_dir)
         )
 
         # Load all user transactions
         statements = [
-            Statement(file_path=file, read_func=read_pdfplumber)
+            Statement(file_path=file, read_func=read_pymullm)
             for file in (self.config.statement_dir).glob("*.pdf")
         ]
 
         transactions = Transactions(statements_list=statements)
 
         # Rename fields
-        transactions.data = transactions.data.rename(
-            {
-                "transaction_date": "date",
-                "transaction_category": "category",
-                "transaction_desc": "detail",
-                "transaction_amount": "amount",
-                "transaction_type": "type",
-                "source_file": "source",
-            }
-        )
+        field_renames = {
+            "transaction_date": "date",
+            "transaction_type": "type",
+            "transaction_category": "category",
+            "transaction_desc": "detail",
+            "transaction_amount": "amount",
+            "source_file": "source",
+            "extract_date": "extract_date",
+            "exclude_flag": "exclude_flag",
+        }
+
+        transactions.data = transactions.data.rename(field_renames)
 
         # Define a function to create summarized data
         def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
+            keep_cols = field_renames.values()
             return (
                 data_df.filter(filter_logic)
-                .group_by(["date", "type", "category", "detail", "source"])
+                .group_by([x for x in keep_cols if x != "amount"])
                 .agg(pl.col("amount").sum().alias("amount"))
-                .select(["date", "type", "category", "detail", "amount", "source"])
+                .select(keep_cols)
             )
 
         # Create summarized datasets
@@ -166,7 +169,10 @@ class UserData:
         savings_df = summarize(filter_logic=(pl.col("type") == "savings"))
         expenses_df = summarize(filter_logic=(pl.col("type") == "expenses"))
         unknown_df = summarize(
-            filter_logic=(~pl.col("type").is_in(["income", "savings", "expenses"]))
+            filter_logic=(
+                ~pl.col("type").is_in(["income", "savings", "expenses"])
+                | pl.col("type").is_null()
+            )
         )
 
         # Update the object variables

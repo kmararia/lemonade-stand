@@ -2,6 +2,7 @@
 Scrapping transactions from pdf file texts
 """
 
+import json
 import logging
 import re
 from datetime import datetime
@@ -12,9 +13,12 @@ import numpy as np
 import polars as pl
 from dateutil.parser import parse
 
+from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
+
+APP_PATHS = AppDir()
 DATA_SCHEMA = pl.Schema(
     {
         "transaction_date": pl.Date(),
@@ -24,6 +28,7 @@ DATA_SCHEMA = pl.Schema(
         "transaction_type": pl.String(),
         "source_file": pl.String(),
         "extract_date": pl.Datetime(),
+        "exclude_flag": pl.Boolean(),
     }
 )
 
@@ -38,16 +43,9 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
     LOGGER.info("Getting year of the statement")
 
-    # Set up the statement file year
-    file_year = re.search(
-        re.compile(r"([A-Za-z]{3,9})\s*(\d{2}),?\s*(\b\d{4}\b)", re.IGNORECASE),
-        pdf_text,
-    )
-
-    file_year = (file_year.group(3)) if file_year else (datetime.now().year)
-
     # Define variables
     transaction_matches = []
+    file_year = None
     month_patterns = {
         "Jan/January": (
             r"(?:"
@@ -72,11 +70,27 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
     # Iterate through all the potentail patterns
     for date_format, pattern in month_patterns.items():
+        space_patt = r"[^\S\r\n]"
+
+        # Build the statement year pattern
+        if date_format == "Jan/January":
+            year_pattern = rf"((?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}}),?{space_patt}*)(\b\d{{4}}\b)"  # Matches: January 31, 2024
+        else:
+            year_pattern = rf"({pattern}/\d{{2}}/?)(\d{{2}}|\d{{4}})"  # Matches: 04/01/24 or 04/01/2024
+
+        LOGGER.info("Getting year of the statement")
+
+        # Find the statement file year
+        year_search = re.search(re.compile(year_pattern, re.IGNORECASE), pdf_text)
+        file_year = year_search.group(2) if year_search else file_year
+
         # Build the full date pattern conditionally
         if date_format == "Jan/January":
-            date_pattern = rf"(?:\d{{2}}\s+{pattern})|(?:{pattern}\s+\d{{2}})"
+            date_pattern = rf"(?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}})"  # Matches: 31 January or January 31
         else:
-            date_pattern = rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"
+            date_pattern = (
+                rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"  # Matches: 01/31 or 01/31/2024
+            )
 
         # Find matches iteratively
         LOGGER.debug(
@@ -85,7 +99,7 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
         transactions = re.finditer(
             re.compile(
-                rf"({date_pattern})\s+(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
+                rf"({date_pattern})\s+(?:{date_pattern}\s+)?(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
                 re.IGNORECASE | re.VERBOSE,
             ),
             pdf_text,
@@ -93,16 +107,24 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
         transaction_matches.append([line.groups() for line in transactions])
 
+    # Populate the file year with today's date if none
+    file_year = (
+        datetime.strptime(file_year, "%y" if len(file_year) == 2 else "%Y")
+        if file_year
+        else datetime.now()
+    )
+
     # Set up the data rows
     data = [
         (
-            parse(row[0], default=datetime(int(file_year), 1, 1)).date(),
+            parse(row[0], default=file_year).date(),
             row[1],
             PyDecimal(row[2].replace(",", "")),
             None,  # Placeholder for transaction_category
             None,  # Placeholder for transaction_type
             None,  # Placeholder for source_file
-            datetime.now(),
+            datetime.now(),  # Placeholder for extract_date
+            False,  # Placeholder for exclude_flag
         )
         for row in transaction_matches[
             np.argmax(
@@ -116,6 +138,114 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
         data=data,
         schema=DATA_SCHEMA,
         orient="row",
+    )
+
+
+def generate_categories() -> pl.Expr:
+    """
+    Generates a polars expression from the user category mappings
+
+    Arguments:
+        None
+    Returns:
+        A polars expression for the category field creation
+    """
+
+    # Define the configuration file path
+    config_path = APP_PATHS.category_config_path
+
+    # Read in the category config file if it exists
+    if config_path.exists():
+        with config_path.open("r") as file:
+            category_mappings: dict = json.load(file)
+    else:
+        category_mappings: dict = {}
+
+    # Generate category field expression
+    field_expr = pl.when(pl.lit(False)).then(pl.lit(None))
+
+    for category, substring_list in category_mappings.items():
+        lowercase_substring_list = [x.lower() for x in substring_list]
+
+        field_expr = field_expr.when(
+            pl.col("transaction_desc")
+            .str.to_lowercase()
+            .str.contains_any(lowercase_substring_list)
+        ).then(pl.lit(category))
+
+    return field_expr
+
+
+def generate_types() -> pl.Expr:
+    """
+    Generates a polars expression from the user type mappings
+
+    Arguments:
+        None
+    Returns:
+        A polars expression for the transaction-type field creation
+    """
+
+    # Define the configuration file path
+    config_path = APP_PATHS.types_config_path
+
+    # Read in the category config file if it exists
+    if config_path.exists():
+        with config_path.open("r") as file:
+            transctn_type_mappings: dict = json.load(file)
+    else:
+        transctn_type_mappings: dict = {}
+
+    # Generate category field expression
+    field_expr = pl.when(pl.col("transaction_amount") < 0).then(pl.lit("income"))
+
+    for transaction_type, category_list in transctn_type_mappings.items():
+        lowercase_category_list = [x.lower() for x in category_list]
+
+        field_expr = field_expr.when(
+            pl.col("transaction_category")
+            .str.to_lowercase()
+            .str.contains_any(lowercase_category_list)
+        ).then(pl.lit(transaction_type))
+
+    return field_expr
+
+
+def flag_exclusions() -> pl.Expr:
+    """
+    Filters out transactions listed in the user configuration file
+
+    Arguments:
+        data_df: A polars dadtaframe
+    Returns:
+        A polars dataframe without the listed records
+    """
+
+    # Define the configuration file path
+    config_path = APP_PATHS.exclusions_config_path
+
+    # Read in the category config file if it exists
+    if config_path.exists():
+        with config_path.open("r") as file:
+            exclude_transactions: dict = json.load(file)
+    else:
+        exclude_transactions: dict = {"exclude": []}
+
+    # Create the transactions filter flag
+    LOGGER.info("Creating and exclusion flag...")
+
+    exclude_list = [x.lower() for x in exclude_transactions.get("exclude", [])]
+    exclude_pattern = "|".join(exclude_list)
+
+    return (
+        pl.col("transaction_desc")
+        .str.to_lowercase()
+        .str.count_matches(rf"{exclude_pattern}")
+        > 0
+    ) | (
+        pl.col("transaction_desc")
+        .str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
+        .is_not_null()
     )
 
 
@@ -167,22 +297,23 @@ def clean_transactions(
 
     # Filter out transactions with dollar values in description
     clean_df = data_df.filter(
-        (
-            pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
-        ).is_null()
+        pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_null()
     )
+
+    # Pull the category and type field expressions
+    categories_expr = generate_categories()
+    transaction_type_expr = generate_types()
+    exclude_flag_expr = flag_exclusions()
 
     LOGGER.info("Adding missing fields...")
 
-    # Set up empty columns
+    # Populate empty columns
     clean_df = clean_df.with_columns(
+        categories_expr.alias("transaction_category")
+    ).with_columns(
+        transaction_type_expr.alias("transaction_type"),
+        exclude_flag_expr.alias("exclude_flag"),
         pl.lit(file_name).alias("source_file"),
-        pl.lit("Category").alias("transaction_category"),
-        (
-            pl.when(pl.col("transaction_amount") < 0)
-            .then(pl.lit("expenses"))
-            .otherwise(pl.lit("income"))
-        ).alias("transaction_type"),
     )
 
     # # Filter out unnecessary data tables
