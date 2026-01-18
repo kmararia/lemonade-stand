@@ -141,24 +141,27 @@ class UserData:
         transactions = Transactions(statements_list=statements)
 
         # Rename fields
-        transactions.data = transactions.data.rename(
-            {
-                "transaction_date": "date",
-                "transaction_category": "category",
-                "transaction_desc": "detail",
-                "transaction_amount": "amount",
-                "transaction_type": "type",
-                "source_file": "source",
-            }
-        )
+        field_renames = {
+            "transaction_date": "date",
+            "transaction_type": "type",
+            "transaction_category": "category",
+            "transaction_desc": "detail",
+            "transaction_amount": "amount",
+            "source_file": "source",
+            "extract_date": "extract_date",
+            "exclude_flag": "exclude_flag",
+        }
+
+        transactions.data = transactions.data.rename(field_renames)
 
         # Define a function to create summarized data
         def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
+            keep_cols = field_renames.values()
             return (
                 data_df.filter(filter_logic)
-                .group_by(["date", "type", "category", "detail", "source"])
+                .group_by([x for x in keep_cols if x != "amount"])
                 .agg(pl.col("amount").sum().alias("amount"))
-                .select(["date", "type", "category", "detail", "amount", "source"])
+                .select(keep_cols)
             )
 
         # Create summarized datasets
