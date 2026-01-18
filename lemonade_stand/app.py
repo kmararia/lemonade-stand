@@ -62,7 +62,21 @@ app_ui = ui.page_navbar(
     expense_ui("Expense"),
     # Allow dark mode
     ui.nav_spacer(),
-    ui.nav_control(ui.input_dark_mode(id="view_mode")),
+    ui.nav_control(
+        ui.span(
+            ui.input_task_button(
+                id="refresh_data",
+                label="",
+                label_busy="",
+                icon=icon_svg("rotate-right"),
+                icon_busy=icon_svg("spinner"),
+                type="default",
+                class_="glob_task_button",
+            ),
+            ui.input_dark_mode(id="view_mode"),
+            style="display: flex; justify-content: flex-end; gap: 0.5rem;",
+        )
+    ),
     # Add Side bar
     sidebar=ui.sidebar(
         user_guide_ui("user_guide"),
@@ -109,6 +123,7 @@ def server(input, output, session):  # noqa: ARG001
     """
 
     # Define reactive values to track execution
+    data_refresh_tracker: reactive.Value[int] = reactive.Value(0)
     build_params: reactive.Value[UserConfig] = reactive.Value()
     data_path: reactive.Value[Path] = reactive.Value()
 
@@ -161,13 +176,21 @@ def server(input, output, session):  # noqa: ARG001
 
     # Reactively set up the user data
     @reactive.Calc
-    @reactive.event(data_path)
+    @reactive.event(input.refresh_data, data_path)
     def dataset() -> UserData | SimpleNamespace:
         current_config = build_params()
 
         with ThreadPoolExecutor() as executor:
+            # Determine appropriate function to use
+            if data_refresh_tracker.get() < input.refresh_data():
+                LOGGER.info("Refreshing the data on user request...")
+                prep_data_func = UserData
+            else:
+                LOGGER.info("Pulling the data for shiny app...")
+                prep_data_func = get_data
+
             # Submit the task
-            future = executor.submit(get_data, run_config=current_config)
+            future = executor.submit(prep_data_func, config=current_config)
 
             with ui.Progress(min=0, max=1) as p:
                 counter = 0
@@ -202,7 +225,11 @@ def server(input, output, session):  # noqa: ARG001
                 for x in stack_df_list
             ],
             how="diagonal",
-        ).select(pl.exclude("extract_date", "exclude_flag"))
+        ).select(
+            pl.exclude("extract_date")
+            if input.show_excluded()
+            else pl.exclude("extract_date", "exclude_flag")
+        )
 
         # Call the page servers
         if stacked_df.shape[0] > 0:

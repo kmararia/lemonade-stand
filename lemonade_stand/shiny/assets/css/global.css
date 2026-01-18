@@ -128,3 +128,15 @@
     opacity: 0.8;
     color: #ff0000;
 }
+
+/* ***** EXTRAS ***** */
+.glob_task_button {  /* Refresh data action button */
+    border: none !important;
+    outline: none !important;
+    padding-top: 1rem;
+    height: 1em;
+    width: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
