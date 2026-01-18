@@ -69,6 +69,11 @@ app_ui = ui.page_navbar(
         mappings_type_ui("mappings_type"),
         mappings_category_ui("mappings_category"),
         exclude_ui("mappings_exclude"),
+        ui.input_switch(
+            id="show_excluded",
+            label=ui.p("Show excluded", class_="sidebar-link"),
+            value=False,
+        ),
         title="Options",
         style="font-weight: bold;",
     ),
@@ -171,15 +176,23 @@ def server(input, output, session):  # noqa: ARG001
         user_data = dataset()
 
         # Stack all the datasets for the home-page
+        stack_df_list = [
+            user_data.income,
+            user_data.savings,
+            user_data.expenses,
+            user_data.unknown,
+        ]
         stacked_df = pl.union(
             [
-                user_data.income.filter(~pl.col("exclude_flag")),
-                user_data.savings.filter(~pl.col("exclude_flag")),
-                user_data.expenses.filter(~pl.col("exclude_flag")),
-                user_data.unknown.filter(~pl.col("exclude_flag")),
+                x
+                if input.show_excluded()
+                else x.filter(
+                    ~pl.coalesce("exclude_flag", pl.lit(False))
+                )  # Adding redundancy check incase exclude flag was not populated
+                for x in stack_df_list
             ],
             how="diagonal",
-        )
+        ).select(pl.exclude("extract_date", "exclude_flag"))
 
         # Call the page servers
         if stacked_df.shape[0] > 0:
