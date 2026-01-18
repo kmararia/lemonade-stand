@@ -11,6 +11,7 @@
 .sidebar-link {
     text-decoration: none !important;
     color: inherit;
+    font-size: 0.875rem;
     font-weight: 500;
     transition: opacity 0.2s ease;
 }
@@ -39,6 +40,7 @@
 [id$="data_table"] .shiny-data-frame {
     --shiny-datagrid-grid-header-bgcolor: #f8f9fa !important;
     --shiny-datagrid-grid-header-color: #212529 !important;
+    --shiny-datagrid-font-size: 0.8rem !important;
 }
 
 /* Dark Mode Overrides using the same wildcard */
@@ -46,6 +48,7 @@
     --shiny-datagrid-grid-header-bgcolor: #2d2d2d !important;
     --shiny-datagrid-grid-header-color: #00d1b2 !important;
     --shiny-datagrid-grid-border-color: #444 !important;
+    --shiny-datagrid-font-size: 0.8rem !important;
 }
 
 /* Header Text Styling */
@@ -89,6 +92,7 @@
     background-color: #018773;
     color: #eee;
     border-radius: 7px;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
