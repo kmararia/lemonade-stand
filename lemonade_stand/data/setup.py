@@ -99,7 +99,7 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
         transactions = re.finditer(
             re.compile(
-                rf"({date_pattern})\s+(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
+                rf"({date_pattern})\s+(?:{date_pattern}\s+)?(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
                 re.IGNORECASE | re.VERBOSE,
             ),
             pdf_text,
@@ -234,8 +234,15 @@ def flag_exclusions() -> pl.Expr:
     # Create the transactions filter flag
     LOGGER.info("Creating and exclusion flag...")
 
-    final_exclude_list = [x.lower() for x in exclude_transactions.get("exclude", [])]
-    return (pl.col("transaction_desc").str.to_lowercase().is_in(final_exclude_list)) | (
+    exclude_list = [x.lower() for x in exclude_transactions.get("exclude", [])]
+    exclude_pattern = "|".join(exclude_list)
+
+    return (
+        pl.col("transaction_desc")
+        .str.to_lowercase()
+        .str.count_matches(rf"{exclude_pattern}")
+        > 0
+    ) | (
         pl.col("transaction_desc")
         .str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
         .is_not_null()
