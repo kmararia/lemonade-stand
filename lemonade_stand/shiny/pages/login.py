@@ -66,7 +66,8 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ),
                 ui.h5(
                     "Sign in with your Account",
-                    style="font-weight: bold; margin-bottom: 1.8rem",
+                    style="margin-bottom: 1.8rem",
+                    class_="items-centered",
                 ),
                 ui.div(
                     ui.input_text_area(
@@ -77,7 +78,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                         autoresize=True,
                     ),
                     ui.output_ui(id="confirm_valid_username"),
-                    class_="login-modal-input",
+                    class_="items-centered",
                 ),
                 ui.div(
                     ui.input_password(
@@ -86,10 +87,9 @@ def auth_server(input, output, session):  # noqa: ARG001
                         placeholder="Password",
                     ),
                     ui.output_ui(id="confirm_valid_password"),
-                    class_="login-modal-input",
+                    class_="items-centered",
                 ),
                 ui.output_ui(id="note_user_credentials"),
-                class_="login-modal-content",
             ),
             ui.div(
                 ui.input_action_button(
@@ -109,7 +109,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                     id="skip_login", label="always skip login", value=False
                 ),
                 style="display: flex; justify-content: flex-start; margin-top: 1rem;",
-                class_="checkbox-desciption",
+                class_="checkbox-note",
             ),
             size="m",
             footer=None,
@@ -277,7 +277,7 @@ def auth_server(input, output, session):  # noqa: ARG001
 
             return ui.div(
                 f"Invalid {' and '.join(auth_result.invalid_credentials)}!",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     @render.ui
@@ -321,12 +321,12 @@ def auth_server(input, output, session):  # noqa: ARG001
             else:
                 return ui.div(
                     "Statement folder does not contain any statement files. Please confirm that '.pdf' files exist",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 )
         else:
             return ui.div(
                 "Invalid statement path! Path does not exist",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     @reactive.effect

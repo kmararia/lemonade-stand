@@ -121,7 +121,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
         if input.always_refresh_data():
             return ui.span(
                 "Note: A full data refresh might slow down your application depending on your data size.",
-                class_="switch-note",
+                class_="disclaimer-note",
             )
         return None
 
@@ -164,7 +164,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                 id="purge_confirmation",
                 label=ui.span(
                     "Application purged! All saved data has been removed",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 ),
                 width="50%",
             )
@@ -175,7 +175,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                     id="user_type_purge",
                     label=ui.span(
                         "Type 'purge' to confirm action:  This action cannot be undone",
-                        class_="switch-note",
+                        class_="disclaimer-note",
                     ),
                     width="50%",
                 ),

@@ -137,7 +137,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             return ui.div(
                 ui.p(
                     f"Substring '{substring_input}' already exists in '{current_keys[0]}' category. Would you like to override the current mapping? ",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 ),
                 ui.input_radio_buttons(
                     id="confirm_add_mapping",
@@ -163,7 +163,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                 category_mappings.set(new_data)
 
             return ui.span(
-                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
+                "Success!", class_="valid-note", style="margin-bottom: 1rem;"
             )
 
     @reactive.Effect(priority=-1)
@@ -225,7 +225,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                 category_mappings.set(new_data)
 
                 return ui.span(
-                    "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
+                    "Success!", class_="valid-note", style="margin-bottom: 1rem;"
                 )
             else:
                 LOGGER.info(
@@ -234,13 +234,13 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
 
                 return ui.span(
                     f"Category '{delete_category}' does not exist in Transaction-Type '{delete_type}'",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                     style="margin-bottom: 1rem;",
                 )
         else:
             return ui.span(
                 f"Transaction-Type '{delete_type}' does not exist",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     # A function to reactively update the local config file
@@ -288,7 +288,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             else:
                 ui.span(
                     f"Application does not support files with extension '{upload_path.suffix}'. Please upload '.json' or '.csv' files.",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                     style="margin-bottom: 1rem;",
                 )
 
@@ -306,7 +306,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             # Return success message
             return ui.span(
                 "Success! File mappings have been imported!",
-                class_="login-valid-note",
+                class_="valid-note",
                 style="margin-bottom: 1rem;",
             )
 

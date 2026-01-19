@@ -118,7 +118,7 @@ def exclude_server(input, output, session):  # noqa: ARG001
             LOGGER.info("Transaction exists in exclusion list. Displaying note...")
             return ui.p(
                 "Transaction already exists in the exclusion list",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
         else:
@@ -126,7 +126,7 @@ def exclude_server(input, output, session):  # noqa: ARG001
             category_mappings.set({"exclude": (new_data + [exclude_input])})
 
             return ui.span(
-                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
+                "Success!", class_="valid-note", style="margin-bottom: 1rem;"
             )
 
     @render.ui
@@ -151,14 +151,14 @@ def exclude_server(input, output, session):  # noqa: ARG001
             )
 
             return ui.span(
-                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
+                "Success!", class_="valid-note", style="margin-bottom: 1rem;"
             )
         else:
             LOGGER.info("Exclusion transaction does not exist. Skipping deletion...")
 
             return ui.span(
                 f"Exclusion transaction '{delete_input}' does not exist list",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     @reactive.Effect
@@ -207,7 +207,7 @@ def exclude_server(input, output, session):  # noqa: ARG001
             else:
                 ui.span(
                     f"Application does not support files with extension '{upload_path.suffix}'. Please upload '.json' or '.csv' files.",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                     style="margin-bottom: 1rem;",
                 )
 
@@ -225,12 +225,12 @@ def exclude_server(input, output, session):  # noqa: ARG001
                             "Key 'exclude' does not exist in the uploaded file. Please reupload with the following format:"
                         ),
                         ui.span("'exclude': [transactions strings to exclude]"),
-                        class_="login-invalid-note",
+                        class_="invalid-note",
                     )
             else:
                 return ui.span(
                     "Uploaded file does not have an object of type 'list' or 'dict' at the highest level",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 )
 
             current_exclusions = category_mappings().get("exclude", [])
@@ -241,7 +241,7 @@ def exclude_server(input, output, session):  # noqa: ARG001
             # Return success message
             return ui.span(
                 "Success! File mappings have been imported!",
-                class_="login-valid-note",
+                class_="valid-note",
                 style="margin-bottom: 1rem;",
             )
 

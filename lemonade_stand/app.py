@@ -51,8 +51,6 @@ app_ui = ui.page_navbar(
     # Inject the custom configuration files
     ui.head_content(
         ui.tags.link(rel="stylesheet", type="text/css", href="css/global.css"),
-        ui.tags.link(rel="stylesheet", type="text/css", href="css/login.css"),
-        ui.tags.link(rel="stylesheet", type="text/css", href="css/settings.css"),
     ),
     ui.nav_spacer(),
     # Main content page
@@ -71,7 +69,7 @@ app_ui = ui.page_navbar(
                 icon=icon_svg("rotate-right"),
                 icon_busy=icon_svg("spinner"),
                 type="default",
-                class_="glob_task_button",
+                class_="task_button",
             ),
             ui.input_dark_mode(id="view_mode"),
             style="display: flex; justify-content: flex-end; gap: 0.5rem;",
