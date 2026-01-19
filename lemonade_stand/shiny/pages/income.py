@@ -58,7 +58,7 @@ def income_ui():
         # Data container
         ui.tags.div(
             ui.div(
-                ui.h5("Income", style="font-weight: bold;"),
+                ui.h5("Income", class_="title-styles"),
                 ui.download_button(
                     id="download_data", label="Download CSV", class_="download-button"
                 ),
@@ -117,12 +117,15 @@ def income_server(input, output, session, view_mode_setting, data_df):  # noqa: 
         summ_income = data().select(pl.sum("amount").alias("amount")).item(0, "amount")
 
         return ui.span(
-            ui.h4(f"${summ_income:,.0f}", style="font-weight: bold;"),
+            ui.h4(
+                ui.span("$", style="font-family: Courier New; font-weight: bold;"),
+                ui.span(f"{summ_income:,.0f}", class_="title-styles"),
+            ),
             ui.p(
                 "earned this period",
-                style="font-size: 0.9rem; font-style: italic; margin-bottom: 0rem;",
+                style="font-size: 0.9rem; font-style: italic; margin-bottom: 0.3rem;",
             ),
-            style="display: flex; justify-content: flex-start; align-items: center; gap: 0.3rem;",
+            style="display: flex; justify-content: flex-start; align-items: center; width: 100%; gap: 0.3rem;",
         )
 
     # Chart logic

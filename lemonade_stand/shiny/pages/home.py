@@ -30,7 +30,7 @@ def home_ui():
         # Data plot container
         ui.tags.div(
             ui.div(
-                ui.h3("Transaction Summary", style="font-weight: bold; width: 100%"),
+                ui.h4("Transaction Summary", class_="title-styles"),
                 ui.div(
                     ui.input_date_range(
                         id="daterange_select",
@@ -59,7 +59,7 @@ def home_ui():
         # Data container
         ui.tags.div(
             ui.div(
-                ui.h5("Cash flow history", style="font-weight: bold;"),
+                ui.h5("Cash flow history", class_="title-styles"),
                 ui.download_button(
                     "download_data", "Download CSV", class_="download-button"
                 ),

@@ -1,3 +1,25 @@
+/* ***** FONT CONFIGURATIONS ***** */
+@font-face {
+    font-family: 'Harman Retro';
+    src: url('fonts/harman-retro.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    unicode-range: U+0020-007E;
+}
+@font-face {
+    font-family: 'Harman Sans';
+    src: url('fonts/harman-sans.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    unicode-range: U+0020-007E;
+}
+
+.title-styles {
+    font-family: 'HarmanRetro', 'Harman Sans', Lucida Sans, serif;
+    width: 100%;
+}
+
+
 /* ***** SIDEBAR CONFIGURATIONS ***** */
 .sidebar {
     border-right: 1px solid #eee;

@@ -50,9 +50,9 @@ ASSETS_DIR = Path(lemonade_stand.__file__).parent / "shiny" / "assets"
 app_ui = ui.page_navbar(
     # Inject the custom configuration files
     ui.head_content(
-        ui.include_css(ASSETS_DIR / "css" / "global.css"),
-        ui.include_css(ASSETS_DIR / "css" / "login.css"),
-        ui.include_css(ASSETS_DIR / "css" / "settings.css"),
+        ui.tags.link(rel="stylesheet", type="text/css", href="css/global.css"),
+        ui.tags.link(rel="stylesheet", type="text/css", href="css/login.css"),
+        ui.tags.link(rel="stylesheet", type="text/css", href="css/settings.css"),
     ),
     ui.nav_spacer(),
     # Main content page
@@ -98,7 +98,7 @@ app_ui = ui.page_navbar(
             label=ui.p("Show excluded", class_="sidebar-link"),
             value=False,
         ),
-        title="Options",
+        title=ui.h5("Options", class_="title-styles"),
         style="font-weight: bold;",
     ),
     title=ui.div(
@@ -106,7 +106,7 @@ app_ui = ui.page_navbar(
             ui.output_image("logo_svg", inline=True),
             style="width: 2.5rem; flex-shrink: 0;",
         ),
-        ui.h5(
+        ui.h6(
             "Lemonade Stand",
             style="font-style: italic; letter-spacing: 0.02rem; margin-bottom: 0;",
         ),
@@ -278,4 +278,4 @@ def initialize_app() -> None:
 
 
 # Connect everything
-app = App(app_ui, server)
+app = App(app_ui, server, static_assets=ASSETS_DIR)
