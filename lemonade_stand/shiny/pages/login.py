@@ -9,7 +9,6 @@ from shiny import module
 from shiny import reactive
 from shiny import render
 from shiny import ui
-from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
@@ -40,15 +39,6 @@ def auth_server(input, output, session):  # noqa: ARG001
     login_initialized = reactive.Value(False)
     auth_feedback = reactive.Value()
 
-    @render.image
-    def logo_svg():
-        img: ImgData = {
-            "src": str(APP_LOGO),
-            "width": "100%",
-            "height": "100%",
-        }
-        return img
-
     ## **** LOGIN MODAL ****
     def show_login_modal():
         """
@@ -60,8 +50,8 @@ def auth_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         login_modal = ui.modal(
             ui.div(
-                ui.span(
-                    ui.output_image("logo_svg", inline=True),
+                ui.img(
+                    src="images/app_logo.svg",
                     style="width: 35%; display: block; margin: 10% auto 10% auto;",
                 ),
                 ui.h5(
@@ -89,13 +79,12 @@ def auth_server(input, output, session):  # noqa: ARG001
                     ui.output_ui(id="confirm_valid_password"),
                     class_="items-centered",
                 ),
-                ui.output_ui(id="note_user_credentials"),
+                ui.output_ui(id="note_user_credentials", class_="collapsable-space"),
             ),
-            ui.div(
-                ui.input_action_button(
-                    id="confirm_login", label="Login", style="margin: auto;"
-                ),
-                style="margin: 0.5rem auto 2rem auto; width: 100%; display: flex; justify-content: center;",
+            ui.input_action_button(
+                id="confirm_login",
+                label="Login",
+                style="margin: 0.5rem auto 2rem auto; display: flex; justify-content: center;",
             ),
             ui.div(
                 ui.p("New here? "),
@@ -131,12 +120,9 @@ def auth_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         signup_modal = ui.modal(
             ui.div(
-                ui.span(
-                    ui.output_image("logo_svg", inline=True),
-                    style="width: 10%; max-width: 18%;",
-                ),
-                ui.h5("Lemonade-Stand", style="font-style: italic; margin: 0;"),
-                style="display: flex; justify-content: center; align-items: flex-end; width: 100%;",
+                ui.img(src="images/app_logo.svg", style="width: 10%; max-width: 18%;"),
+                ui.span("Lemonade Stand", style="font-style: italic; margin: 0;"),
+                style="display: flex; justify-content: flex-start; align-items: flex-end;",
             ),
             ui.h5(
                 "Create your Account",

@@ -12,10 +12,8 @@ import polars as pl
 from faicons import icon_svg
 from shiny import App
 from shiny import reactive
-from shiny import render
 from shiny import run_app
 from shiny import ui
-from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
@@ -100,10 +98,7 @@ app_ui = ui.page_navbar(
         style="font-weight: bold;",
     ),
     title=ui.div(
-        ui.div(
-            ui.output_image("logo_svg", inline=True),
-            style="width: 2.5rem; flex-shrink: 0;",
-        ),
+        ui.img(src="images/app_logo.svg", class_="logo-image"),
         ui.span(
             "Lemonade Stand",
             style="font-size: 1rem; font-style: italic; letter-spacing: 0.02rem; margin-bottom: 0;",
@@ -253,15 +248,6 @@ def server(input, output, session):  # noqa: ARG001
                     style="padding-left: 5rem;",
                 )
             )
-
-    @render.image
-    def logo_svg():
-        img: ImgData = {
-            "src": str(ASSETS_DIR / "images" / "app_logo.svg"),
-            "width": "100%",
-            "height": "100%",
-        }
-        return img
 
 
 def initialize_app() -> None:

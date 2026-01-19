@@ -210,10 +210,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* || UTILITIES */
 
+.logo-image {
+    width: 2.5rem;
+    flex-shrink: 0;
+}
+
 .items-centered {
     display: flex;
     justify-content: center;
     align-items: center;
     width: auto;
     gap: 10px;
+}
+
+.collapsable-space {
+    min-height: 0px;
+    transition: all 0.3s ease;
 }
