@@ -86,7 +86,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
             ui.br(),
             # Purging danger zone!
             ui.div(
-                ui.h6("Danger Zone!!"),
+                ui.h5("Danger Zone"),
                 ui.input_switch(id="purge_app", label="Purge all data", value=False),
                 ui.output_ui(id="confirm_purge"),
             ),

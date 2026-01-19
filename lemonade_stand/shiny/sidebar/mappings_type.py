@@ -106,7 +106,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             size="l",
             easy_close=True,
             footer=ui.modal_button("Close"),
-            title="CATEGORY-TYPE MAPPINGS",
+            title="CATEGORY TYPE MAPPINGS",
             class_="modal-content",
         )
 
