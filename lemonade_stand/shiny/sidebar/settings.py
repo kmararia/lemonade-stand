@@ -49,8 +49,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
     def _():
         # Set up the modal
         settings_modal = ui.modal(
-            ui.h5("Transaction statements"),
-            ui.br(),
+            ui.h5("Transaction statements", class_="space-items"),
             ui.div(
                 ui.input_text(
                     id="statement_path",
@@ -60,7 +59,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                     width="80%",
                 ),
                 ui.output_ui(id="confirm_valid_path"),
-                style="margin-top: 5%",
+                # class_="space-items"
             ),
             ui.div(
                 ui.input_switch(
@@ -69,32 +68,29 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                     value=(return_namespace.user_config).always_refresh_data,
                     width="15rem",
                 ),
-                ui.span(
-                    ui.output_ui(id="note_data_refresh"), style="margin-bottom: 1.2rem;"
-                ),
-                style="display: flex; align-items: center; gap: 1rem; margin-top: 2rem;",
+                ui.output_ui(id="note_data_refresh"),
+                class_="items-space-between",
             ),
             ui.input_switch(
                 id="always_skip_login",
                 label="Always skip login",
                 value=(return_namespace.user_config).always_skip_login,
             ),
-            ui.br(),
             # User experience settings
-            ui.h5("User experience"),
+            ui.h5("User experience", class_="space-items"),
             ui.input_switch("show_decimals", "Show decimal places", True),
-            ui.br(),
             # Purging danger zone!
             ui.div(
-                ui.h6("Danger Zone!!"),
+                ui.h5("Danger Zone", class_="space-items"),
                 ui.input_switch(id="purge_app", label="Purge all data", value=False),
                 ui.output_ui(id="confirm_purge"),
             ),
-            size="l",
-            easy_close=True,
-            footer=ui.input_action_button(id="close_settings", label="Close"),
-            title="Main Application Settings",
+            ui.span(ui.modal_button("Close"), class_="items-centered space-items"),
+            title="MAIN APPLICATION SETTINGS",
             class_="modal-content",
+            easy_close=True,
+            footer=None,
+            size="l",
         )
 
         # Unhide the modal
@@ -121,7 +117,8 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
         if input.always_refresh_data():
             return ui.span(
                 "Note: A full data refresh might slow down your application depending on your data size.",
-                class_="switch-note",
+                style="margin-bottom: 1rem;",  # Adding this to keep note in line with selector
+                class_="disclaimer-note",
             )
         return None
 
@@ -164,7 +161,7 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                 id="purge_confirmation",
                 label=ui.span(
                     "Application purged! All saved data has been removed",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 ),
                 width="50%",
             )
@@ -175,16 +172,17 @@ def settings_server(input, output, session) -> SimpleNamespace:  # noqa: ARG001
                     id="user_type_purge",
                     label=ui.span(
                         "Type 'purge' to confirm action:  This action cannot be undone",
-                        class_="switch-note",
+                        class_="disclaimer-note",
                     ),
                     width="50%",
                 ),
                 ui.input_action_button(
                     id="user_confirm_purge",
                     label="confirm",
-                    style="height: 2.2rem; width: 5rem; margin: auto 0 1rem 0; display: inline-flex; justify-content: center; align-items: center;",
+                    style="margin-top: 1rem",  # Adding this to keep the button in line with input box
+                    class_="confirm-button",
                 ),
-                style="display: flex; justify-content: flex-start; align-items: flex-end; gap: 20px;",
+                class_="items-center-left",
             )
         return None
 

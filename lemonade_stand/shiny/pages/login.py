@@ -9,7 +9,6 @@ from shiny import module
 from shiny import reactive
 from shiny import render
 from shiny import ui
-from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
@@ -40,15 +39,6 @@ def auth_server(input, output, session):  # noqa: ARG001
     login_initialized = reactive.Value(False)
     auth_feedback = reactive.Value()
 
-    @render.image
-    def logo_svg():
-        img: ImgData = {
-            "src": str(APP_LOGO),
-            "width": "100%",
-            "height": "100%",
-        }
-        return img
-
     ## **** LOGIN MODAL ****
     def show_login_modal():
         """
@@ -60,13 +50,13 @@ def auth_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         login_modal = ui.modal(
             ui.div(
-                ui.span(
-                    ui.output_image("logo_svg", inline=True),
+                ui.img(
+                    src="images/app_logo.svg",
                     style="width: 35%; display: block; margin: 10% auto 10% auto;",
                 ),
                 ui.h5(
                     "Sign in with your Account",
-                    style="font-weight: bold; margin-bottom: 1.8rem",
+                    class_="items-centered space-items",
                 ),
                 ui.div(
                     ui.input_text_area(
@@ -77,7 +67,7 @@ def auth_server(input, output, session):  # noqa: ARG001
                         autoresize=True,
                     ),
                     ui.output_ui(id="confirm_valid_username"),
-                    class_="login-modal-input",
+                    class_="items-centered",
                 ),
                 ui.div(
                     ui.input_password(
@@ -86,35 +76,33 @@ def auth_server(input, output, session):  # noqa: ARG001
                         placeholder="Password",
                     ),
                     ui.output_ui(id="confirm_valid_password"),
-                    class_="login-modal-input",
+                    class_="items-centered",
                 ),
-                ui.output_ui(id="note_user_credentials"),
-                class_="login-modal-content",
+                ui.output_ui(id="note_user_credentials", class_="collapsable-space"),
+            ),
+            ui.input_action_button(
+                id="confirm_login",
+                label="Login",
+                style="margin: 1rem auto 2rem auto;",
+                class_="confirm-button",
             ),
             ui.div(
-                ui.input_action_button(
-                    id="confirm_login", label="Login", style="margin: auto;"
-                ),
-                style="margin: 0.5rem auto 2rem auto; width: 100%; display: flex; justify-content: center;",
-            ),
-            ui.div(
-                ui.p("New here? "),
+                ui.span("New here? "),
                 ui.input_action_link(
                     "open_signup", "Create an account", class_="general-link"
                 ),
-                style="display: flex; justify-content: center; gap: 4px; font-size: .9375rem",
+                style="font-size: .9rem; margin-bottom: 2rem;",
+                class_="items-centered",
             ),
-            ui.div(
-                ui.input_checkbox(
-                    id="skip_login", label="always skip login", value=False
-                ),
-                style="display: flex; justify-content: flex-start; margin-top: 1rem;",
-                class_="checkbox-desciption",
+            ui.input_checkbox(
+                id="skip_login",
+                label=ui.span("always skip login", class_="checkbox-note"),
+                value=False,
             ),
-            size="m",
-            footer=None,
-            easy_close=False,
             class_="modal-content",
+            easy_close=False,
+            footer=None,
+            size="m",
         )
 
         # Unhide the modal
@@ -131,17 +119,12 @@ def auth_server(input, output, session):  # noqa: ARG001
         # Set up the modal
         signup_modal = ui.modal(
             ui.div(
-                ui.span(
-                    ui.output_image("logo_svg", inline=True),
-                    style="width: 10%; max-width: 18%;",
-                ),
-                ui.h5("Lemonade-Stand", style="font-style: italic; margin: 0;"),
-                style="display: flex; justify-content: center; align-items: flex-end; width: 100%;",
+                ui.img(src="images/app_logo.svg", style="width: 10%; max-width: 18%;"),
+                ui.span("Lemonade Stand", class_="brand-name"),
+                style="margin-bottom: 5%",
+                class_="items-bottom-left",
             ),
-            ui.h5(
-                "Create your Account",
-                style="font-weight: bold; margin-top: 10%; margin-bottom: 5%;",
-            ),
+            ui.h5("Create your Account", class_="space-items"),
             ui.input_text(
                 id="signup_user_name",
                 placeholder="Username *",
@@ -154,8 +137,8 @@ def auth_server(input, output, session):  # noqa: ARG001
             ),
             ui.span(
                 "Personal information ",
-                ui.em("(Optional)", style="font-style: italic; opacity: 0.8;"),
-                style="margin-top: 5%; margin-bottom: 2%;",
+                ui.span("(Optional)", class_="checkbox-note"),
+                class_="space-items",
             ),
             ui.input_text(
                 id="signup_first_name",
@@ -181,26 +164,25 @@ def auth_server(input, output, session):  # noqa: ARG001
                 ui.input_text(
                     id="statement_path",
                     label="Statements directory path:",
-                    placeholder="A folder that contains your statement pdfs",
-                    width="75%",
+                    placeholder="A folder containing your pdf statements",
+                    width="67%",
                 ),
                 ui.output_ui(id="confirm_valid_path"),
-                style="margin-top: 5%",
+                class_="space-items",
             ),
             ui.div(
-                ui.input_action_button(
-                    id="confirm_signup", label="Create Account", style="margin: auto;"
-                ),
-                style="margin-top: 20px; width: 100%; display: flex; justify-content: center;",
+                ui.input_action_button(id="confirm_signup", label="Create Account"),
+                class_="items-centered space-items",
             ),
-            size="m",
-            easy_close=False,
-            footer=ui.div(
-                ui.p("Already have an account?"),
+            ui.div(
+                ui.span("Already have an account?", style="font-size: .9rem;"),
                 ui.input_action_link("open_login", "Sign in", class_="general-link"),
-                style="display: flex; justify-content: flex-end; align-items: flex-start; gap: 4px;",
+                class_="items-bottom-right space-items",
             ),
             class_="modal-content",
+            easy_close=False,
+            footer=None,
+            size="m",
         )
 
         # Unhide the modal
@@ -277,7 +259,7 @@ def auth_server(input, output, session):  # noqa: ARG001
 
             return ui.div(
                 f"Invalid {' and '.join(auth_result.invalid_credentials)}!",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     @render.ui
@@ -321,12 +303,12 @@ def auth_server(input, output, session):  # noqa: ARG001
             else:
                 return ui.div(
                     "Statement folder does not contain any statement files. Please confirm that '.pdf' files exist",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 )
         else:
             return ui.div(
                 "Invalid statement path! Path does not exist",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     @reactive.effect

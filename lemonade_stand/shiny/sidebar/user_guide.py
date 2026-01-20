@@ -38,11 +38,12 @@ def user_guide_server(input, output, session):  # noqa: ARG001
             ui.h5("How to Run"),
             ui.br(),
             ui.output_text_verbatim(id="documentation", placeholder=False),
-            size="l",
-            easy_close=True,
-            footer=ui.modal_button("Dismiss"),
+            ui.span(ui.modal_button("Close"), class_="items-centered space-items"),
             title="USER GUIDE",
             class_="modal-content",
+            easy_close=True,
+            footer=None,
+            size="l",
         )
 
         # Unhide the modal

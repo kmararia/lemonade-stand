@@ -28,8 +28,9 @@ def mappings_type_ui():
 
     return ui.input_action_link(
         id="open_mappings",
-        label=ui.p("Types", style="margin-left: 0.5rem;"),
-        class_="sidebar-link",
+        label="Types",
+        style="margin: 0 0 0.5rem 1.2rem;",
+        class_="sidebar-link items-top-left",
         icon=icon_svg("layer-group"),
     )
 
@@ -64,9 +65,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             ui.p("Manual input mappings"),
             ui.div(
                 ui.input_action_button(
-                    id="add_mapping",
-                    label="Add",
-                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem;",
+                    id="add_mapping", label="Add", class_="confirm-button"
                 ),
                 ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
                 ui.span(
@@ -74,16 +73,14 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                     ui.input_text(
                         id="value_mapping", label=None, placeholder="Category"
                     ),
-                    style="display: flex; justify-content: flex-start; gap: 0.5rem;",
+                    class_="items-top-left",
                 ),
-                style="display: flex; justify-content: space-between;",
+                class_="items-top-left",
             ),
             ui.output_ui(id="confirm_override"),
             ui.div(
                 ui.input_action_button(
-                    id="delete_mapping",
-                    label="Delete",
-                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; max-width: 5.6rem;",
+                    id="delete_mapping", label="Delete", class_="confirm-button"
                 ),
                 ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
                 ui.span(
@@ -91,23 +88,24 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                     ui.input_text(
                         id="value_delete", label=None, placeholder="Category"
                     ),
-                    style="display: flex; justify-content: flex-start; gap: 0.5rem;",
+                    class_="items-top-left",
                 ),
-                style="display: flex; justify-content: space-between;",
+                class_="items-top-left",
             ),
             ui.output_ui(id="confirm_deletion"),
             ui.div(
                 ui.download_button(
                     "download_json", "Download json", class_="download-button"
                 ),
-                style="display: flex; justify-content: flex-end; align-items: center;",
+                class_="items-bottom-right",
             ),
             ui.output_text_verbatim(id="display_json", placeholder=True),
-            size="l",
-            easy_close=True,
-            footer=ui.modal_button("Close"),
-            title="CATEGORY-TYPE MAPPINGS",
+            ui.modal_button("Close", class_="space-items"),
+            title="CATEGORY TYPE MAPPINGS",
             class_="modal-content",
+            easy_close=True,
+            footer=None,
+            size="l",
         )
 
         # Unhide the modal
@@ -137,7 +135,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             return ui.div(
                 ui.p(
                     f"Substring '{substring_input}' already exists in '{current_keys[0]}' category. Would you like to override the current mapping? ",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 ),
                 ui.input_radio_buttons(
                     id="confirm_add_mapping",
@@ -145,9 +143,8 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                     choices=["yes", "no"],
                     selected="no",
                     inline=True,
-                    # style="display: flex; justify-content: center; align-items: center; max-height: 2.1rem; margin-left: 0.5rem;",
                 ),
-                style="display: flex; justify-content: space-between; margin-bottom: 1rem;",
+                class_="items-top-left",
             )
 
         else:
@@ -162,9 +159,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                 # Update reactive value
                 category_mappings.set(new_data)
 
-            return ui.span(
-                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
-            )
+            return ui.span("Success!", class_="valid-note")
 
     @reactive.Effect(priority=-1)
     @reactive.event(input.confirm_add_mapping)
@@ -224,9 +219,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
                 # Update the reactive value
                 category_mappings.set(new_data)
 
-                return ui.span(
-                    "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
-                )
+                return ui.span("Success!", class_="valid-note")
             else:
                 LOGGER.info(
                     "Category does not exist in Transaction-Type. Skipping category mapping deletion..."
@@ -234,13 +227,12 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
 
                 return ui.span(
                     f"Category '{delete_category}' does not exist in Transaction-Type '{delete_type}'",
-                    class_="login-invalid-note",
-                    style="margin-bottom: 1rem;",
+                    class_="invalid-note",
                 )
         else:
             return ui.span(
                 f"Transaction-Type '{delete_type}' does not exist",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     # A function to reactively update the local config file
@@ -288,8 +280,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             else:
                 ui.span(
                     f"Application does not support files with extension '{upload_path.suffix}'. Please upload '.json' or '.csv' files.",
-                    class_="login-invalid-note",
-                    style="margin-bottom: 1rem;",
+                    class_="invalid-note",
                 )
 
             LOGGER.info("Setting up user mappings into mapping config")
@@ -306,8 +297,7 @@ def mappings_type_server(input, output, session):  # noqa: ARG001
             # Return success message
             return ui.span(
                 "Success! File mappings have been imported!",
-                class_="login-valid-note",
-                style="margin-bottom: 1rem;",
+                class_="valid-note",
             )
 
     # Download the json file of the data

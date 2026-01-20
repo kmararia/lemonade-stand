@@ -12,10 +12,8 @@ import polars as pl
 from faicons import icon_svg
 from shiny import App
 from shiny import reactive
-from shiny import render
 from shiny import run_app
 from shiny import ui
-from shiny.types import ImgData
 
 import lemonade_stand
 from lemonade_stand.config import UserConfig
@@ -50,9 +48,7 @@ ASSETS_DIR = Path(lemonade_stand.__file__).parent / "shiny" / "assets"
 app_ui = ui.page_navbar(
     # Inject the custom configuration files
     ui.head_content(
-        ui.include_css(ASSETS_DIR / "css" / "global.css"),
-        ui.include_css(ASSETS_DIR / "css" / "login.css"),
-        ui.include_css(ASSETS_DIR / "css" / "settings.css"),
+        ui.tags.link(rel="stylesheet", type="text/css", href="css/global.css"),
     ),
     ui.nav_spacer(),
     # Main content page
@@ -71,7 +67,7 @@ app_ui = ui.page_navbar(
                 icon=icon_svg("rotate-right"),
                 icon_busy=icon_svg("spinner"),
                 type="default",
-                class_="glob_task_button",
+                class_="task-button",
             ),
             ui.input_dark_mode(id="view_mode"),
             style="display: flex; justify-content: flex-end; gap: 0.5rem;",
@@ -98,19 +94,12 @@ app_ui = ui.page_navbar(
             label=ui.p("Show excluded", class_="sidebar-link"),
             value=False,
         ),
-        title="Options",
-        style="font-weight: bold;",
+        title=ui.h5("Options"),
     ),
     title=ui.div(
-        ui.div(
-            ui.output_image("logo_svg", inline=True),
-            style="width: 2.5rem; flex-shrink: 0;",
-        ),
-        ui.h5(
-            "Lemonade Stand",
-            style="font-style: italic; letter-spacing: 0.02rem; margin-bottom: 0;",
-        ),
-        style="display: flex; justify-content: flex-start; align-items: flex-end; width: fit-content;",
+        ui.img(src="images/app_logo.svg", class_="logo-image"),
+        ui.span("Lemonade Stand", class_="brand-name"),
+        class_="items-bottom-left",
     ),
     lang="en",
     id="pages",
@@ -256,15 +245,6 @@ def server(input, output, session):  # noqa: ARG001
                 )
             )
 
-    @render.image
-    def logo_svg():
-        img: ImgData = {
-            "src": str(ASSETS_DIR / "images" / "app_logo.svg"),
-            "width": "100%",
-            "height": "100%",
-        }
-        return img
-
 
 def initialize_app() -> None:
     """
@@ -278,4 +258,4 @@ def initialize_app() -> None:
 
 
 # Connect everything
-app = App(app_ui, server)
+app = App(app_ui, server, static_assets=ASSETS_DIR)

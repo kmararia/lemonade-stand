@@ -47,26 +47,22 @@ def income_ui():
                         selected="bar",
                         width="50%",
                     ),
-                    style="display: flex; justify-content: flex-end; align-items: flex-end; gap: 20px;",
+                    class_="items-bottom-right",
                 ),
-                style="display: flex; justify-content: space-between; align-items: center; width: 100%;",
+                class_="items-space-between",
             ),
             output_widget("plot_data"),
             id="plot-container",
-            style="margin-bottom: 2rem;",
         ),
         # Data container
-        ui.tags.div(
-            ui.div(
-                ui.h5("Income", style="font-weight: bold;"),
-                ui.download_button(
-                    id="download_data", label="Download CSV", class_="download-button"
-                ),
-                style="display: flex; justify-content: space-between; align-items: center;",
+        ui.div(
+            ui.h5("Income"),
+            ui.download_button(
+                id="download_data", label="Download CSV", class_="download-button"
             ),
-            ui.output_data_frame("income_data_table"),
-            id="table-container",
+            class_="items-space-between",
         ),
+        ui.output_data_frame("income_data_table"),
         # Add loader spinners
         ui.busy_indicators.options(
             spinner_type="bars", spinner_selector="#plot-container"
@@ -116,13 +112,25 @@ def income_server(input, output, session, view_mode_setting, data_df):  # noqa: 
     def total_income():
         summ_income = data().select(pl.sum("amount").alias("amount")).item(0, "amount")
 
-        return ui.span(
-            ui.h4(f"${summ_income:,.0f}", style="font-weight: bold;"),
+        if summ_income >= 0:
+            amount_css_class = "positive-amounts"
+            dollar_sign = "$"
+        else:
+            amount_css_class = "negative-amounts"
+            dollar_sign = "$-"
+
+        return ui.h4(
+            ui.p(
+                ui.span(
+                    dollar_sign, style="font-family: Courier New; font-weight: bold;"
+                ),
+                ui.span(f"{abs(summ_income):,.0f}"),
+                class_=amount_css_class,
+            ),
             ui.p(
                 "earned this period",
-                style="font-size: 0.9rem; font-style: italic; margin-bottom: 0rem;",
+                style="font-size: 0.9rem; font-style: italic; margin-left: 0.9rem;",
             ),
-            style="display: flex; justify-content: flex-start; align-items: center; gap: 0.3rem;",
         )
 
     # Chart logic

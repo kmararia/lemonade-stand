@@ -1,29 +1,30 @@
-/* ***** SIDEBAR CONFIGURATIONS ***** */
-.sidebar {
-    border-right: 1px solid #eee;
+/* || GENERAL STYLES */
+
+@font-face {
+    font-family: 'Harman Retro';
+    src: url('fonts/harman-retro.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    unicode-range: U+0020-007E;
 }
 
-[data-bs-theme="dark"] .sidebar {
-    border-right: 1px solid #333;
+@font-face {
+    font-family: 'Harman Sans';
+    src: url('fonts/harman-sans.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    unicode-range: U+0020-007E;
 }
 
-/* Custom class for sidebar links */
-.sidebar-link {
-    text-decoration: none !important;
-    color: inherit;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: opacity 0.2s ease;
-    display: flex;
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'HarmanRetro', 'Harman Sans', Lucida Sans, serif;
+    width: 100%;
 }
 
-.sidebar-link:hover {
-    text-decoration: none !important;
-    opacity: 0.7;
-    color: #00d1b2;
-}
 
-/* ***** GENERAL LINKS ***** */
+/* || SITEWIDE */
+
+/* Links */
 .general-link {
     text-decoration: none !important;
     color: rgb(0, 94, 255);
@@ -37,51 +38,75 @@
     color: #00d1b2;
 }
 
-/* ***** TABLE DATA CONFIGURATIONS ****** */
-[id$="data_table"] .shiny-data-frame {
-    --shiny-datagrid-grid-header-bgcolor: #f8f9fa !important;
-    --shiny-datagrid-grid-header-color: #212529 !important;
-    --shiny-datagrid-font-size: 0.8rem !important;
+/* Notes */
+.valid-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    text-align: center !important;
+    opacity: 0.8;
+    color: #408301;
 }
 
-/* Dark Mode Overrides using the same wildcard */
-[data-bs-theme="dark"] [id$="data_table"] {
-    --shiny-datagrid-grid-header-bgcolor: #2d2d2d !important;
-    --shiny-datagrid-grid-header-color: #00d1b2 !important;
-    --shiny-datagrid-grid-border-color: #444 !important;
-    --shiny-datagrid-font-size: 0.8rem !important;
+.invalid-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    text-align: center !important;
+    opacity: 0.8;
+    color: #ff0000;
 }
 
-/* Header Text Styling */
-[id$="data_table"] th {
-    font-weight: 800 !important;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    color: inherit !important; /* Forces it to use the variable color */
+.disclaimer-note {
+    font-size: 0.75rem;
+    font-style: italic;
+    margin-left: 0;
+    opacity: 0.8;
 }
 
-/* Fix for the filter input boxes in Dark Mode */
-[data-bs-theme="dark"] .shiny-data-frame input {
-    background-color: #121212 !important;
-    color: white !important;
-    border: 1px solid #444 !important;
-    border-radius: 4px;
+.checkbox-note {
+    font-size: 0.85rem;
+    font-style: italic;
+    opacity: 0.9;
+    color: #555555;
 }
 
-/* Ensure the 'Date', 'Category' text labels are visible */
-[data-bs-theme="dark"] .shiny-data-frame .grid-header-label {
-    color: #00d1b2 !important;
+[data-bs-theme="dark"] .valid-note {
+    color: #00ff0d !important;
 }
 
+[data-bs-theme="dark"] .disclaimer-note {
+    color: #ffcc00 !important;
+}
 
-/* ***** DATA DOWNLOAD BUTTON ***** */
+[data-bs-theme="dark"] .checkbox-note {
+    color: #7b7b7b !important;
+}
+
+/* Buttons */
+.confirm-button {
+    max-height: 2.3rem;
+    max-width: 5.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-button {
+    border: none !important;
+    outline: none !important;
+    padding-top: 1rem;
+    height: 1em;
+    width: 2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .download-button {
     width: 120px;
     height: 30px;
     padding: 0 5px;
     margin-bottom: 0.5rem;
 
-    /* Flexbox to center the text perfectly */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -106,7 +131,6 @@
     color: #fff;
 }
 
-/* Light mode overrides */
 [data-bs-theme="dark"] .download-button {
     background-color: #002d2b;
     color: #eee;
@@ -120,23 +144,163 @@
 }
 
 
+/* || MODALS */
 
-/* ***** NOTE DISPLAYS ***** */
-.invalid-note {
-    font-size: 0.75rem;
-    font-style: italic;
-    opacity: 0.8;
-    color: #ff0000;
+.modal-content {
+    border-radius: 25px !important;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
 
-/* ***** EXTRAS ***** */
-.glob_task_button {  /* Refresh data action button */
-    border: none !important;
-    outline: none !important;
-    padding-top: 1rem;
-    height: 1em;
-    width: 2em;
+.space-items {
+    margin: 2rem 0 1.5rem 0;
+}
+
+
+/* || SIDEBAR */
+
+.sidebar {
+    border-right: 1px solid #eee;
+}
+
+[data-bs-theme="dark"] .sidebar {
+    border-right: 1px solid #333;
+}
+
+/* Links */
+.sidebar-link {
+    text-decoration: none !important;
+    color: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
     display: flex;
+}
+
+.sidebar-link:hover {
+    text-decoration: none !important;
+    opacity: 0.7;
+    color: #00d1b2;
+}
+
+
+
+/* || DATA TABLE */
+
+[id$="data_table"] .shiny-data-frame {
+    --shiny-datagrid-grid-header-bgcolor: #f8f9fa !important;
+    --shiny-datagrid-grid-header-color: #212529 !important;
+    --shiny-datagrid-font-size: 0.8rem !important;
+}
+
+[data-bs-theme="dark"] [id$="data_table"] {
+    --shiny-datagrid-grid-header-bgcolor: #2d2d2d !important;
+    --shiny-datagrid-grid-header-color: #00d1b2 !important;
+    --shiny-datagrid-grid-border-color: #444 !important;
+    --shiny-datagrid-font-size: 0.8rem !important;
+}
+
+/* Table header */
+[id$="data_table"] th {
+    font-weight: 800 !important;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: inherit !important;
+}
+
+[data-bs-theme="dark"] .shiny-data-frame .grid-header-label {
+    color: #00d1b2 !important;
+}
+
+/* Filter input boxes */
+[data-bs-theme="dark"] .shiny-data-frame input {
+    background-color: #121212 !important;
+    color: white !important;
+    border: 1px solid #444 !important;
+    border-radius: 4px;
+}
+
+
+/* || DATA INFORMATION */
+[id$="plot-container"] {
+    margin-bottom: 4rem;
+}
+
+.positive-amounts {
+    font-family: 'HarmanRetro', 'Harman Sans', Lucida Sans, serif;
+    color: #30b201;
+    margin-bottom: 0;
+}
+
+.negative-amounts {
+    font-family: 'HarmanRetro', 'Harman Sans', Lucida Sans, serif;
+    color: #e30808;
+    margin-bottom: 0;
+}
+
+
+/* || UTILITIES */
+
+.logo-image {
+    width: 2.5rem;
+    flex-shrink: 0;
+}
+
+.brand-name {
+    font-size: 1rem;
+    font-style: italic;
+    margin-bottom: 0;
+}
+
+.items-space-between {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+}
+
+.items-centered {
+    display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.items-top-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.items-bottom-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.items-bottom-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.items-center-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.items-top-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.collapsable-space {
+    min-height: 0px;
+    transition: all 0.5s ease;
 }

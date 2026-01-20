@@ -52,45 +52,50 @@ def exclude_server(input, output, session):  # noqa: ARG001
 
         # Set up the modal
         mappings_modal = ui.modal(
-            ui.input_file(
-                id="user_upload",
-                label="File mapping uploads",
-                accept=[".json", ".csv"],
-                multiple=False,
+            ui.div(
+                ui.input_file(
+                    id="user_upload",
+                    label="File mapping uploads",
+                    accept=[".json", ".csv"],
+                    multiple=False,
+                ),
+                ui.output_ui(id="confirm_upload"),
+                class_="items-center-left",
             ),
-            ui.output_ui(id="confirm_upload"),
             ui.p("Manual input mappings"),
             ui.div(
-                ui.input_action_button(
-                    id="add_exclusion",
-                    label="Add",
-                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem;",
+                ui.span(
+                    ui.input_action_button(
+                        id="add_exclusion", label="Add", class_="confirm-button"
+                    ),
+                    ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
+                    ui.input_text(
+                        id="key_exclude", label=None, placeholder="Exclude transaction"
+                    ),
+                    class_="items-top-left",
                 ),
-                ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
-                ui.input_text(
-                    id="key_exclude", label=None, placeholder="Exclude transaction"
-                ),
-                style="display: flex; justify-content: flex-start; gap: 0.5rem;",
+                ui.output_ui(id="confirm_addition"),
+                class_="items-center-left",
             ),
-            ui.output_ui(id="confirm_addition"),
             ui.div(
-                ui.input_action_button(
-                    id="delete_exclusion",
-                    label="Delete",
-                    style="display: flex; justify-content: center; align-items: center; max-height: 2.3rem; max-width: 5.6rem;",
+                ui.span(
+                    ui.input_action_button(
+                        id="delete_exclusion", label="Delete", class_="confirm-button"
+                    ),
+                    ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
+                    ui.input_text(
+                        id="key_delete", label=None, placeholder="Delete exclusion"
+                    ),
+                    class_="items-top-left",
                 ),
-                ui.span("𓃊", style="padding: 0.5rem 0.5rem 0.5rem 0.5rem;"),
-                ui.input_text(
-                    id="key_delete", label=None, placeholder="Delete exclusion"
-                ),
-                style="display: flex; justify-content: flex-start; gap: 0.5rem;",
+                ui.output_ui(id="confirm_deletion"),
+                class_="items-center-left",
             ),
-            ui.output_ui(id="confirm_deletion"),
             ui.div(
                 ui.download_button(
                     "download_json", "Download json", class_="download-button"
                 ),
-                style="display: flex; justify-content: flex-end; align-items: center;",
+                class_="items-bottom-right",
             ),
             ui.output_text_verbatim(id="display_json", placeholder=True),
             size="l",
@@ -118,16 +123,14 @@ def exclude_server(input, output, session):  # noqa: ARG001
             LOGGER.info("Transaction exists in exclusion list. Displaying note...")
             return ui.p(
                 "Transaction already exists in the exclusion list",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
         else:
             LOGGER.info("Adding new exclusion transaction...")
             category_mappings.set({"exclude": (new_data + [exclude_input])})
 
-            return ui.span(
-                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
-            )
+            return ui.span("Success!", class_="valid-note")
 
     @render.ui
     @reactive.event(input.delete_exclusion)
@@ -150,15 +153,13 @@ def exclude_server(input, output, session):  # noqa: ARG001
                 {"exclude": [x for x in old_data if x != delete_input]}
             )
 
-            return ui.span(
-                "Success!", class_="login-valid-note", style="margin-bottom: 1rem;"
-            )
+            return ui.span("Success!", class_="valid-note")
         else:
             LOGGER.info("Exclusion transaction does not exist. Skipping deletion...")
 
             return ui.span(
                 f"Exclusion transaction '{delete_input}' does not exist list",
-                class_="login-invalid-note",
+                class_="invalid-note",
             )
 
     @reactive.Effect
@@ -207,8 +208,7 @@ def exclude_server(input, output, session):  # noqa: ARG001
             else:
                 ui.span(
                     f"Application does not support files with extension '{upload_path.suffix}'. Please upload '.json' or '.csv' files.",
-                    class_="login-invalid-note",
-                    style="margin-bottom: 1rem;",
+                    class_="invalid-note",
                 )
 
             LOGGER.info("Setting up user mappings into mapping config")
@@ -225,12 +225,12 @@ def exclude_server(input, output, session):  # noqa: ARG001
                             "Key 'exclude' does not exist in the uploaded file. Please reupload with the following format:"
                         ),
                         ui.span("'exclude': [transactions strings to exclude]"),
-                        class_="login-invalid-note",
+                        class_="invalid-note",
                     )
             else:
                 return ui.span(
                     "Uploaded file does not have an object of type 'list' or 'dict' at the highest level",
-                    class_="login-invalid-note",
+                    class_="invalid-note",
                 )
 
             current_exclusions = category_mappings().get("exclude", [])
@@ -241,8 +241,7 @@ def exclude_server(input, output, session):  # noqa: ARG001
             # Return success message
             return ui.span(
                 "Success! File mappings have been imported!",
-                class_="login-valid-note",
-                style="margin-bottom: 1rem;",
+                class_="valid-note",
             )
 
     # Download the json file of the data
