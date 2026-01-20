@@ -46,28 +46,23 @@ def home_ui():
                         selected="bar",
                         width="50%",
                     ),
-                    style="display: flex; justify-content: flex-end; align-items: flex-end;  gap: 20px;",
+                    class_="items-bottom-right",
                 ),
-                style="display: flex; justify-content: space-between; align-items: center; width: 100%;",
+                class_="items-space-between",
             ),
             ui.br(),
             output_widget("plot_data"),
             id="plot-container",
         ),
-        ui.br(),
-        ui.br(),
         # Data container
-        ui.tags.div(
-            ui.div(
-                ui.h5("Cash flow history"),
-                ui.download_button(
-                    "download_data", "Download CSV", class_="download-button"
-                ),
-                style="display: flex; justify-content: space-between; align-items: center;",
+        ui.div(
+            ui.h5("Cash flow history"),
+            ui.download_button(
+                "download_data", "Download CSV", class_="download-button"
             ),
-            ui.output_data_frame("home_data_table"),
-            id="table-container",
+            class_="items-space-between",
         ),
+        ui.output_data_frame("home_data_table"),
         # Add loader spinners
         ui.busy_indicators.options(
             spinner_type="bars", spinner_selector="#plot-container"

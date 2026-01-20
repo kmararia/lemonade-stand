@@ -82,7 +82,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Buttons */
-.task_button {
+.confirm-button {
+    max-height: 2.3rem;
+    max-width: 5.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-button {
     border: none !important;
     outline: none !important;
     padding-top: 1rem;
@@ -143,6 +151,11 @@ h1, h2, h3, h4, h5, h6 {
     border: none;
     box-shadow: 0 15px 35px rgba(0,0,0,0.2);
 }
+
+.space-items {
+    margin: 2rem 0 1.5rem 0;
+}
+
 
 /* || SIDEBAR */
 
@@ -208,6 +221,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* || DATA INFORMATION */
+[id$="plot-container"] {
+    margin-bottom: 4rem;
+}
+
+.positive-amounts {
+    font-family: 'HarmanRetro', 'Harman Sans', Lucida Sans, serif;
+    color: #30b201;
+    margin-bottom: 0;
+}
+
+.negative-amounts {
+    font-family: 'HarmanRetro', 'Harman Sans', Lucida Sans, serif;
+    color: #e30808;
+    margin-bottom: 0;
+}
+
+
 /* || UTILITIES */
 
 .logo-image {
@@ -215,15 +246,61 @@ h1, h2, h3, h4, h5, h6 {
     flex-shrink: 0;
 }
 
+.brand-name {
+    font-size: 1rem;
+    font-style: italic;
+    margin-bottom: 0;
+}
+
+.items-space-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 .items-centered {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: auto;
-    gap: 10px;
+    gap: 0.5rem;
+}
+
+.items-top-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.items-bottom-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.items-bottom-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.items-center-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.items-top-left {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
 }
 
 .collapsable-space {
     min-height: 0px;
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
 }
