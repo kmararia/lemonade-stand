@@ -14,6 +14,7 @@
         "bcrypt>=5.0.0",
         "duckdb>=1.4.3",
         "faicons>=0.2.2",
+        "great-tables>=0.20.0",
         "inquirerpy>=0.3.4",
         "llama-index>=0.14.10",
         "pdfplumber>=0.11.8",

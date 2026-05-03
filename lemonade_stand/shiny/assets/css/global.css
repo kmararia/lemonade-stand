@@ -304,3 +304,22 @@ h1, h2, h3, h4, h5, h6 {
     min-height: 0px;
     transition: all 0.5s ease;
 }
+
+
+/* Ensure the container is also dark */
+[data-bs-theme="dark"] [id$="data_table"] .gt_container,
+[data-bs-theme="dark"] [id$="data_table"] .gt_table {
+    background-color: #1a1a1a !important;
+    color: #e0e0e0 !important;
+    font-size: 1rem !important;
+}
+
+/* Target the specific headers and spanners */
+[data-bs-theme="dark"] [id$="data_table"] .gt_col_heading,
+[data-bs-theme="dark"] [id$="data_table"] .gt_column_spanner,
+[data-bs-theme="dark"] [id$="data_table"] .gt_row {
+    background-color: #1a1a1a !important;
+    color: #fcf700 !important;
+    border-color: #444 !important;
+    font-size: 1rem !important;
+}

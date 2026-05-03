@@ -23,3 +23,14 @@ class MissingDatabaseError(Exception):
         """Class initialization method"""
         self.message = message
         super().__init__(self.message)
+
+
+class MissingDeltaError(Exception):
+    """
+    A custom exception for missing matching delta file
+    """
+
+    def __init__(self, message):
+        """Class initialization method"""
+        self.message = message
+        super().__init__(self.message)

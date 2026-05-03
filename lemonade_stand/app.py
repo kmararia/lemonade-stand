@@ -94,6 +94,31 @@ app_ui = ui.page_navbar(
             label=ui.p("Show excluded", class_="sidebar-link"),
             value=False,
         ),
+        ui.popover(
+            ui.input_action_button(
+                id="power_options",
+                label=None,
+                icon=icon_svg("power-off", height="1.5rem", width="1.5rem"),
+                style="height: 2rem; width: 1.5rem;",
+                class_="task-button",
+            ),
+            ui.input_action_link(
+                id="user_sign_out",
+                label=ui.h6("Sign out", style="margin: 0.2rem"),
+                icon=icon_svg("arrow-right-from-bracket"),
+                class_="sidebar-link space-items",
+            ),
+            ui.input_action_link(
+                id="user_shut_off",
+                label=ui.h6("Shut off", style="margin: 0.1rem"),
+                icon=icon_svg("toggle-off"),
+                class_="sidebar-link",
+            ),
+            title=None,
+            id="popover",
+            placement="bottom",
+            class_="items-centered space-items",
+        ),
         title=ui.h5("Options"),
     ),
     title=ui.div(
@@ -143,6 +168,41 @@ def server(input, output, session):  # noqa: ARG001
     build_params.set(run_config)
     data_path.set(run_config.statement_dir)
 
+    def app_power_out(task: str):
+        """
+        Log out and clean up function
+
+        Args:
+            task: The power out option to run
+        Returns:
+            None
+        """
+
+        if task == "log-out":
+            LOGGER.info("Logging out...")
+
+            login_config = auth_server("user_logout")
+            build_params.set(login_config)
+            data_path.set(login_config.statement_dir)
+
+        elif task == "shut-off":
+            pass  # Placeholder for the application shut off option
+
+        else:
+            pass
+
+    @reactive.Effect
+    @reactive.event(input.user_sign_out)
+    def _():
+        LOGGER.info("Logging out on user request...")
+        app_power_out("log-out")
+
+    @reactive.Effect
+    @reactive.event(input.user_shut_off)
+    def _():
+        LOGGER.info("Shutting off application on user request...")
+        app_power_out("shut-off")
+
     # Update build configurations on settings close
     @reactive.Effect
     @reactive.event(settings_config.trigger)
@@ -150,10 +210,8 @@ def server(input, output, session):  # noqa: ARG001
         # Log out if the user purged the application
         if settings_config.log_out:
             LOGGER.info("Initializing login after purge...")
+            app_power_out("log-out")
 
-            login_config = auth_server("user_purge_login")
-            build_params.set(login_config)
-            data_path.set(login_config.statement_dir)
         else:
             new_settings = settings_config.user_config
             build_params.set(new_settings)
