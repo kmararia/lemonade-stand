@@ -26,7 +26,7 @@ def index() -> rx.Component:
             rx.el.div(
                 class_name="absolute top-[-50px] left-[-50px] w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl -z-10 mix-blend-multiply filter opacity-70 animate-blob animation-delay-2000"
             ),
-            class_name="fixed inset-0 overflow-hidden pointer-events-none",
+            class_name="fixed inset-0 overflow-hidden pointer-events-none dark:hidden",
         )
 
     return rx.el.div(
@@ -38,18 +38,20 @@ def index() -> rx.Component:
                 dashboard_content(),
                 class_name="flex-1 p-6 md:p-8 overflow-y-auto scroll-smooth",
             ),
-            class_name="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50/30 backdrop-blur-sm",
+            class_name="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50/30 dark:bg-transparent backdrop-blur-sm",
         ),
-        class_name="flex h-screen bg-gray-50 font-['Inter'] selection:bg-indigo-100 selection:text-indigo-900",
+        class_name="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-300 font-['Inter'] selection:bg-indigo-100 dark:selection:bg-cyan-900 selection:text-indigo-900 dark:selection:text-cyan-100",
     )
 
 
+# Build and deploy the app
 app = rx.App(
-    theme=rx.theme(appearance="light"),
+    theme=rx.theme(appearance="inherit"),
     stylesheets=[
         "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
     ],
 )
+
 app.add_page(index, route="/")
 app.add_page(budgets_page, route="/budgets")
 app.add_page(goals_page, route="/goals")

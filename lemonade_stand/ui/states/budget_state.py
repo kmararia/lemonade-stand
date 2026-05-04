@@ -1041,20 +1041,20 @@ class BudgetState(rx.State):
         self.report_date_range = value
 
     @rx.event
-    def set_warning_threshold(self, value: str):
+    def set_warning_threshold(self, value: float):
         """"""
 
         try:
-            self.warning_threshold = int(float(value))
+            self.warning_threshold = float(value)
         except ValueError as e:
             logging.exception("Error setting warning threshold: %s", e)
 
     @rx.event
-    def set_critical_threshold(self, value: str):
+    def set_critical_threshold(self, value: float):
         """"""
 
         try:
-            self.critical_threshold = int(float(value))
+            self.critical_threshold = float(value)
         except ValueError as e:
             logging.exception("Error setting critical threshold: %s", e)
 

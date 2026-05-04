@@ -12,8 +12,12 @@ def section_header(title: str, description: str) -> rx.Component:
     """"""
 
     return rx.el.div(
-        rx.el.h3(title, class_name="text-lg font-bold text-gray-900"),
-        rx.el.p(description, class_name="text-sm text-gray-500 mt-1"),
+        rx.el.h3(
+            title, class_name="text-lg font-bold text-gray-900 dark:text-gray-100"
+        ),
+        rx.el.p(
+            description, class_name="text-sm text-gray-500 dark:text-gray-400 mt-1"
+        ),
         class_name="mb-6",
     )
 
@@ -43,7 +47,7 @@ def category_settings() -> rx.Component:
             rx.el.div(
                 rx.el.h4(
                     "Departments",
-                    class_name="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider",
+                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wider",
                 ),
                 rx.el.div(
                     rx.foreach(
@@ -73,7 +77,7 @@ def category_settings() -> rx.Component:
             rx.el.div(
                 rx.el.h4(
                     "Projects",
-                    class_name="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wider",
+                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 uppercase tracking-wider",
                 ),
                 rx.el.div(
                     rx.foreach(
@@ -119,7 +123,7 @@ def threshold_settings() -> rx.Component:
                 rx.el.div(
                     rx.el.label(
                         "Warning Threshold",
-                        class_name="text-sm font-medium text-gray-900",
+                        class_name="text-sm font-medium text-gray-900 dark:text-gray-100",
                     ),
                     rx.el.span(
                         f"{BudgetState.warning_threshold}%",
@@ -138,7 +142,7 @@ def threshold_settings() -> rx.Component:
                 ),
                 rx.el.p(
                     "Budgets will turn orange when utilization exceeds this value.",
-                    class_name="text-xs text-gray-500 mt-2",
+                    class_name="text-xs text-gray-500 dark:text-gray-400 mt-2",
                 ),
                 class_name="bg-white p-5 rounded-xl border border-gray-200",
             ),
@@ -146,7 +150,7 @@ def threshold_settings() -> rx.Component:
                 rx.el.div(
                     rx.el.label(
                         "Critical Threshold",
-                        class_name="text-sm font-medium text-gray-900",
+                        class_name="text-sm font-medium text-gray-900 dark:text-gray-100",
                     ),
                     rx.el.span(
                         f"{BudgetState.critical_threshold}%",
@@ -165,7 +169,7 @@ def threshold_settings() -> rx.Component:
                 ),
                 rx.el.p(
                     "Budgets will turn red when utilization exceeds this value.",
-                    class_name="text-xs text-gray-500 mt-2",
+                    class_name="text-xs text-gray-500 dark:text-gray-400 mt-2",
                 ),
                 class_name="bg-white p-5 rounded-xl border border-gray-200",
             ),
@@ -227,7 +231,11 @@ def notification_toggle(
     """"""
 
     return rx.el.div(
-        rx.el.div(rx.el.h4(label, class_name="text-sm font-medium text-gray-900")),
+        rx.el.div(
+            rx.el.h4(
+                label, class_name="text-sm font-medium text-gray-900 dark:text-gray-100"
+            )
+        ),
         rx.el.label(
             rx.el.input(
                 type="checkbox",
@@ -255,7 +263,7 @@ def general_settings() -> rx.Component:
             rx.el.div(
                 rx.el.h4(
                     "Notifications",
-                    class_name="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider",
+                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4 uppercase tracking-wider",
                 ),
                 notification_toggle(
                     "Email Alerts",
@@ -277,17 +285,17 @@ def general_settings() -> rx.Component:
             rx.el.div(
                 rx.el.h4(
                     "Data Management",
-                    class_name="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wider",
+                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4 uppercase tracking-wider",
                 ),
                 rx.el.div(
                     rx.el.div(
                         rx.el.p(
                             "Export Data",
-                            class_name="text-sm font-medium text-gray-900",
+                            class_name="text-sm font-medium text-gray-900 dark:text-gray-100",
                         ),
                         rx.el.p(
                             "Download a full report of your budget history.",
-                            class_name="text-xs text-gray-500",
+                            class_name="text-xs text-gray-500 dark:text-gray-400",
                         ),
                     ),
                     rx.el.button(
@@ -321,11 +329,11 @@ def settings_page() -> rx.Component:
                     rx.el.div(
                         rx.el.h2(
                             "Settings",
-                            class_name="text-3xl font-bold text-gray-900 tracking-tight",
+                            class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
                         ),
                         rx.el.p(
                             "Manage your preferences and configurations.",
-                            class_name="text-gray-500 mt-2 text-lg",
+                            class_name="text-gray-500 dark:text-gray-400 mt-2 text-lg",
                         ),
                         class_name="mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500",
                     ),
@@ -354,7 +362,7 @@ def settings_page() -> rx.Component:
                             ),
                             class_name="flex justify-end pt-8 border-t border-gray-200/50 mt-8 animate-in fade-in slide-in-from-bottom-12 duration-700",
                         ),
-                        class_name="bg-white/70 backdrop-blur-xl rounded-2xl p-8 border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+                        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl p-8 border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
                     ),
                     class_name="max-w-5xl mx-auto relative z-10",
                 ),

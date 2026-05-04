@@ -16,6 +16,10 @@ config = rx.Config(
                 "plugins": [
                     "@tailwindcss/typography",
                 ],
+                "darkMode": "class",
+                "theme": {
+                    "extend": {},
+                },
             }
         )
     ],

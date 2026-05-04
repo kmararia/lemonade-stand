@@ -20,10 +20,11 @@ def summary_stat(
             rx.el.div(
                 rx.el.p(
                     label,
-                    class_name="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1",
+                    class_name="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1",
                 ),
                 rx.el.h3(
-                    value, class_name="text-2xl font-bold text-gray-900 tracking-tight"
+                    value,
+                    class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
                 ),
                 class_name="flex flex-col",
             ),
@@ -37,7 +38,10 @@ def summary_stat(
             subtext != "",
             rx.el.div(
                 rx.icon("trending-up", size=14, class_name="text-emerald-500 mr-1"),
-                rx.el.span(subtext, class_name="text-xs font-medium text-gray-500"),
+                rx.el.span(
+                    subtext,
+                    class_name="text-xs font-medium text-gray-500 dark:text-gray-400",
+                ),
                 class_name="flex items-center",
             ),
             rx.el.span(class_name="hidden"),
@@ -53,7 +57,7 @@ def legend_item(label: str, color: str) -> rx.Component:
         rx.el.div(
             class_name="w-3 h-3 rounded-full mr-2", style={"backgroundColor": color}
         ),
-        rx.el.span(label, class_name="text-sm text-gray-600"),
+        rx.el.span(label, class_name="text-sm text-gray-600 dark:text-gray-400"),
         class_name="flex items-center",
     )
 
@@ -76,7 +80,10 @@ def trend_chart() -> rx.Component:
     """"""
 
     return rx.el.div(
-        rx.el.h3("Spending Trends", class_name="text-lg font-bold text-gray-900 mb-6"),
+        rx.el.h3(
+            "Spending Trends",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
+        ),
         rx.el.div(
             rx.recharts.line_chart(
                 rx.recharts.cartesian_grid(
@@ -161,7 +168,8 @@ def distribution_chart() -> rx.Component:
 
     return rx.el.div(
         rx.el.h3(
-            "Expense Distribution", class_name="text-lg font-bold text-gray-900 mb-6"
+            "Expense Distribution",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
         ),
         rx.el.div(
             rx.recharts.pie_chart(
@@ -216,7 +224,8 @@ def forecast_chart() -> rx.Component:
 
     return rx.el.div(
         rx.el.h3(
-            "Spending Projection", class_name="text-lg font-bold text-gray-900 mb-6"
+            "Spending Projection",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
         ),
         rx.el.div(
             rx.recharts.area_chart(
@@ -279,7 +288,7 @@ def department_comparison_chart() -> rx.Component:
     return rx.el.div(
         rx.el.h3(
             "Department Budget vs. Spend",
-            class_name="text-lg font-bold text-gray-900 mb-6",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
         ),
         rx.el.div(
             rx.recharts.bar_chart(
@@ -335,7 +344,10 @@ def department_comparison_chart() -> rx.Component:
 def top_spenders_widget() -> rx.Component:
     """"""
     return rx.el.div(
-        rx.el.h3("Top Spenders", class_name="text-lg font-bold text-gray-900 mb-4"),
+        rx.el.h3(
+            "Top Spenders",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
+        ),
         class_name="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm h-full",
     )
 
@@ -344,7 +356,8 @@ def comparison_table() -> rx.Component:
     """"""
     return rx.el.div(
         rx.el.h3(
-            "Budget vs. Actuals", class_name="text-lg font-bold text-gray-900 mb-6"
+            "Budget vs. Actuals",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
         ),
         rx.el.div(
             rx.el.table(
@@ -352,23 +365,23 @@ def comparison_table() -> rx.Component:
                     rx.el.tr(
                         rx.el.th(
                             "Category",
-                            class_name="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                            class_name="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                         ),
                         rx.el.th(
                             "Allocated",
-                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                         ),
                         rx.el.th(
                             "Actual Spent",
-                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                         ),
                         rx.el.th(
                             "Variance",
-                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                         ),
                         rx.el.th(
                             "Utilization",
-                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider",
+                            class_name="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                         ),
                         class_name="bg-gray-50 border-b border-gray-200",
                     )
@@ -379,17 +392,18 @@ def comparison_table() -> rx.Component:
                         lambda b: rx.el.tr(
                             rx.el.td(
                                 rx.el.div(
-                                    b["name"], class_name="font-medium text-gray-900"
+                                    b["name"],
+                                    class_name="font-medium text-gray-900 dark:text-gray-100",
                                 ),
                                 class_name="px-6 py-4 whitespace-nowrap text-sm",
                             ),
                             rx.el.td(
                                 f"${b['allocated_amount']:,.2f}",
-                                class_name="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right font-medium",
+                                class_name="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 text-right font-medium",
                             ),
                             rx.el.td(
                                 f"${b['spent']:,.2f}",
-                                class_name="px-6 py-4 whitespace-nowrap text-sm text-gray-600 text-right font-medium",
+                                class_name="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400 text-right font-medium",
                             ),
                             rx.el.td(
                                 rx.el.span(
@@ -425,15 +439,15 @@ def comparison_table() -> rx.Component:
                     rx.el.tr(
                         rx.el.td(
                             "Total",
-                            class_name="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900",
+                            class_name="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100",
                         ),
                         rx.el.td(
                             f"${BudgetState.total_budget:,.2f}",
-                            class_name="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right",
+                            class_name="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 text-right",
                         ),
                         rx.el.td(
                             f"${BudgetState.total_spent:,.2f}",
-                            class_name="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-right",
+                            class_name="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-gray-100 text-right",
                         ),
                         rx.el.td(
                             rx.el.span(
@@ -487,11 +501,11 @@ def reports_page() -> rx.Component:
                         rx.el.div(
                             rx.el.h2(
                                 "Reports & Analytics",
-                                class_name="text-3xl font-bold text-gray-900 tracking-tight",
+                                class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
                             ),
                             rx.el.p(
                                 "Deep dive into your financial performance.",
-                                class_name="text-gray-500 mt-2 text-lg",
+                                class_name="text-gray-500 dark:text-gray-400 mt-2 text-lg",
                             ),
                         ),
                         rx.el.select(
@@ -554,11 +568,11 @@ def reports_page() -> rx.Component:
                             rx.el.div(
                                 rx.el.h3(
                                     "Export Reports",
-                                    class_name="text-lg font-bold text-gray-900 mb-4",
+                                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
                                 ),
                                 rx.el.p(
                                     "Download detailed financial reports for your team.",
-                                    class_name="text-sm text-gray-500 mb-6",
+                                    class_name="text-sm text-gray-500 dark:text-gray-400 mb-6",
                                 ),
                                 rx.el.button(
                                     rx.icon("file-down", size=20, class_name="mr-2"),

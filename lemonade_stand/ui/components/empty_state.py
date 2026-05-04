@@ -16,10 +16,16 @@ def empty_state(
         rx.el.div(
             rx.el.div(
                 rx.icon(icon, size=48, class_name="text-indigo-200 mb-4 mx-auto"),
-                class_name="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6",
+                class_name="w-24 h-24 bg-indigo-50 dark:bg-cyan-900/30 rounded-full flex items-center justify-center mx-auto mb-6",
             ),
-            rx.el.h3(title, class_name="text-xl font-bold text-gray-900 mb-2"),
-            rx.el.p(description, class_name="text-gray-500 mb-8 max-w-md mx-auto"),
+            rx.el.h3(
+                title,
+                class_name="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2",
+            ),
+            rx.el.p(
+                description,
+                class_name="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto",
+            ),
             rx.cond(
                 action_label is not None,
                 rx.el.button(

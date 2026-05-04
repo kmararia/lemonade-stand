@@ -24,7 +24,7 @@ def budget_modal() -> rx.Component:
                     rx.cond(
                         BudgetState.current_budget["id"], "Edit Budget", "New Budget"
                     ),
-                    class_name="text-lg font-bold text-gray-900 mb-4",
+                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
                 ),
                 rx.el.div(
                     rx.el.div(
@@ -176,17 +176,17 @@ def budget_card(budget: BudgetStats) -> rx.Component:
                     rx.el.div(
                         rx.el.h3(
                             budget["name"],
-                            class_name="text-lg font-bold text-gray-900 truncate",
+                            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 truncate",
                         ),
                         rx.el.span(
                             budget["type"],
-                            class_name="ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500",
+                            class_name="ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 dark:text-gray-400",
                         ),
                         class_name="flex items-center mb-1",
                     ),
                     rx.el.p(
                         f"${budget['allocated_amount']:,.0f}",
-                        class_name="text-2xl font-bold text-indigo-600",
+                        class_name="text-2xl font-bold text-indigo-600 dark:text-cyan-400",
                     ),
                     class_name="flex-1 min-w-0",
                 ),
@@ -220,7 +220,7 @@ def budget_card(budget: BudgetStats) -> rx.Component:
                 rx.el.button(
                     "Edit",
                     on_click=lambda: BudgetState.open_edit_budget_modal(budget),
-                    class_name="text-xs font-medium text-gray-500 hover:text-indigo-600 transition-colors px-3 py-1.5 hover:bg-indigo-50 rounded-lg",
+                    class_name="text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:text-cyan-400 transition-colors px-3 py-1.5 hover:bg-indigo-50 dark:bg-cyan-900/30 rounded-lg",
                 ),
                 rx.el.button(
                     rx.icon(
@@ -235,7 +235,7 @@ def budget_card(budget: BudgetStats) -> rx.Component:
             ),
             class_name="p-6",
         ),
-        class_name="bg-white/70 backdrop-blur-xl rounded-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 group",
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1 group",
     )
 
 
@@ -266,11 +266,11 @@ def budgets_page() -> rx.Component:
                         rx.el.div(
                             rx.el.h2(
                                 "Budgets",
-                                class_name="text-3xl font-bold text-gray-900 tracking-tight",
+                                class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
                             ),
                             rx.el.p(
                                 "Manage your spending limits and track utilization.",
-                                class_name="text-gray-500 mt-2 text-lg",
+                                class_name="text-gray-500 dark:text-gray-400 mt-2 text-lg",
                             ),
                         ),
                         class_name="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10",

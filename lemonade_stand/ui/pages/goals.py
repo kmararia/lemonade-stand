@@ -55,11 +55,11 @@ def goal_card(goal: Goal) -> rx.Component:
                 rx.el.div(
                     rx.el.span(
                         goal["category"],
-                        class_name="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1 block",
+                        class_name="text-xs font-semibold text-indigo-600 dark:text-cyan-400 uppercase tracking-wider mb-1 block",
                     ),
                     rx.el.h3(
                         goal["name"],
-                        class_name="text-lg font-bold text-gray-900 line-clamp-1",
+                        class_name="text-lg font-bold text-gray-900 dark:text-gray-100 line-clamp-1",
                     ),
                 ),
                 goal_status_badge(goal["status"]),
@@ -68,7 +68,8 @@ def goal_card(goal: Goal) -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.el.span(
-                        "Progress", class_name="text-xs font-medium text-gray-500"
+                        "Progress",
+                        class_name="text-xs font-medium text-gray-500 dark:text-gray-400",
                     ),
                     rx.el.span(
                         f"{progress:.0f}%", class_name="text-xs font-bold text-gray-700"
@@ -97,7 +98,7 @@ def goal_card(goal: Goal) -> rx.Component:
                         ),
                         rx.el.p(
                             f"${goal['current_amount']:,.0f}",
-                            class_name="text-sm font-bold text-gray-900",
+                            class_name="text-sm font-bold text-gray-900 dark:text-gray-100",
                         ),
                     ),
                     rx.el.div(
@@ -107,7 +108,7 @@ def goal_card(goal: Goal) -> rx.Component:
                         ),
                         rx.el.p(
                             f"${goal['target_amount']:,.0f}",
-                            class_name="text-sm font-bold text-gray-900 text-right",
+                            class_name="text-sm font-bold text-gray-900 dark:text-gray-100 text-right",
                         ),
                     ),
                     class_name="flex justify-between items-end",
@@ -118,7 +119,8 @@ def goal_card(goal: Goal) -> rx.Component:
                 rx.el.div(
                     rx.icon("calendar", size=14, class_name="text-gray-400 mr-2"),
                     rx.el.span(
-                        f"Due {goal['deadline']}", class_name="text-xs text-gray-500"
+                        f"Due {goal['deadline']}",
+                        class_name="text-xs text-gray-500 dark:text-gray-400",
                     ),
                     class_name="flex items-center",
                 ),
@@ -138,7 +140,7 @@ def goal_card(goal: Goal) -> rx.Component:
                 class_name="flex justify-between items-center pt-4 border-t border-gray-100",
             ),
         ),
-        class_name="bg-white/70 backdrop-blur-xl p-6 rounded-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1",
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1",
     )
 
 
@@ -157,7 +159,7 @@ def goal_modal() -> rx.Component:
                     rx.cond(
                         GoalsState.current_goal["id"], "Edit Goal", "New Savings Goal"
                     ),
-                    class_name="text-lg font-bold text-gray-900 mb-4",
+                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
                 ),
                 rx.el.div(
                     rx.el.div(
@@ -327,11 +329,11 @@ def goals_page() -> rx.Component:
                         rx.el.div(
                             rx.el.h2(
                                 "Goals & Savings",
-                                class_name="text-3xl font-bold text-gray-900 tracking-tight",
+                                class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
                             ),
                             rx.el.p(
                                 "Track your progress towards financial targets.",
-                                class_name="text-gray-500 mt-2 text-lg",
+                                class_name="text-gray-500 dark:text-gray-400 mt-2 text-lg",
                             ),
                         ),
                         class_name="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10",
