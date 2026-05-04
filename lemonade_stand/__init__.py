@@ -1,5 +1,3 @@
-"""
-Main application entry point
-"""
+"""Main application entry point"""
 
 __all__ = []

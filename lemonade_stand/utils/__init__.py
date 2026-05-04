@@ -1,6 +1,4 @@
-"""
-Bring up module functions
-"""
+"""Bring up module functions"""
 
 from .database_io import read_from_database
 from .database_io import write_to_database

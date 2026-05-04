@@ -1,6 +1,4 @@
-"""
-Holds metadata configurations for different module steps
-"""
+"""Holds metadata configurations for different module steps"""
 
 import importlib.metadata
 from datetime import datetime

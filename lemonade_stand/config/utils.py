@@ -1,6 +1,4 @@
-"""
-Holds dataclasses for the application configuration set up
-"""
+"""Holds dataclasses for the application configuration set up"""
 
 import json
 import os
@@ -19,9 +17,7 @@ from .metadata import USER_CONFIG
 
 @dataclass
 class UserConfig:
-    """
-    A dataclass for the applicaton configs
-    """
+    """A dataclass for the applicaton configs"""
 
     app_version: str = field(init=False)
     always_refresh_data: bool = field(init=False)
@@ -30,10 +26,7 @@ class UserConfig:
     dev_mode: bool = field(default=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
-
+        """Post initialization variables set up"""
         dirs = AppDir()
 
         # Set up the configurations
@@ -50,24 +43,21 @@ class UserConfig:
         )
 
     def __str__(self):
-        """
-        String representation of the class
-        """
-
+        """String representation of the class"""
         print_str = [f"\t{x.name}: --> {getattr(self, x.name)}" for x in fields(self)]
 
         return "\n".join(print_str)
 
     def update_attribute(self, mappings: dict) -> None:
-        """
-        Class method to update the object attributes
+        """Class method to update the object attributes
 
         Arguments:
             mappings: A dictionary of new mappings e.g. {"my_attribute": "new_value"}
+
         Returns:
             None
-        """
 
+        """
         # Update the object variables
         for attr, new_val in mappings.items():
             object.__setattr__(self, attr, new_val)
@@ -94,9 +84,7 @@ class UserConfig:
 
 @dataclass
 class AppDir:
-    """
-    A dataclass for the applicaton directories
-    """
+    """A dataclass for the applicaton directories"""
 
     current_dir: Path = Path.cwd()
     root_dir: Path = field(init=False)
@@ -109,10 +97,7 @@ class AppDir:
     database_dir: Path = field(init=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
-
+        """Post initialization variables set up"""
         self.root_dir = self.get_app_root_dir()
         self.session_dir = self.get_os_home()
 
@@ -130,10 +115,7 @@ class AppDir:
         self.database_dir = self.root_dir / "shared" / "data"
 
     def get_app_root_dir(self) -> Path:
-        """
-        Returns the root working directory for the application
-        """
-
+        """Returns the root working directory for the application"""
         # Windows
         if os.name == "nt":
             apps_dir = Path(os.getenv("APPDATA", Path.home()))
@@ -149,28 +131,20 @@ class AppDir:
         return apps_dir / "lemonade-stand"
 
     def get_os_home(self) -> Path:
-        """
-        Returns the home directory of the user's operating system
-        """
-
+        """Returns the home directory of the user's operating system"""
         return Path("~/") if os.name == "posix" else Path("C:\\")
 
 
 @dataclass
 class ModelConfig:
-    """
-    A dataclass for the applicaton configs
-    """
+    """A dataclass for the applicaton configs"""
 
     category: str
     refresh_flag: bool = field(init=False)
     dot_data: SimpleNamespace = field(init=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
-
+        """Post initialization variables set up"""
         dirs = AppDir()
 
         if self.category == "model":
@@ -183,9 +157,6 @@ class ModelConfig:
         self.dot_data = SimpleNamespace(**metadata.MODEL_CONFIG)
 
     def __str__(self):
-        """
-        String representation of the class
-        """
-
+        """String representation of the class"""
         print_str = [f"{x.name} --> ({x.type})" for x in fields(self)]
         return "\n".join(print_str)

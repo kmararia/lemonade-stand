@@ -1,12 +1,8 @@
-"""
-Set up a logger with handlers
-"""
+"""Set up a logger with handlers"""
 
 
 class VersionMismatchError(Exception):
-    """
-    A custom exception for version mismatches
-    """
+    """A custom exception for version mismatches"""
 
     def __init__(self, message):
         """Class initialization method"""
@@ -15,9 +11,7 @@ class VersionMismatchError(Exception):
 
 
 class MissingDatabaseError(Exception):
-    """
-    A custom exception for missing databases
-    """
+    """A custom exception for missing databases"""
 
     def __init__(self, message):
         """Class initialization method"""
@@ -26,9 +20,7 @@ class MissingDatabaseError(Exception):
 
 
 class MissingDeltaError(Exception):
-    """
-    A custom exception for missing matching delta file
-    """
+    """A custom exception for missing matching delta file"""
 
     def __init__(self, message):
         """Class initialization method"""

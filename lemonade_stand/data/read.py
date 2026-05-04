@@ -1,6 +1,4 @@
-"""
-Reads pdf file texts
-"""
+"""Reads pdf file texts"""
 
 from pathlib import Path
 
@@ -13,10 +11,7 @@ LOGGER = set_up_logger(Path(__file__).stem)
 
 
 def read_pdfplumber(pdf_path: Path):
-    """
-    Extracts page text using pdfplumber
-    """
-
+    """Extracts page text using pdfplumber"""
     LOGGER.info("Reading file using pdfplumber")
 
     # Initialize pdf read object
@@ -27,10 +22,7 @@ def read_pdfplumber(pdf_path: Path):
 
 
 def read_pymullm(pdf_path: Path):
-    """
-    Extracts page text using pymullm
-    """
-
+    """Extracts page text using pymullm"""
     LOGGER.info("Reading file using pymupdf4llm")
 
     # Initialize pdf read object

@@ -1,6 +1,4 @@
-"""
-Set up a logger with handlers
-"""
+"""Set up a logger with handlers"""
 
 import logging
 from pathlib import Path
@@ -9,10 +7,7 @@ from pathlib import Path
 def set_up_logger(
     name: str, level: int = logging.INFO, log_file_path: Path | None = None
 ):
-    """
-    A logger set up function
-    """
-
+    """A logger set up function"""
     # Set up logger and formatter
     logger = logging.getLogger(name)
     formatter = logging.Formatter(

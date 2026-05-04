@@ -1,6 +1,4 @@
-"""
-Bring up module functions
-"""
+"""Bring up module functions"""
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -17,10 +15,7 @@ DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 
 def get_data(config: UserConfig) -> UserData | SimpleNamespace:
-    """
-    A function to read data from database if exists otherwise process from start
-    """
-
+    """A function to read data from database if exists otherwise process from start"""
     if (DATABASE_PATH).exists() and (not config.always_refresh_data):
         LOGGER.info(
             "Reading pre-processed tables from database: \n\t%s", str(DATABASE_PATH)

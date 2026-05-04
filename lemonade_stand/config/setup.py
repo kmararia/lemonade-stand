@@ -1,6 +1,4 @@
-"""
-Sets up the application configurations
-"""
+"""Sets up the application configurations"""
 
 import json
 from pathlib import Path
@@ -14,9 +12,7 @@ USER_CONFIG = metadata.USER_CONFIG
 
 
 def check_version(config_path: Path, config_dict: dict):
-    """
-    Validates that the embedding data exists and is upto date
-    """
+    """Validates that the embedding data exists and is upto date"""
 
     def _write_config(configs: dict):
         with config_path.open("w") as file:
@@ -47,10 +43,7 @@ def check_version(config_path: Path, config_dict: dict):
 
 
 def get_user_configs(user_config: Path):
-    """
-    Sets up application configurations. Uses saved configs or user input configs
-    """
-
+    """Sets up application configurations. Uses saved configs or user input configs"""
     # Search for the configuration file in the path
     if user_config.exists():
         with user_config.open("r") as file:

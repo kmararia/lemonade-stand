@@ -1,6 +1,4 @@
-"""
-Scrapping transactions from pdf file texts
-"""
+"""Scrapping transactions from pdf file texts"""
 
 import json
 import logging
@@ -34,13 +32,12 @@ DATA_SCHEMA = pl.Schema(
 
 
 def get_transactions(pdf_text: str) -> pl.DataFrame:
-    """
-    Extracts the transaction lines from a string of text
+    """Extracts the transaction lines from a string of text
 
     Returns:
         A list of transaction records
-    """
 
+    """
     LOGGER.info("Getting year of the statement")
 
     # Define variables
@@ -142,15 +139,14 @@ def get_transactions(pdf_text: str) -> pl.DataFrame:
 
 
 def generate_categories() -> pl.Expr:
-    """
-    Generates a polars expression from the user category mappings
+    """Generates a polars expression from the user category mappings
 
     Arguments:
         None
     Returns:
         A polars expression for the category field creation
-    """
 
+    """
     # Define the configuration file path
     config_path = APP_PATHS.category_config_path
 
@@ -177,15 +173,14 @@ def generate_categories() -> pl.Expr:
 
 
 def generate_types() -> pl.Expr:
-    """
-    Generates a polars expression from the user type mappings
+    """Generates a polars expression from the user type mappings
 
     Arguments:
         None
     Returns:
         A polars expression for the transaction-type field creation
-    """
 
+    """
     # Define the configuration file path
     config_path = APP_PATHS.types_config_path
 
@@ -212,15 +207,14 @@ def generate_types() -> pl.Expr:
 
 
 def flag_exclusions() -> pl.Expr:
-    """
-    Filters out transactions listed in the user configuration file
+    """Filters out transactions listed in the user configuration file
 
     Arguments:
         data_df: A polars dadtaframe
     Returns:
         A polars dataframe without the listed records
-    """
 
+    """
     # Define the configuration file path
     config_path = APP_PATHS.exclusions_config_path
 
@@ -252,9 +246,7 @@ def flag_exclusions() -> pl.Expr:
 def clean_transactions(
     data_df: pl.DataFrame, file_name: str | None = None
 ) -> pl.DataFrame:
-    """
-    Filters out transactions that are most likely invalid
-    """
+    """Filters out transactions that are most likely invalid"""
 
     def save_popular_block(data_df: pl.DataFrame) -> pl.DataFrame:
         """ """

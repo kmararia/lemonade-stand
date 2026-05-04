@@ -1,6 +1,4 @@
-"""
-A module to help read and write from a duckdb database
-"""
+"""A module to help read and write from a duckdb database"""
 
 from pathlib import Path
 from types import SimpleNamespace

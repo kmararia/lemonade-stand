@@ -1,6 +1,4 @@
-"""
-Holds dataclasses for the application statement transaction set up
-"""
+"""Holds dataclasses for the application statement transaction set up"""
 
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -26,9 +24,7 @@ DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 @dataclass
 class Statement:
-    """
-    A dataclass for a statement file
-    """
+    """A dataclass for a statement file"""
 
     file_path: Path
     read_func: Callable
@@ -36,10 +32,7 @@ class Statement:
     transactions: pl.DataFrame = field(init=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables
-        """
-
+        """Post initialization variables"""
         LOGGER.info("Setting up data structure for %s", Path(self.file_path).name)
 
         self.pages = self.read_func(Path(self.file_path))
@@ -55,18 +48,13 @@ class Statement:
 
 @dataclass
 class Transactions:
-    """
-    A dataclass for the available statements
-    """
+    """A dataclass for the available statements"""
 
     statements_list: list[Statement] = field(default_factory=list)
     data: pl.DataFrame = field(init=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables
-        """
-
+        """Post initialization variables"""
         LOGGER.info("Creating transactions data-class...\n")
 
         if len(self.statements_list) > 0:
@@ -79,9 +67,7 @@ class Transactions:
             self.data = pl.DataFrame(data=[], schema=DATA_SCHEMA)
 
     def __iter__(self):
-        """
-        Iterable for the transactions dataclass
-        """
+        """Iterable for the transactions dataclass"""
         for file in self.statements_list:
             yield file.transactions
 
@@ -92,10 +78,7 @@ class Transactions:
     def add(self, file_stmt: list[Statement]): ...
 
     def add(self, file_stmt):
-        """
-        Appends file statements to the classs statment list
-        """
-
+        """Appends file statements to the classs statment list"""
         if isinstance(file_stmt, Statement):
             self.statements_list.append(file_stmt)
         elif isinstance(file_stmt, list) and all(
@@ -113,9 +96,7 @@ class Transactions:
 
 @dataclass(frozen=True)
 class UserData:
-    """
-    Dataclass for the user statement data
-    """
+    """Dataclass for the user statement data"""
 
     config: UserConfig
     income: pl.DataFrame = field(init=False)
@@ -124,10 +105,7 @@ class UserData:
     unknown: pl.DataFrame = field(init=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
-
+        """Post initialization variables set up"""
         LOGGER.info(
             "Loading statements from path: \n\t'%s'\n", str(self.config.statement_dir)
         )

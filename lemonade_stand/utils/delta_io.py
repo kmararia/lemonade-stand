@@ -1,6 +1,4 @@
-"""
-A module to help read and write delta lakes as needed
-"""
+"""A module to help read and write delta lakes as needed"""
 
 from pathlib import Path
 
@@ -16,16 +14,15 @@ BASE_DATA_PATH = AppDir.database_dir
 
 
 def read_delta(table_name: str, search_dir: Path = BASE_DATA_PATH) -> pl.LazyFrame:
-    """
-    A function that finds the delta lake associated with the table and reads it in as a polars dataframe
+    """A function that finds the delta lake associated with the table and reads it in as a polars dataframe
 
     Arguments:
         table_name: The respective file/dataset name
         search_dir: A directory to search for the table in
     Returns:
         A polars lazyframe
-    """
 
+    """
     # Search for files matching the file name
     full_name_matches = list(search_dir.glob(f"{table_name}"))
     final_matches = (

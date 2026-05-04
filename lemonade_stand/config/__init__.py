@@ -1,6 +1,4 @@
-"""
-Bring up functions from the modules
-"""
+"""Bring up functions from the modules"""
 
 from .utils import AppDir
 from .utils import ModelConfig
