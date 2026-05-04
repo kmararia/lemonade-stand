@@ -1,319 +1,57 @@
-"""
-Main application module
-"""
+""""""
 
-import argparse
-import time
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from types import SimpleNamespace
+import reflex as rx
 
-import polars as pl
-from faicons import icon_svg
-from shiny import App
-from shiny import reactive
-from shiny import run_app
-from shiny import ui
-
-import lemonade_stand
-from lemonade_stand.config import UserConfig
-from lemonade_stand.data import UserData
-from lemonade_stand.data import get_data
-from lemonade_stand.shiny import auth_server
-from lemonade_stand.shiny import exclude_server
-from lemonade_stand.shiny import exclude_ui
-from lemonade_stand.shiny import expense_server
-from lemonade_stand.shiny import expense_ui
-from lemonade_stand.shiny import home_server
-from lemonade_stand.shiny import home_ui
-from lemonade_stand.shiny import income_server
-from lemonade_stand.shiny import income_ui
-from lemonade_stand.shiny import mappings_category_server
-from lemonade_stand.shiny import mappings_category_ui
-from lemonade_stand.shiny import mappings_type_server
-from lemonade_stand.shiny import mappings_type_ui
-from lemonade_stand.shiny import savings_server
-from lemonade_stand.shiny import savings_ui
-from lemonade_stand.shiny import settings_server
-from lemonade_stand.shiny import settings_ui
-from lemonade_stand.shiny import user_guide_server
-from lemonade_stand.shiny import user_guide_ui
-from lemonade_stand.utils import set_up_logger
-
-LOGGER = set_up_logger(Path(__file__).stem)
-ASSETS_DIR = Path(lemonade_stand.__file__).parent / "shiny" / "assets"
+from lemonade_stand.ui.components.header import header
+from lemonade_stand.ui.components.sidebar import sidebar
+from lemonade_stand.ui.pages.budgets import budgets_page
+from lemonade_stand.ui.pages.dashboard import dashboard_content
+from lemonade_stand.ui.pages.goals import goals_page
+from lemonade_stand.ui.pages.reports import reports_page
+from lemonade_stand.ui.pages.settings import settings_page
 
 
-# Define the application UI and Server using Shiny
-app_ui = ui.page_navbar(
-    # Inject the custom configuration files
-    ui.head_content(
-        ui.tags.link(rel="stylesheet", type="text/css", href="css/global.css"),
-    ),
-    ui.nav_spacer(),
-    # Main content page
-    home_ui("Home"),
-    income_ui("Income"),
-    savings_ui("Savings"),
-    expense_ui("Expense"),
-    # Allow dark mode
-    ui.nav_spacer(),
-    ui.nav_control(
-        ui.span(
-            ui.input_task_button(
-                id="refresh_data",
-                label="",
-                label_busy="",
-                icon=icon_svg("rotate-right"),
-                icon_busy=icon_svg("spinner"),
-                type="default",
-                class_="task-button",
+def index() -> rx.Component:
+    """"""
+
+    def background_pattern() -> rx.Component:
+        """ """
+        return rx.el.div(
+            rx.el.div(
+                class_name="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-100/40 via-purple-100/30 to-transparent -z-10"
             ),
-            ui.input_dark_mode(id="view_mode"),
-            style="display: flex; justify-content: flex-end; gap: 0.5rem;",
+            rx.el.div(
+                class_name="absolute top-[-50px] right-[-50px] w-96 h-96 bg-purple-200/30 rounded-full blur-3xl -z-10 mix-blend-multiply filter opacity-70 animate-blob"
+            ),
+            rx.el.div(
+                class_name="absolute top-[-50px] left-[-50px] w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl -z-10 mix-blend-multiply filter opacity-70 animate-blob animation-delay-2000"
+            ),
+            class_name="fixed inset-0 overflow-hidden pointer-events-none",
         )
-    ),
-    # Add Side bar
-    sidebar=ui.sidebar(
-        user_guide_ui("user_guide"),
-        settings_ui("user_settings"),
-        exclude_ui("mappings_exclude"),
-        ui.accordion(
-            ui.accordion_panel(
-                ui.span("Mappings", class_="sidebar-link"),
-                mappings_type_ui("mappings_type"),
-                mappings_category_ui("mappings_category"),
-                value="mappings_panel",
-                icon=icon_svg("code"),
+
+    return rx.el.div(
+        background_pattern(),
+        sidebar(),
+        rx.el.div(
+            header(),
+            rx.el.main(
+                dashboard_content(),
+                class_name="flex-1 p-6 md:p-8 overflow-y-auto scroll-smooth",
             ),
-            id="mapping_accordion",
-            open=False,
+            class_name="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50/30 backdrop-blur-sm",
         ),
-        ui.input_switch(
-            id="show_excluded",
-            label=ui.p("Show excluded", class_="sidebar-link"),
-            value=False,
-        ),
-        ui.popover(
-            ui.input_action_button(
-                id="power_options",
-                label=None,
-                icon=icon_svg("power-off", height="1.5rem", width="1.5rem"),
-                style="height: 2rem; width: 1.5rem;",
-                class_="task-button",
-            ),
-            ui.input_action_link(
-                id="user_sign_out",
-                label=ui.h6("Sign out", style="margin: 0.2rem"),
-                icon=icon_svg("arrow-right-from-bracket"),
-                class_="sidebar-link space-items",
-            ),
-            ui.input_action_link(
-                id="user_shut_off",
-                label=ui.h6("Shut off", style="margin: 0.1rem"),
-                icon=icon_svg("toggle-off"),
-                class_="sidebar-link",
-            ),
-            title=None,
-            id="popover",
-            placement="bottom",
-            class_="items-centered space-items",
-        ),
-        title=ui.h5("Options"),
-    ),
-    title=ui.div(
-        ui.img(src="images/app_logo.svg", class_="logo-image"),
-        ui.span("Lemonade Stand", class_="brand-name"),
-        class_="items-bottom-left",
-    ),
-    lang="en",
-    id="pages",
+        class_name="flex h-screen bg-gray-50 font-['Inter'] selection:bg-indigo-100 selection:text-indigo-900",
+    )
+
+
+app = rx.App(
+    theme=rx.theme(appearance="light"),
+    stylesheets=[
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    ],
 )
-
-
-def server(input, output, session):  # noqa: ARG001
-    """
-    The main application server
-    """
-
-    # Define reactive values to track execution
-    data_refresh_tracker: reactive.Value[int] = reactive.Value(0)
-    build_params: reactive.Value[UserConfig] = reactive.Value()
-    data_path: reactive.Value[Path] = reactive.Value()
-
-    # Create argparse object instance
-    parser = argparse.ArgumentParser(description="Lemonade Stand application")
-    parser.add_argument(
-        "--as", type=str, dest="as_", default="user", help="The run option (optional)."
-    )
-
-    # Save parsed arguments
-    args = parser.parse_args()
-
-    LOGGER.info("Initializing application in '%s' mode", str(args.as_))
-
-    # Check whether to initialize login page
-    run_config = (
-        UserConfig(dev_mode=True) if args.as_ == "dev" else auth_server("user_login")
-    )
-
-    # Build app documentation and settings page
-    user_guide_server("user_guide")
-    mappings_type_server("mappings_type")
-    mappings_category_server("mappings_category")
-    exclude_server("mappings_exclude")
-    settings_config = settings_server("user_settings")
-
-    # Update the reactive values
-    build_params.set(run_config)
-    data_path.set(run_config.statement_dir)
-
-    def app_power_out(task: str):
-        """
-        Log out and clean up function
-
-        Args:
-            task: The power out option to run
-        Returns:
-            None
-        """
-
-        if task == "log-out":
-            LOGGER.info("Logging out...")
-
-            login_config = auth_server("user_logout")
-            build_params.set(login_config)
-            data_path.set(login_config.statement_dir)
-
-        elif task == "shut-off":
-            pass  # Placeholder for the application shut off option
-
-        else:
-            pass
-
-    @reactive.Effect
-    @reactive.event(input.user_sign_out)
-    def _():
-        LOGGER.info("Logging out on user request...")
-        app_power_out("log-out")
-
-    @reactive.Effect
-    @reactive.event(input.user_shut_off)
-    def _():
-        LOGGER.info("Shutting off application on user request...")
-        app_power_out("shut-off")
-
-    # Update build configurations on settings close
-    @reactive.Effect
-    @reactive.event(settings_config.trigger)
-    def _():
-        # Log out if the user purged the application
-        if settings_config.log_out:
-            LOGGER.info("Initializing login after purge...")
-            app_power_out("log-out")
-
-        else:
-            new_settings = settings_config.user_config
-            build_params.set(new_settings)
-
-            if new_settings.statement_dir != data_path():
-                data_path.set(new_settings.statement_dir)
-
-        LOGGER.info("Using configuration: \n%s", str(build_params()))
-
-    # Reactively set up the user data
-    @reactive.Calc
-    @reactive.event(input.refresh_data, data_path)
-    def dataset() -> UserData | SimpleNamespace:
-        current_config = build_params()
-
-        with ThreadPoolExecutor() as executor:
-            # Determine appropriate function to use
-            if data_refresh_tracker.get() < input.refresh_data():
-                LOGGER.info("Refreshing the data on user request...")
-                prep_data_func = UserData
-            else:
-                LOGGER.info("Pulling the data for shiny app...")
-                prep_data_func = get_data
-
-            # Submit the task
-            future = executor.submit(prep_data_func, config=current_config)
-
-            with ui.Progress(min=0, max=1) as p:
-                counter = 0
-
-                while not future.done():
-                    counter += 1
-                    p.set(message=f"Processing your data... ({counter}s)")
-                    time.sleep(1)
-
-            # Retrieve the resulting user-data and save it in the reactive value
-            return future.result()
-
-    # Build tab pages
-    @reactive.effect
-    def _():
-        user_data = dataset()
-
-        # Stack all the datasets for the home-page
-        stack_df_list = [
-            user_data.income,
-            user_data.savings,
-            user_data.expenses,
-            user_data.unknown,
-        ]
-        stacked_df = pl.union(
-            [
-                x
-                if input.show_excluded()
-                else x.filter(
-                    ~pl.coalesce("exclude_flag", pl.lit(False))
-                )  # Adding redundancy check incase exclude flag was not populated
-                for x in stack_df_list
-            ],
-            how="diagonal",
-        ).select(
-            pl.exclude("extract_date")
-            if input.show_excluded()
-            else pl.exclude("extract_date", "exclude_flag")
-        )
-
-        # Call the page servers
-        if stacked_df.shape[0] > 0:
-            home_server("Home", input.view_mode, stacked_df)
-            income_server("Income", input.view_mode, user_data.income)
-            savings_server("Savings", input.view_mode, user_data.savings)
-            expense_server("Expense", input.view_mode, user_data.expenses)
-
-        else:
-            # Read in markdown contents
-            no_data_md = ASSETS_DIR / "markdown" / "no_data.md"
-
-            with no_data_md.open("r", encoding="utf-8") as file:
-                no_data_text = file.read()
-
-            # Display modal with message
-            ui.modal_show(
-                ui.modal(
-                    ui.markdown(no_data_text),
-                    size="l",
-                    easy_close=True,
-                    footer=ui.modal_button("Close"),
-                    style="padding-left: 5rem;",
-                )
-            )
-
-
-def initialize_app() -> None:
-    """
-    Temporary function to initialize the shiny application
-    """
-
-    run_app(
-        app="lemonade_stand.app:app",
-        reload=True,
-    )
-
-
-# Connect everything
-app = App(app_ui, server, static_assets=ASSETS_DIR)
+app.add_page(index, route="/")
+app.add_page(budgets_page, route="/budgets")
+app.add_page(goals_page, route="/goals")
+app.add_page(reports_page, route="/reports")
+app.add_page(settings_page, route="/settings")

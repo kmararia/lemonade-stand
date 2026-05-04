@@ -1,0 +1,96 @@
+""""""
+
+import reflex as rx
+
+from lemonade_stand.ui.states.budget_state import BudgetState
+
+
+def legend_item(name: str, color: str) -> rx.Component:
+    """"""
+
+    return rx.el.div(
+        rx.el.div(
+            class_name="w-3 h-3 rounded-full mr-2", style={"backgroundColor": color}
+        ),
+        rx.el.span(name, class_name="text-sm text-gray-600"),
+        class_name="flex items-center mr-6",
+    )
+
+
+def chart_legend() -> rx.Component:
+    """"""
+
+    return rx.el.div(
+        legend_item("Allocated Budget", "#6366f1"),
+        legend_item("Actual Spent", "#f97316"),
+        class_name="flex items-center mb-4",
+    )
+
+
+def budget_chart() -> rx.Component:
+    """"""
+
+    return rx.el.div(
+        rx.el.div(
+            rx.el.h3(
+                "Budget vs. Actual Spend", class_name="text-lg font-bold text-gray-900"
+            ),
+            rx.el.button(
+                "Export",
+                rx.icon("download", size=14, class_name="ml-2"),
+                class_name="text-sm font-medium text-gray-600 hover:text-indigo-600 flex items-center transition-colors px-3 py-1.5 hover:bg-indigo-50 rounded-lg",
+            ),
+            class_name="flex items-center justify-between mb-6",
+        ),
+        chart_legend(),
+        rx.el.div(
+            rx.recharts.bar_chart(
+                rx.recharts.cartesian_grid(
+                    stroke_dasharray="3 3", vertical=False, class_name="stroke-gray-100"
+                ),
+                rx.recharts.x_axis(
+                    data_key="name",
+                    axis_line=False,
+                    tick_line=False,
+                    tick={"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},
+                    dy=10,
+                ),
+                rx.recharts.y_axis(
+                    axis_line=False,
+                    tick_line=False,
+                    tick={"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},
+                ),
+                rx.recharts.tooltip(
+                    cursor={"fill": "#f8fafc"},
+                    content_style={
+                        "backgroundColor": "rgba(255, 255, 255, 0.9)",
+                        "borderRadius": "12px",
+                        "border": "1px solid rgba(255, 255, 255, 0.5)",
+                        "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                        "backdropFilter": "blur(10px)",
+                        "padding": "12px",
+                    },
+                ),
+                rx.recharts.bar(
+                    data_key="allocated",
+                    name="Allocated Budget",
+                    fill="#6366f1",
+                    radius=[6, 6, 0, 0],
+                    bar_size=24,
+                ),
+                rx.recharts.bar(
+                    data_key="spent",
+                    name="Actual Spent",
+                    fill="#f97316",
+                    radius=[6, 6, 0, 0],
+                    bar_size=24,
+                ),
+                data=BudgetState.budget_vs_actual_data,
+                height=320,
+                width="100%",
+                margin={"top": 10, "right": 0, "left": -20, "bottom": 0},
+            ),
+            class_name="w-full h-[320px]",
+        ),
+        class_name="bg-white/70 backdrop-blur-xl p-8 rounded-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
+    )
