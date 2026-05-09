@@ -2,14 +2,9 @@
 
 import json
 import logging
-import re
-from datetime import datetime
-from decimal import Decimal as PyDecimal
 from pathlib import Path
 
-import numpy as np
 import polars as pl
-from dateutil.parser import parse
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
@@ -17,125 +12,6 @@ from lemonade_stand.utils import set_up_logger
 LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
 
 APP_PATHS = AppDir()
-DATA_SCHEMA = pl.Schema(
-    {
-        "transaction_date": pl.Date(),
-        "transaction_desc": pl.String(),
-        "transaction_amount": pl.Decimal(None, 2),
-        "transaction_category": pl.String(),
-        "transaction_type": pl.String(),
-        "source_file": pl.String(),
-        "extract_date": pl.Datetime(),
-        "exclude_flag": pl.Boolean(),
-    }
-)
-
-
-def get_transactions(pdf_text: str) -> pl.DataFrame:
-    """Extracts the transaction lines from a string of text
-
-    Returns:
-        A list of transaction records
-
-    """
-    LOGGER.info("Getting year of the statement")
-
-    # Define variables
-    transaction_matches = []
-    file_year = None
-    month_patterns = {
-        "Jan/January": (
-            r"(?:"
-            r"Jan(?:uary)?"
-            r"|Feb(?:ruary)?"
-            r"|Mar(?:ch)?"
-            r"|Apr(?:il)?"
-            r"|May"
-            r"|Jun(?:e)?"
-            r"|Jul(?:y)?"
-            r"|Aug(?:ust)?"
-            r"|Sept(?:ember)?"
-            r"|Oct(?:ober)?"
-            r"|Nov(?:ember)?"
-            r"|Dec(?:ember)?"
-            r")"
-        ),
-        "01": r"\d{2}",
-    }
-
-    LOGGER.info("Scraping transaction lines")
-
-    # Iterate through all the potentail patterns
-    for date_format, pattern in month_patterns.items():
-        space_patt = r"[^\S\r\n]"
-
-        # Build the statement year pattern
-        if date_format == "Jan/January":
-            year_pattern = rf"((?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}}),?{space_patt}*)(\b\d{{4}}\b)"  # Matches: January 31, 2024
-        else:
-            year_pattern = rf"({pattern}/\d{{2}}/?)(\d{{2}}|\d{{4}})"  # Matches: 04/01/24 or 04/01/2024
-
-        LOGGER.info("Getting year of the statement")
-
-        # Find the statement file year
-        year_search = re.search(re.compile(year_pattern, re.IGNORECASE), pdf_text)
-        file_year = year_search.group(2) if year_search else file_year
-
-        # Build the full date pattern conditionally
-        if date_format == "Jan/January":
-            date_pattern = rf"(?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}})"  # Matches: 31 January or January 31
-        else:
-            date_pattern = (
-                rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"  # Matches: 01/31 or 01/31/2024
-            )
-
-        # Find matches iteratively
-        LOGGER.debug(
-            "Checking date-format %s using pattern: \n\t%s", date_format, date_pattern
-        )
-
-        transactions = re.finditer(
-            re.compile(
-                rf"({date_pattern})\s+(?:{date_pattern}\s+)?(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
-                re.IGNORECASE | re.VERBOSE,
-            ),
-            pdf_text,
-        )
-
-        transaction_matches.append([line.groups() for line in transactions])
-
-    # Populate the file year with today's date if none
-    file_year = (
-        datetime.strptime(file_year, "%y" if len(file_year) == 2 else "%Y")
-        if file_year
-        else datetime.now()
-    )
-
-    # Set up the data rows
-    data = [
-        (
-            parse(row[0], default=file_year).date(),
-            row[1],
-            PyDecimal(row[2].replace(",", "")),
-            None,  # Placeholder for transaction_category
-            None,  # Placeholder for transaction_type
-            None,  # Placeholder for source_file
-            datetime.now(),  # Placeholder for extract_date
-            False,  # Placeholder for exclude_flag
-        )
-        for row in transaction_matches[
-            np.argmax(
-                [len(x) for x in transaction_matches]
-            )  # Get list with most transactions captured. Doing this to make sure the optimal date-pattern was captured
-        ]
-    ]
-
-    # Return a polars dataframe
-    return pl.DataFrame(
-        data=data,
-        schema=DATA_SCHEMA,
-        orient="row",
-    )
 
 
 def generate_categories() -> pl.Expr:

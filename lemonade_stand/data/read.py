@@ -1,33 +1,194 @@
 """Reads pdf file texts"""
 
+import re
+from collections.abc import Callable
+from dataclasses import dataclass
+from dataclasses import field
+from datetime import datetime
+from decimal import Decimal as PyDecimal
 from pathlib import Path
 
+import numpy as np
 import pdfplumber
+import polars as pl
 import pymupdf4llm
+from dateutil.parser import parse
 
+from lemonade_stand.data.setup import clean_transactions
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
 
 
-def read_pdfplumber(pdf_path: Path):
-    """Extracts page text using pdfplumber"""
-    LOGGER.info("Reading file using pdfplumber")
+@dataclass
+class Statement:
+    """A dataclass for a statement file"""
 
-    # Initialize pdf read object
-    pdf = pdfplumber.open(pdf_path)
+    file_path: str | Path
+    engine: str
+    pages: list = field(init=False)
+    transactions: pl.DataFrame = field(init=False)
+    schema: pl.datatypes.Schema = pl.Schema(
+        {
+            "transaction_date": pl.Date(),
+            "transaction_desc": pl.String(),
+            "transaction_amount": pl.Decimal(None, 2),
+            "transaction_category": pl.String(),
+            "transaction_type": pl.String(),
+            "source_file": pl.String(),
+            "extract_date": pl.Datetime(),
+            "exclude_flag": pl.Boolean(),
+        }
+    )
 
-    # Return list of page strings
-    return [page.extract_text() for page in pdf.pages]
+    def __post_init__(self):
+        """Post initialization variables"""
 
+        self.file_path = Path(self.file_path)
 
-def read_pymullm(pdf_path: Path):
-    """Extracts page text using pymullm"""
-    LOGGER.info("Reading file using pymupdf4llm")
+        LOGGER.info("Setting up data structure for file %s", self.file_path.name)
 
-    # Initialize pdf read object
-    read_obj = pymupdf4llm.LlamaMarkdownReader()
-    pdf_data = read_obj.load_data(pdf_path)
+        self.pages = self.read_file(read_path=self.file_path)
 
-    # Return list of page strings
-    return [page.to_dict()["text"] for page in pdf_data]
+        full_transactions = self.get_transactions(
+            pdf_text="\n".join(self.pages),
+        )
+        self.transactions = clean_transactions(
+            data_df=full_transactions,
+            file_name=self.file_path.name,
+        )
+
+    def read_file(self, read_path: Path) -> list[str]:
+        """Extracts page text using specified engine"""
+
+        engine_dict: dict[str, Callable] = {
+            "pdfplumber": self._read_pdfplumber,
+            "pymullm": self._read_pymullm,
+        }
+
+        def _read_pdfplumber(pdf_path: Path):
+            """Extracts page text using pdfplumber"""
+
+            LOGGER.info("Reading file using pdfplumber")
+
+            pdf = pdfplumber.open(pdf_path)
+
+            return [page.extract_text() for page in pdf.pages]
+
+        def _read_pymullm(pdf_path: Path):
+            """Extracts page text using pymullm"""
+
+            LOGGER.info("Reading file using pymupdf4llm")
+
+            read_obj = pymupdf4llm.LlamaMarkdownReader()
+            pdf_data = read_obj.load_data(pdf_path)
+
+            return [page.to_dict()["text"] for page in pdf_data]
+
+        return engine_dict[self.engine](read_path)
+
+    def get_transactions(self, pdf_text: str) -> pl.DataFrame:
+        """Extracts the transaction lines from a string of text
+
+        Returns:
+            A list of transaction records
+
+        """
+        LOGGER.info("Getting year of the statement")
+
+        # Define variables
+        transaction_matches = []
+        file_year = None
+        month_patterns = {
+            "Jan/January": (
+                r"(?:"
+                r"Jan(?:uary)?"
+                r"|Feb(?:ruary)?"
+                r"|Mar(?:ch)?"
+                r"|Apr(?:il)?"
+                r"|May"
+                r"|Jun(?:e)?"
+                r"|Jul(?:y)?"
+                r"|Aug(?:ust)?"
+                r"|Sept(?:ember)?"
+                r"|Oct(?:ober)?"
+                r"|Nov(?:ember)?"
+                r"|Dec(?:ember)?"
+                r")"
+            ),
+            "01": r"\d{2}",
+        }
+
+        LOGGER.info("Scraping transaction lines")
+
+        # Iterate through all the potentail patterns
+        for date_format, pattern in month_patterns.items():
+            space_patt = r"[^\S\r\n]"
+
+            # Build the statement year pattern
+            if date_format == "Jan/January":
+                year_pattern = rf"((?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}}),?{space_patt}*)(\b\d{{4}}\b)"  # Matches: January 31, 2024
+            else:
+                year_pattern = rf"({pattern}/\d{{2}}/?)(\d{{2}}|\d{{4}})"  # Matches: 04/01/24 or 04/01/2024
+
+            LOGGER.info("Getting year of the statement")
+
+            # Find the statement file year
+            year_search = re.search(re.compile(year_pattern, re.IGNORECASE), pdf_text)
+            file_year = year_search.group(2) if year_search else file_year
+
+            # Build the full date pattern conditionally
+            if date_format == "Jan/January":
+                date_pattern = rf"(?:\d{{2}}{space_patt}+{pattern})|(?:{pattern}{space_patt}+\d{{2}})"  # Matches: 31 January or January 31
+            else:
+                date_pattern = (
+                    rf"{pattern}/\d{{2}}(?:/\d{{2,4}})?"  # Matches: 01/31 or 01/31/2024
+                )
+
+            # Find matches iteratively
+            LOGGER.debug(
+                "Checking date-format %s using pattern: \n\t%s",
+                date_format,
+                date_pattern,
+            )
+
+            transactions = re.finditer(
+                re.compile(
+                    rf"({date_pattern})\s+(?:{date_pattern}\s+)?(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
+                    re.IGNORECASE | re.VERBOSE,
+                ),
+                pdf_text,
+            )
+
+            transaction_matches.append([line.groups() for line in transactions])
+
+        # Populate the file year with today's date if none
+        file_year = (
+            datetime.strptime(file_year, "%y" if len(file_year) == 2 else "%Y")
+            if file_year
+            else datetime.now()
+        )
+
+        # Build dataframe from transaction line matches
+        data = [
+            (
+                parse(row[0], default=file_year).date(),
+                row[1],
+                PyDecimal(row[2].replace(",", "")),
+                None,
+                None,
+                None,
+                datetime.now(),
+                False,
+            )
+            for row in transaction_matches[
+                # Get list with most transactions captured. Doing this to make sure the optimal date-pattern was captured
+                np.argmax([len(x) for x in transaction_matches])
+            ]
+        ]
+
+        return pl.DataFrame(
+            data=data,
+            schema=self.schema,
+            orient="row",
+        )

@@ -1,6 +1,5 @@
 """Holds dataclasses for the application statement transaction set up"""
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
@@ -9,41 +8,12 @@ from typing import overload
 import polars as pl
 
 from lemonade_stand.config import AppDir
-from lemonade_stand.config import UserConfig
-from lemonade_stand.data.read import read_pdfplumber  # noqa: F401
-from lemonade_stand.data.read import read_pymullm  # noqa: F401
-from lemonade_stand.data.setup import DATA_SCHEMA
-from lemonade_stand.data.setup import clean_transactions
-from lemonade_stand.data.setup import get_transactions
+from lemonade_stand.data.read import Statement
 from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils import write_to_database
 
 LOGGER = set_up_logger(Path(__file__).stem)
 DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
-
-
-@dataclass
-class Statement:
-    """A dataclass for a statement file"""
-
-    file_path: Path
-    read_func: Callable
-    pages: list = field(init=False)
-    transactions: pl.DataFrame = field(init=False)
-
-    def __post_init__(self):
-        """Post initialization variables"""
-        LOGGER.info("Setting up data structure for %s", Path(self.file_path).name)
-
-        self.pages = self.read_func(Path(self.file_path))
-
-        full_transactions = get_transactions(
-            pdf_text="\n".join(self.pages),
-        )
-        self.transactions = clean_transactions(
-            data_df=full_transactions,
-            file_name=self.file_path.name,
-        )
 
 
 @dataclass
@@ -64,7 +34,7 @@ class Transactions:
         else:
             LOGGER.error("No statements pdfs were found! Setting up empty dataset...")
 
-            self.data = pl.DataFrame(data=[], schema=DATA_SCHEMA)
+            self.data = pl.DataFrame(data=[], schema=Statement.schema)
 
     def __iter__(self):
         """Iterable for the transactions dataclass"""
@@ -98,7 +68,7 @@ class Transactions:
 class UserData:
     """Dataclass for the user statement data"""
 
-    config: UserConfig
+    statement_dir: str | Path
     income: pl.DataFrame = field(init=False)
     savings: pl.DataFrame = field(init=False)
     expenses: pl.DataFrame = field(init=False)
@@ -106,17 +76,15 @@ class UserData:
 
     def __post_init__(self):
         """Post initialization variables set up"""
-        LOGGER.info(
-            "Loading statements from path: \n\t'%s'\n", str(self.config.statement_dir)
-        )
+        LOGGER.info("Loading statements from path: \n\t'%s'\n", str(self.statement_dir))
 
         # Load all user transactions
-        statements = [
-            Statement(file_path=file, read_func=read_pymullm)
-            for file in (self.config.statement_dir).glob("*.pdf")
-        ]
-
-        transactions = Transactions(statements_list=statements)
+        transactions = Transactions(
+            statements_list=[
+                Statement(file_path=file, engine="pymullm")
+                for file in Path(self.statement_dir).glob("*.pdf")
+            ]
+        )
 
         # Rename fields
         field_renames = {

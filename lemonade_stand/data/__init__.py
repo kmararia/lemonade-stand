@@ -29,8 +29,8 @@ def get_data(config: UserConfig) -> UserData | SimpleNamespace:
         )
 
     else:
-        return UserData(config=config)
+        return UserData(statement_dir=config.statement_dir)
 
 
 # Expose only the user data
-__all__ = ["get_data", "UserData"]
+__all__ = ["get_data"]
