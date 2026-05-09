@@ -14,7 +14,7 @@ import polars as pl
 import pymupdf4llm
 from dateutil.parser import parse
 
-from lemonade_stand.data.setup import clean_transactions
+from lemonade_stand.data.support import clean_transactions
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
