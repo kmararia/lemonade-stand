@@ -1,72 +1,83 @@
 """A module to help read and write delta lakes as needed"""
 
 from pathlib import Path
+from typing import Any
 
 import polars as pl
-
-from lemonade_stand.config.utils import AppDir
 
 from .exceptions import MissingDeltaError
 from .logging_utils import set_up_logger
 
 LOGGER = set_up_logger(__name__)
-BASE_DATA_PATH = AppDir.database_dir
 
 
-def read_delta(table_name: str, search_dir: Path = BASE_DATA_PATH) -> pl.LazyFrame:
+def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
     """A function that finds the delta lake associated with the table and reads it in as a polars dataframe
 
     Arguments:
-        table_name: The respective file/dataset name
+        table: The respective file/dataset name
         search_dir: A directory to search for the table in
     Returns:
         A polars lazyframe
 
     """
-    # Search for files matching the file name
-    full_name_matches = list(search_dir.glob(f"{table_name}"))
-    final_matches = (
-        full_name_matches
-        if len(full_name_matches) > 0
-        else list(search_dir.glob(f"{table_name}*"))
-    )
 
-    if len(final_matches) == 0:
+    parquet_path = search_dir / table
+    if not parquet_path.exists():
         raise MissingDeltaError(
-            f"Table or file '{table_name}' is missing in the following directory: \n\t{search_dir}"
+            f"Table or file '{table}' is missing in the following directory: \n\t{search_dir}"
         )
-    else:
-        file_match = final_matches[0]
 
     # Confirm parquet file(s) are available
-    if (file_match.is_dir() and (len(list(file_match.glob("*.parquet"))) >= 1)) or (
-        file_match.is_file() and (file_match.suffix == ".parquet")
+    if (parquet_path.is_dir() and (len(list(parquet_path.glob("*.parquet"))) >= 1)) or (
+        parquet_path.is_file() and (parquet_path.suffix == ".parquet")
     ):
         pass
     else:
         raise ValueError(
-            "Found file/dir does not contain any readable parquet files!! \n\t{file_match}"
+            f"Found file/dir does not contain any readable parquet files!! \n\t{parquet_path}"
         )
 
-    # Read and return lazyframe
-    LOGGER.info("Reading deltalake: %s", file_match)
+    LOGGER.info("Reading deltalake: %s", parquet_path)
 
-    return pl.scan_delta(source=file_match)
+    return pl.scan_delta(source=parquet_path)
 
 
-# def write_delta(
-#     data_df: pl.DataFrame, table_name: str, write_dir: Path = BASE_DATA_PATH
-# ) -> Path:
-#     """
-#     A function that to write out delta lakes to a specified directory
+def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> Path:
+    """
+    A function that to write out delta lakes to a specified directory
 
-#     Arguments:
-#         table_name: The respective file/dataset name
-#         write_dir: A directory path to write to
-#     Returns:
-#         A path object to the written delta lake
-#     """
+    Arguments:
+        write_info_dict: A dictionary where keys are table names and values are dictionaries containing a polars DataFrame and optional partitioning information
+        write_dir: A directory path to write to
+    Returns:
+        A path object to the written delta lake
+    """
 
-#     data_df: pl.DataFrame = data_df
+    # Create directory if it does not exist
+    write_dir.mkdir(parents=True, exist_ok=True)
 
-#     data_df.write_delta()
+    for table, data_info in write_info_dict.items():
+        parquet_path = write_dir / table
+        data_df = data_info["dataframe"]
+        partition_by = data_info.get("partition_by", ["source_file"])
+
+        if parquet_path.exists():
+            LOGGER.warning(
+                "Table '%s' already exists in the following directory: \n\t%s \n\tOverwriting it!!",
+                table,
+                write_dir,
+            )
+
+        if not set(partition_by).issubset(set(data_df.columns)):
+            raise ValueError(
+                f"Partition columns {partition_by} are not all present in the dataframe columns {data_df.columns}"
+            )
+
+        data_df.write_delta(
+            target=parquet_path,
+            mode=data_info.get("mode", "overwrite"),
+            delta_write_options={"partition_by": partition_by},
+        )
+
+    return write_dir

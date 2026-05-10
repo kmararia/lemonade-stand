@@ -94,7 +94,7 @@ class AppDir:
     category_config_path: Path = field(init=False)
     types_config_path: Path = field(init=False)
     exclusions_config_path: Path = field(init=False)
-    database_dir: Path = field(init=False)
+    data_dir: Path = field(init=False)
 
     def __post_init__(self):
         """Post initialization variables set up"""
@@ -112,7 +112,7 @@ class AppDir:
         self.exclusions_config_path = (
             self.root_dir / "shared" / "config" / "exclusions_config.json"
         )
-        self.database_dir = self.root_dir / "shared" / "data"
+        self.data_dir = self.root_dir / "shared" / "data"
 
     def get_app_root_dir(self) -> Path:
         """Returns the root working directory for the application"""
