@@ -4,8 +4,8 @@ import json
 from pathlib import Path
 
 from lemonade_stand.config import metadata
-from lemonade_stand.utils import VersionMismatchError
 from lemonade_stand.utils import set_up_logger
+from lemonade_stand.utils.exceptions import VersionMismatchError
 
 LOGGER = set_up_logger(Path(__file__).stem)
 USER_CONFIG = metadata.USER_CONFIG
