@@ -29,8 +29,9 @@ def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
         )
 
     # Confirm parquet file(s) are available
-    if (parquet_path.is_dir() and (len(list(parquet_path.glob("*.parquet"))) >= 1)) or (
-        parquet_path.is_file() and (parquet_path.suffix == ".parquet")
+    if parquet_path.is_dir() and (
+        len(list(parquet_path.glob("*.parquet"))) >= 1
+        or len(list(parquet_path.glob("_delta_log"))) > 0
     ):
         pass
     else:
@@ -64,7 +65,7 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
 
         if parquet_path.exists():
             LOGGER.warning(
-                "Table '%s' already exists in the following directory: \n\t%s \n\tOverwriting it!!",
+                "Table '%s' already exists. Overwriting it in the following directory: \n\t%s",
                 table,
                 write_dir,
             )
