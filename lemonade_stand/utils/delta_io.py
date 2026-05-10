@@ -35,7 +35,7 @@ def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
     ):
         pass
     else:
-        raise ValueError(
+        raise FileNotFoundError(
             f"Found file/dir does not contain any readable parquet files!! \n\t{parquet_path}"
         )
 
