@@ -203,7 +203,7 @@ class Statement:
                 "Credit/Debit Card",
                 row[1],
                 None,
-                None,
+                self.file_path.name,
                 datetime.now(),
                 False,
             )

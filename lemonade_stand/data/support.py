@@ -113,9 +113,7 @@ def flag_exclusions() -> pl.Expr:
     ) | (pl.col("description").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_not_null())
 
 
-def clean_transactions(
-    data_df: pl.DataFrame, file_name: str | None = None
-) -> pl.DataFrame:
+def clean_transactions(data_df: pl.DataFrame) -> pl.DataFrame:
     """Filters out transactions that are most likely invalid"""
 
     def save_popular_block(data_df: pl.DataFrame) -> pl.DataFrame:
@@ -172,7 +170,6 @@ def clean_transactions(
     clean_df = clean_df.with_columns(categories_expr.alias("category")).with_columns(
         transaction_type_expr.alias("type"),
         exclude_flag_expr.alias("exclude_flag"),
-        pl.lit(file_name).alias("source_file"),
     )
 
     # # Filter out unnecessary data tables
