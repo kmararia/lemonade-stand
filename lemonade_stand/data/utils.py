@@ -95,44 +95,34 @@ class UserData:
                 "\n\t".join([f"{file}: \n\t\t{error}" for file, error in error_list]),
             )
 
+        # Break down transactions into individual table types
         transactions = Transactions(statements_list=statements_list)
+        tables = ["income", "savings", "expenses", "unknown"]
+        table_dict = {}
 
-        def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
-            """A function to create summarized data"""
-            return (
-                data_df.filter(filter_logic)
-                .group_by([x for x in data_df.columns if x != "amount"])
-                .agg(pl.col("amount").sum().alias("amount"))
-                .select(data_df.columns)
+        for table in tables:
+            filter_condition = (
+                (pl.col("type") == table)
+                if table != "unknown"
+                else (
+                    ~pl.col("type").is_in([x for x in tables if x != "unknown"])
+                    | pl.col("type").is_null()
+                )
             )
-
-        # Create summarized datasets
-        income_df = summarize(filter_logic=(pl.col("type") == "income"))
-        savings_df = summarize(filter_logic=(pl.col("type") == "savings"))
-        expenses_df = summarize(filter_logic=(pl.col("type") == "expenses"))
-        unknown_df = summarize(
-            filter_logic=(
-                ~pl.col("type").is_in(["income", "savings", "expenses"])
-                | pl.col("type").is_null()
-            )
-        )
+            table_dict[table] = {
+                "dataframe": transactions.data.filter(filter_condition)
+            }
 
         # Write out to delta lake
-        write_dir = AppDir().data_dir
         write_path = write_delta(
-            write_info_dict={
-                "income": {"dataframe": income_df},
-                "savings": {"dataframe": savings_df},
-                "expenses": {"dataframe": expenses_df},
-                "unknown": {"dataframe": unknown_df},
-            },
-            write_dir=write_dir,
+            write_info_dict=table_dict,
+            write_dir=AppDir().data_dir,
         )
 
         LOGGER.info("Written tables to delta lake path:\n\t%s", write_path)
 
         # Update class attributes
-        for table in ["income", "savings", "expenses", "unknown"]:
+        for table in tables:
             object.__setattr__(
-                self, table, read_delta(table=table, search_dir=write_dir)
+                self, table, read_delta(table=table, search_dir=write_path)
             )
