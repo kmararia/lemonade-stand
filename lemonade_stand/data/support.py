@@ -1,7 +1,6 @@
 """Scrapping transactions from pdf file texts"""
 
 import json
-import logging
 from pathlib import Path
 
 import polars as pl
@@ -9,8 +8,7 @@ import polars as pl
 from lemonade_stand.config import AppDir
 from lemonade_stand.utils import set_up_logger
 
-LOGGER = set_up_logger(name=Path(__file__).stem, level=logging.ERROR)
-
+LOGGER = set_up_logger(Path(__file__).stem)
 APP_PATHS = AppDir()
 
 
@@ -40,7 +38,7 @@ def generate_categories() -> pl.Expr:
         lowercase_substring_list = [x.lower() for x in substring_list]
 
         field_expr = field_expr.when(
-            pl.col("transaction_desc")
+            pl.col("description")
             .str.to_lowercase()
             .str.contains_any(lowercase_substring_list)
         ).then(pl.lit(category))
@@ -68,13 +66,13 @@ def generate_types() -> pl.Expr:
         transctn_type_mappings: dict = {}
 
     # Generate category field expression
-    field_expr = pl.when(pl.col("transaction_amount") < 0).then(pl.lit("income"))
+    field_expr = pl.when(pl.col("amount") < 0).then(pl.lit("income"))
 
     for transaction_type, category_list in transctn_type_mappings.items():
         lowercase_category_list = [x.lower() for x in category_list]
 
         field_expr = field_expr.when(
-            pl.col("transaction_category")
+            pl.col("category")
             .str.to_lowercase()
             .str.contains_any(lowercase_category_list)
         ).then(pl.lit(transaction_type))
@@ -102,21 +100,17 @@ def flag_exclusions() -> pl.Expr:
         exclude_transactions: dict = {"exclude": []}
 
     # Create the transactions filter flag
-    LOGGER.info("Creating and exclusion flag...")
+    LOGGER.debug("Creating an exclusion flag...")
 
     exclude_list = [x.lower() for x in exclude_transactions.get("exclude", [])]
     exclude_pattern = "|".join(exclude_list)
 
     return (
-        pl.col("transaction_desc")
+        pl.col("description")
         .str.to_lowercase()
         .str.count_matches(rf"{exclude_pattern}")
         > 0
-    ) | (
-        pl.col("transaction_desc")
-        .str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
-        .is_not_null()
-    )
+    ) | (pl.col("description").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_not_null())
 
 
 def clean_transactions(
@@ -127,15 +121,14 @@ def clean_transactions(
     def save_popular_block(data_df: pl.DataFrame) -> pl.DataFrame:
         """ """
 
-        LOGGER.info("Saving only the necessary transaction blocks")
+        LOGGER.debug("Saving only the necessary transaction blocks")
 
         # Check to see if there are multiple data tables
         date_jump_rows = (
             data_df.with_row_index(name="index")
-            .with_columns(pl.col("transaction_date").shift(-1).alias("lead_date"))
+            .with_columns(pl.col("date").shift(-1).alias("lead_date"))
             .filter(
-                pl.col("transaction_date")
-                > pl.col("transaction_date").shift(-1)  # .dt.total_days()
+                pl.col("date") > pl.col("date").shift(-1)  # .dt.total_days()
             )
         )
 
@@ -161,11 +154,11 @@ def clean_transactions(
         else:
             return data_df
 
-    LOGGER.info("Filtering out bad transactions...")
+    LOGGER.debug("Filtering out bad transactions...")
 
     # Filter out transactions with dollar values in description
     clean_df = data_df.filter(
-        pl.col("transaction_desc").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_null()
+        pl.col("description").str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1).is_null()
     )
 
     # Pull the category and type field expressions
@@ -173,13 +166,11 @@ def clean_transactions(
     transaction_type_expr = generate_types()
     exclude_flag_expr = flag_exclusions()
 
-    LOGGER.info("Adding missing fields...")
+    LOGGER.debug("Adding missing fields...")
 
     # Populate empty columns
-    clean_df = clean_df.with_columns(
-        categories_expr.alias("transaction_category")
-    ).with_columns(
-        transaction_type_expr.alias("transaction_type"),
+    clean_df = clean_df.with_columns(categories_expr.alias("category")).with_columns(
+        transaction_type_expr.alias("type"),
         exclude_flag_expr.alias("exclude_flag"),
         pl.lit(file_name).alias("source_file"),
     )

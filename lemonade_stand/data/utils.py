@@ -9,11 +9,12 @@ import polars as pl
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.data.read import Statement
+from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
-from lemonade_stand.utils import write_to_database
+from lemonade_stand.utils import write_delta
+from lemonade_stand.utils.exceptions import DataLoadingError
 
 LOGGER = set_up_logger(Path(__file__).stem)
-DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 
 @dataclass
@@ -76,38 +77,33 @@ class UserData:
 
     def __post_init__(self):
         """Post initialization variables set up"""
-        LOGGER.info("Loading statements from path: \n\t'%s'\n", str(self.statement_dir))
+        LOGGER.info("Loading statements from path: \n\t%s\n", str(self.statement_dir))
 
         # Load all user transactions
-        transactions = Transactions(
-            statements_list=[
-                Statement(file_path=file, engine="pymullm")
-                for file in Path(self.statement_dir).glob("*.pdf")
-            ]
-        )
+        statements_list = []
+        error_list = []
 
-        # Rename fields
-        field_renames = {
-            "transaction_date": "date",
-            "transaction_type": "type",
-            "transaction_category": "category",
-            "transaction_desc": "detail",
-            "transaction_amount": "amount",
-            "source_file": "source",
-            "extract_date": "extract_date",
-            "exclude_flag": "exclude_flag",
-        }
+        for file in Path(self.statement_dir).glob("*.pdf"):
+            try:
+                statements_list.append(Statement(file_path=file, engine="pymullm"))
+            except DataLoadingError as e:
+                error_list.append((file, str(e)))
 
-        transactions.data = transactions.data.rename(field_renames)
+        if len(error_list) > 0:
+            LOGGER.warning(
+                "The following files could not be loaded:\n\t%s",
+                "\n\t".join([f"{file}: \n\t\t{error}" for file, error in error_list]),
+            )
 
-        # Define a function to create summarized data
+        transactions = Transactions(statements_list=statements_list)
+
         def summarize(filter_logic: pl.Expr, data_df: pl.DataFrame = transactions.data):
-            keep_cols = field_renames.values()
+            """A function to create summarized data"""
             return (
                 data_df.filter(filter_logic)
-                .group_by([x for x in keep_cols if x != "amount"])
+                .group_by([x for x in data_df.columns if x != "amount"])
                 .agg(pl.col("amount").sum().alias("amount"))
-                .select(keep_cols)
+                .select(data_df.columns)
             )
 
         # Create summarized datasets
@@ -121,21 +117,22 @@ class UserData:
             )
         )
 
-        # Update the object variables
-        object.__setattr__(self, "income", income_df)
-        object.__setattr__(self, "savings", savings_df)
-        object.__setattr__(self, "expenses", expenses_df)
-        object.__setattr__(self, "unknown", unknown_df)
-
-        # Write out the tables to a database
-        write_path = write_to_database(
-            database_path=DATABASE_PATH,
+        # Write out to delta lake
+        write_dir = AppDir().data_dir
+        write_path = write_delta(
             write_info_dict={
-                "income": income_df,
-                "savings": savings_df,
-                "expenses": expenses_df,
-                "unknown": unknown_df,
+                "income": {"dataframe": income_df},
+                "savings": {"dataframe": savings_df},
+                "expenses": {"dataframe": expenses_df},
+                "unknown": {"dataframe": unknown_df},
             },
+            write_dir=write_dir,
         )
 
-        LOGGER.info("Written tables to database path:\n\t%s", write_path)
+        LOGGER.info("Written tables to delta lake path:\n\t%s", write_path)
+
+        # Update class attributes
+        for table in ["income", "savings", "expenses", "unknown"]:
+            object.__setattr__(
+                self, table, read_delta(table=table, search_dir=write_dir)
+            )

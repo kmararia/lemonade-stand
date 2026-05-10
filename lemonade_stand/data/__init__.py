@@ -5,28 +5,36 @@ from types import SimpleNamespace
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.config import UserConfig
-from lemonade_stand.utils import read_from_database
+from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
+from lemonade_stand.utils.exceptions import MissingDeltaError
 
 from .utils import UserData
 
 LOGGER = set_up_logger(Path(__file__).stem)
-DATABASE_PATH = AppDir().database_dir / "transactions.duckdb"
 
 
 def get_data(config: UserConfig) -> UserData | SimpleNamespace:
     """A function to read data from database if exists otherwise process from start"""
-    if (DATABASE_PATH).exists() and (not config.always_refresh_data):
-        LOGGER.info(
-            "Reading pre-processed tables from database: \n\t%s", str(DATABASE_PATH)
-        )
 
-        return SimpleNamespace(
-            income=read_from_database(DATABASE_PATH, "income"),
-            savings=read_from_database(DATABASE_PATH, "savings"),
-            expenses=read_from_database(DATABASE_PATH, "expenses"),
-            unknown=read_from_database(DATABASE_PATH, "unknown"),
-        )
+    if not config.always_refresh_data:
+        LOGGER.info("Reading pre-processed tables from data directory")
+
+        try:
+            read_dir = AppDir().data_dir
+            return SimpleNamespace(
+                income=read_delta(table="income", search_dir=read_dir),
+                savings=read_delta(table="savings", search_dir=read_dir),
+                expenses=read_delta(table="expenses", search_dir=read_dir),
+                unknown=read_delta(table="unknown", search_dir=read_dir),
+            )
+        except MissingDeltaError as e:
+            LOGGER.warning(
+                "An error occurred while reading pre-processed tables: %s. Processing data from start.",
+                e,
+            )
+
+            return UserData(statement_dir=config.statement_dir)
 
     else:
         return UserData(statement_dir=config.statement_dir)

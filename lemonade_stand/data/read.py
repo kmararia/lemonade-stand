@@ -14,8 +14,8 @@ import polars as pl
 import pymupdf4llm
 from dateutil.parser import parse
 
-from lemonade_stand.data.support import clean_transactions
 from lemonade_stand.utils import set_up_logger
+from lemonade_stand.utils.exceptions import DataLoadingError
 
 LOGGER = set_up_logger(Path(__file__).stem)
 
@@ -25,51 +25,71 @@ class Statement:
     """A dataclass for a statement file"""
 
     file_path: str | Path
-    engine: str
     pages: list = field(init=False)
     transactions: pl.DataFrame = field(init=False)
-    schema: pl.datatypes.Schema = pl.Schema(
-        {
-            "transaction_date": pl.Date(),
-            "transaction_desc": pl.String(),
-            "transaction_amount": pl.Decimal(None, 2),
-            "transaction_category": pl.String(),
-            "transaction_type": pl.String(),
-            "source_file": pl.String(),
-            "extract_date": pl.Datetime(),
-            "exclude_flag": pl.Boolean(),
-        }
+    engine: str = "pdfplumber"
+    schema: pl.schema.Schema = field(
+        default_factory=lambda: pl.Schema(
+            {
+                "date": pl.Date(),
+                "category": pl.String(),
+                "amount": pl.Decimal(None, 2),
+                "payment": pl.String(),
+                "description": pl.String(),
+                "type": pl.String(),
+                "source_file": pl.String(),
+                "extract_date": pl.Datetime(),
+                "exclude_flag": pl.Boolean(),
+            }
+        )
     )
 
     def __post_init__(self):
         """Post initialization variables"""
 
         self.file_path = Path(self.file_path)
+        try_engines = ["pdfplumber", "pymullm"]
+        used_engines = []
 
         LOGGER.info("Setting up data structure for file %s", self.file_path.name)
 
-        self.pages = self.read_file(read_path=self.file_path)
+        while True:
+            try:
+                used_engines.append(self.engine)
+                self.pages = self.read_file(read_path=self.file_path)
+                self.transactions = self.get_transactions(
+                    pdf_text="\n".join(self.pages),
+                )
+                break
 
-        full_transactions = self.get_transactions(
-            pdf_text="\n".join(self.pages),
-        )
-        self.transactions = clean_transactions(
-            data_df=full_transactions,
-            file_name=self.file_path.name,
-        )
+            except Exception:
+                remaining_engines = [x for x in try_engines if x not in used_engines]
+
+                if len(remaining_engines) >= 1:
+                    self.engine = remaining_engines[0]
+                    LOGGER.error(
+                        "Error processing file \t '%s' \n\tSwitching to alternative engine... %s",
+                        self.file_path.name,
+                        self.engine,
+                    )
+                else:
+                    raise DataLoadingError(
+                        f"Unable to process file '{self.file_path.name}'. Skipping processing..."
+                    ) from None
+
+            # finally:
+            #     self.transactions = clean_transactions(
+            #         data_df=self.transactions,
+            #         file_name=self.file_path.name,
+            #     )
 
     def read_file(self, read_path: Path) -> list[str]:
         """Extracts page text using specified engine"""
 
-        engine_dict: dict[str, Callable] = {
-            "pdfplumber": self._read_pdfplumber,
-            "pymullm": self._read_pymullm,
-        }
-
         def _read_pdfplumber(pdf_path: Path):
             """Extracts page text using pdfplumber"""
 
-            LOGGER.info("Reading file using pdfplumber")
+            LOGGER.debug("Reading file using pdfplumber")
 
             pdf = pdfplumber.open(pdf_path)
 
@@ -78,12 +98,17 @@ class Statement:
         def _read_pymullm(pdf_path: Path):
             """Extracts page text using pymullm"""
 
-            LOGGER.info("Reading file using pymupdf4llm")
+            LOGGER.debug("Reading file using pymupdf4llm")
 
             read_obj = pymupdf4llm.LlamaMarkdownReader()
             pdf_data = read_obj.load_data(pdf_path)
 
             return [page.to_dict()["text"] for page in pdf_data]
+
+        engine_dict: dict[str, Callable] = {
+            "pdfplumber": _read_pdfplumber,
+            "pymullm": _read_pymullm,
+        }
 
         return engine_dict[self.engine](read_path)
 
@@ -94,7 +119,7 @@ class Statement:
             A list of transaction records
 
         """
-        LOGGER.info("Getting year of the statement")
+        LOGGER.debug("Getting year of the statement")
 
         # Define variables
         transaction_matches = []
@@ -119,7 +144,7 @@ class Statement:
             "01": r"\d{2}",
         }
 
-        LOGGER.info("Scraping transaction lines")
+        LOGGER.debug("Scraping transaction lines")
 
         # Iterate through all the potentail patterns
         for date_format, pattern in month_patterns.items():
@@ -131,7 +156,7 @@ class Statement:
             else:
                 year_pattern = rf"({pattern}/\d{{2}}/?)(\d{{2}}|\d{{4}})"  # Matches: 04/01/24 or 04/01/2024
 
-            LOGGER.info("Getting year of the statement")
+            LOGGER.debug("Getting year of the statement")
 
             # Find the statement file year
             year_search = re.search(re.compile(year_pattern, re.IGNORECASE), pdf_text)
@@ -173,9 +198,10 @@ class Statement:
         data = [
             (
                 parse(row[0], default=file_year).date(),
-                row[1],
-                PyDecimal(row[2].replace(",", "")),
                 None,
+                PyDecimal(row[2].replace(",", "")),
+                "Credit/Debit Card",
+                row[1],
                 None,
                 None,
                 datetime.now(),
