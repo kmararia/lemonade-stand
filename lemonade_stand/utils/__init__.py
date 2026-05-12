@@ -2,7 +2,7 @@
 
 from .delta_io import read_delta
 from .delta_io import write_delta
-from .logging_utils import set_up_logger
+from .logging import set_up_logger
 from .types import MISSING
 from .types import MissingType
 

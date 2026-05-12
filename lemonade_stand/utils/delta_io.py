@@ -6,7 +6,7 @@ from typing import Any
 import polars as pl
 
 from .exceptions import MissingDeltaError
-from .logging_utils import set_up_logger
+from .logging import set_up_logger
 
 LOGGER = set_up_logger(__name__)
 
