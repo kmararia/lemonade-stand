@@ -254,7 +254,20 @@ class TransactionCleaner:
                         1,
                     )
                 )
-                .otherwise(
+                .str.strip_chars()
+                .str.to_uppercase()
+            )
+        )
+
+        update_cond_expr = (pl.col("state").is_null()) & (pl.col("city").is_not_null())
+        no_state_cities = self._get_field_value_list(
+            location_df.filter(update_cond_expr), "city"
+        )
+
+        return location_df.with_columns(
+            city=(
+                pl.when(pl.col("city").is_null())
+                .then(
                     # If no state is found, do a random city name match beginning with the longest city names
                     pl.concat_str(
                         [
@@ -269,18 +282,11 @@ class TransactionCleaner:
                             pl.lit(" ~"),
                         ],
                     )
+                    .str.strip_chars()
+                    .str.to_uppercase()
                 )
-                .str.strip_chars()
-                .str.to_uppercase()
-            )
-        )
-
-        update_cond_expr = (pl.col("state").is_null()) & (pl.col("city").is_not_null())
-        no_state_cities = self._get_field_value_list(
-            location_df.filter(update_cond_expr), "city"
-        )
-
-        return location_df.with_columns(
+                .otherwise(pl.col("city"))
+            ),
             state=(
                 pl.when(update_cond_expr)
                 .then(
@@ -299,7 +305,7 @@ class TransactionCleaner:
                     )
                 )
                 .otherwise(pl.col("state"))
-            )
+            ),
         )
 
     def flag_exclusions(self) -> pl.Expr:
