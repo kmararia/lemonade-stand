@@ -1,5 +1,6 @@
 """A module to help read and write delta lakes as needed"""
 
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -69,6 +70,7 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
                 table,
                 write_dir,
             )
+            shutil.rmtree(parquet_path)
 
         if not set(partition_by).issubset(set(data_df.columns)):
             raise ValueError(
