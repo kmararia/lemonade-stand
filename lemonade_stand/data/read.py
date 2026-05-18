@@ -39,7 +39,6 @@ class Statement:
                 "type": pl.String(),
                 "source_file": pl.String(),
                 "extract_date": pl.Datetime(),
-                "exclude_flag": pl.Boolean(),
             }
         )
     )
@@ -76,12 +75,6 @@ class Statement:
                     raise DataLoadingError(
                         f"Unable to process file '{self.file_path.name}'. Skipping processing..."
                     ) from None
-
-            # finally:
-            #     self.transactions = clean_transactions(
-            #         data_df=self.transactions,
-            #         file_name=self.file_path.name,
-            #     )
 
     def read_file(self, read_path: Path) -> list[str]:
         """Extracts page text using specified engine"""
@@ -205,7 +198,6 @@ class Statement:
                 None,
                 self.file_path.name,
                 datetime.now(),
-                False,
             )
             for row in transaction_matches[
                 # Get list with most transactions captured. Doing this to make sure the optimal date-pattern was captured
