@@ -259,54 +259,56 @@ class TransactionCleaner:
             )
         )
 
-        update_cond_expr = (pl.col("state").is_null()) & (pl.col("city").is_not_null())
-        no_state_cities = self._get_field_value_list(
-            location_df.filter(update_cond_expr), "city"
-        )
+        return location_df
 
-        return location_df.with_columns(
-            city=(
-                pl.when(pl.col("city").is_null())
-                .then(
-                    # If no state is found, do a random city name match beginning with the longest city names
-                    pl.concat_str(
-                        [
-                            pl.coalesce(
-                                [
-                                    pl.col("clean_description").str.extract(
-                                        cities_regex, 1
-                                    )
-                                    for cities_regex in self.state_data.regex_cities_generator
-                                ]
-                            ),
-                            pl.lit(" ~"),
-                        ],
-                    )
-                    .str.strip_chars()
-                    .str.to_uppercase()
-                )
-                .otherwise(pl.col("city"))
-            ),
-            state=(
-                pl.when(update_cond_expr)
-                .then(
-                    pl.concat_str(
-                        [
-                            pl.col("city")
-                            .str.replace(" ~", "")
-                            .replace_strict(
-                                self.state_data.get_city_state_mapping(
-                                    cities_list=no_state_cities
-                                ),
-                                default=None,
-                            ),
-                            pl.lit(" ~"),
-                        ]
-                    )
-                )
-                .otherwise(pl.col("state"))
-            ),
-        )
+        # update_cond_expr = (pl.col("state").is_null()) & (pl.col("city").is_not_null())
+        # no_state_cities = self._get_field_value_list(
+        #     location_df.filter(update_cond_expr), "city"
+        # )
+
+        # return location_df.with_columns(
+        #     city=(
+        #         pl.when(pl.col("city").is_null())
+        #         .then(
+        #             # If no state is found, do a random city name match beginning with the longest city names
+        #             pl.concat_str(
+        #                 [
+        #                     pl.coalesce(
+        #                         [
+        #                             pl.col("clean_description").str.extract(
+        #                                 cities_regex, 1
+        #                             )
+        #                             for cities_regex in self.state_data.regex_cities_generator
+        #                         ]
+        #                     ),
+        #                     pl.lit(" ~"),
+        #                 ],
+        #             )
+        #             .str.strip_chars()
+        #             .str.to_uppercase()
+        #         )
+        #         .otherwise(pl.col("city"))
+        #     ),
+        #     state=(
+        #         pl.when(update_cond_expr)
+        #         .then(
+        #             pl.concat_str(
+        #                 [
+        #                     pl.col("city")
+        #                     .str.replace(" ~", "")
+        #                     .replace_strict(
+        #                         self.state_data.get_city_state_mapping(
+        #                             cities_list=no_state_cities
+        #                         ),
+        #                         default=None,
+        #                     ),
+        #                     pl.lit(" ~"),
+        #                 ]
+        #             )
+        #         )
+        #         .otherwise(pl.col("state"))
+        #     ),
+        # )
 
     def flag_exclusions(self) -> pl.Expr:
         """
