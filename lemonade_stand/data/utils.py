@@ -9,6 +9,7 @@ import polars as pl
 
 from lemonade_stand.config import AppDir
 from lemonade_stand.data.read import Statement
+from lemonade_stand.data.support import TransactionCleaner
 from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils import write_delta
@@ -95,8 +96,11 @@ class UserData:
                 "\n\t".join([f"{file}: \n\t\t{error}" for file, error in error_list]),
             )
 
-        # Break down transactions into individual table types
+        # Get all transactions from the statements and clean them
         transactions = Transactions(statements_list=statements_list)
+        cleaner = TransactionCleaner(input_df=transactions.data)
+
+        # Break down transactions into individual table types
         tables = ["income", "savings", "expenses", "unknown"]
         table_dict = {}
 
@@ -110,7 +114,7 @@ class UserData:
                 )
             )
             table_dict[table] = {
-                "dataframe": transactions.data.filter(filter_condition)
+                "dataframe": cleaner.output_df.filter(filter_condition)
             }
 
         # Write out to delta lake
@@ -121,7 +125,6 @@ class UserData:
 
         LOGGER.info("Written tables to delta lake path:\n\t%s", write_path)
 
-        # Update class attributes
         for table in tables:
             object.__setattr__(
                 self, table, read_delta(table=table, search_dir=write_path)
