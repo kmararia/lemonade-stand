@@ -7,6 +7,7 @@
     requires-python = ">=3.13"
     authors = [{ name = "Kelvin", email = "kelvinmararia@icloud.com" }]
     dependencies = [
+        "countrystatecity-countries>=1.0.2",
         "llama-index>=0.14.21",
         "pdfplumber>=0.11.9",
         "polars[rt64, deltalake]>=1.40.1",

@@ -363,6 +363,18 @@ wheels = [
 ]
 
 [[package]]
+name = "countrystatecity-countries"
+version = "1.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/85/0e/7a80a77ae1a4d33f5ce3248db7520a24cd308336959e804d92aaa86ce026/countrystatecity_countries-1.0.2.tar.gz", hash = "sha256:c2cb04c801b0ddc9ce445a7da93f53a4cf5a5b6e6b5e71716f80faa611bd83d2", size = 3810875 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/bf/43/69a698558dfdcfa758ce3141577fabc7d25fd52f471420ac8a04968c9b9f/countrystatecity_countries-1.0.2-py3-none-any.whl", hash = "sha256:62062dd4433ae9d4a80948fd4488239ff664dd9eb55ece01e6a7a9f1d3b0984d", size = 5298028 },
+]
+
+[[package]]
 name = "cryptography"
 version = "48.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -935,6 +947,7 @@ name = "lemonade-stand"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "countrystatecity-countries" },
     { name = "llama-index" },
     { name = "pdfplumber" },
     { name = "polars", extra = ["deltalake", "rt64"] },
@@ -956,6 +969,7 @@ formatters = [
 
 [package.metadata]
 requires-dist = [
+    { name = "countrystatecity-countries", specifier = ">=1.0.2" },
     { name = "llama-index", specifier = ">=0.14.21" },
     { name = "pdfplumber", specifier = ">=0.11.9" },
     { name = "polars", extras = ["rt64", "deltalake"], specifier = ">=1.40.1" },
