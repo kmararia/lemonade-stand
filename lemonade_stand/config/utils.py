@@ -5,13 +5,38 @@ from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
 from pathlib import Path
-from types import SimpleNamespace
 
-from lemonade_stand.config import metadata
-from lemonade_stand.config.setup import check_version
 from lemonade_stand.config.setup import get_user_configs
 
 from .metadata import USER_CONFIG
+
+
+@dataclass
+class AppDir:
+    """A dataclass for the applicaton directories"""
+
+    root_dir: Path = field(init=False)
+    config_dir: Path = field(init=False)
+    data_dir: Path = field(init=False)
+    model_dir: Path = field(init=False)
+    metadata_path: Path = field(init=False)
+
+    def __post_init__(self):
+        """Post initialization variables set up"""
+
+        self.root_dir = self.get_app_root_dir()
+        self.metadata_path = self.root_dir / "metadata.json"
+        self.config_dir = self.root_dir / "configs"
+        self.data_dir = self.root_dir / "shared" / "data"
+        self.model_dir = self.root_dir / "shared" / "model"
+
+    def get_os_home(self) -> Path:
+        """Returns the home directory of the user's operating system"""
+        return Path.home()
+
+    def get_app_root_dir(self) -> Path:
+        """Returns the root working directory for the application"""
+        return self.get_os_home() / ".lemonade-stand"
 
 
 @dataclass
@@ -79,58 +104,3 @@ class UserConfig:
             # Dump user configurations into file
             with (dirs.config_dir / "user_config.json").open("w") as file:
                 json.dump(config_dict, file, indent=4)
-
-
-@dataclass
-class AppDir:
-    """A dataclass for the applicaton directories"""
-
-    root_dir: Path = field(init=False)
-    config_dir: Path = field(init=False)
-    data_dir: Path = field(init=False)
-    model_dir: Path = field(init=False)
-    metadata_path: Path = field(init=False)
-
-    def __post_init__(self):
-        """Post initialization variables set up"""
-
-        self.root_dir = self.get_app_root_dir()
-        self.metadata_path = self.root_dir / "metadata.json"
-        self.config_dir = self.root_dir / "configs"
-        self.data_dir = self.root_dir / "shared" / "data"
-        self.model_dir = self.root_dir / "shared" / "model"
-
-    def get_os_home(self) -> Path:
-        """Returns the home directory of the user's operating system"""
-        return Path.home()
-
-    def get_app_root_dir(self) -> Path:
-        """Returns the root working directory for the application"""
-        return self.get_os_home() / ".lemonade-stand"
-
-
-@dataclass
-class ModelConfig:
-    """A dataclass for the applicaton configs"""
-
-    category: str
-    refresh_flag: bool = field(init=False)
-    dot_data: SimpleNamespace = field(init=False)
-
-    def __post_init__(self):
-        """Post initialization variables set up"""
-        dirs = AppDir()
-
-        if self.category == "model":
-            self.refresh_flag = check_version(
-                config_path=dirs.metadata_path,
-                config_dict=metadata.MODEL_CONFIG,
-            )
-
-        # Save dict as simple-namespace
-        self.dot_data = SimpleNamespace(**metadata.MODEL_CONFIG)
-
-    def __str__(self):
-        """String representation of the class"""
-        print_str = [f"{x.name} --> ({x.type})" for x in fields(self)]
-        return "\n".join(print_str)
