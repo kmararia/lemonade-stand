@@ -136,7 +136,7 @@ class TransactionCleaner:
 
         return (
             data_df.filter(pl.col(col_name).is_not_null())
-            .select(pl.col(col_name).str.replace(" ~", ""))
+            .select(pl.col(col_name).str.replace_all(" ~", ""))
             .unique()
             .to_series()
             .to_list()
@@ -153,7 +153,7 @@ class TransactionCleaner:
 
         delete_regex = (
             r"(?i)"  #                                              case-insensitive flag
-            r"X+-?X+"  #                                            Xs that come from redacting ID numbers
+            r"\bX+-?X+\b"  #                                        Xs that come from redacting ID numbers
             r"|\b[a-z0-9]*([a-z]\d|\d[a-z])[a-z0-9]*\b"  #          alternating letters and numbers that are likely to be IDs or codes
             r"|\b(TEL|WEB|PPD|PMT|PAYMENT)[\s]+ID(\:|\s)[\s\S]*"  # strings that look like ID numbers
             r"|\b(CARD|CARD\s+ENDING\s+IN|AUT)\s+\d+[\s\S]*"  #     strings that look like card or authorization numbers
@@ -179,7 +179,7 @@ class TransactionCleaner:
                 .str.strip_chars()
                 .replace("", None)
             )
-        )
+        ).filter(pl.col("clean_description").is_not_null())
 
     def find_merchant(self) -> pl.DataFrame:
         """
@@ -295,7 +295,7 @@ class TransactionCleaner:
         #             pl.concat_str(
         #                 [
         #                     pl.col("city")
-        #                     .str.replace(" ~", "")
+        #                     .str.replace_all(" ~", "")
         #                     .replace_strict(
         #                         self.state_data.get_city_state_mapping(
         #                             cities_list=no_state_cities
