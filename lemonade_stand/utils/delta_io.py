@@ -61,7 +61,7 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
 
     for table, data_info in write_info_dict.items():
         parquet_path = write_dir / table
-        data_df = data_info["dataframe"]
+        data_df: pl.LazyFrame = data_info["dataframe"]
         partition_by = data_info.get("partition_by", ["source_file"])
 
         if parquet_path.exists():
@@ -77,7 +77,7 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
                 f"Partition columns {partition_by} are not all present in the dataframe columns {data_df.columns}"
             )
 
-        data_df.write_delta(
+        data_df.sink_delta(
             target=parquet_path,
             mode=data_info.get("mode", "overwrite"),
             delta_write_options={"partition_by": partition_by},

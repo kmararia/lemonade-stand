@@ -115,8 +115,8 @@ class StateCities:
 class TransactionCleaner:
     """Filters out transactions that are most likely invalid"""
 
-    input_df: pl.DataFrame
-    output_df: pl.DataFrame = field(init=False)
+    input_df: pl.LazyFrame
+    output_df: pl.LazyFrame = field(init=False)
     state_data: StateCities = field(default_factory=StateCities)
 
     def __post_init__(self):
@@ -131,18 +131,19 @@ class TransactionCleaner:
         self.output_df = self.find_locations()
         self.output_df = self.find_merchant()
 
-    def _get_field_value_list(self, data_df: pl.DataFrame, col_name: str) -> list:
+    def _get_field_value_list(self, data_df: pl.LazyFrame, col_name: str) -> list:
         """Gets a list of column values"""
 
         return (
             data_df.filter(pl.col(col_name).is_not_null())
             .select(pl.col(col_name).str.replace_all(" ~", ""))
             .unique()
+            .collect()
             .to_series()
             .to_list()
         )
 
-    def clean_description(self) -> pl.DataFrame:
+    def clean_description(self) -> pl.LazyFrame:
         """
         Cleans the description field of the transaction.
 
@@ -181,7 +182,7 @@ class TransactionCleaner:
             )
         ).filter(pl.col("clean_description").is_not_null())
 
-    def find_merchant(self) -> pl.DataFrame:
+    def find_merchant(self) -> pl.LazyFrame:
         """
         Finds the merchant of the transaction from the description field.
 
@@ -218,7 +219,7 @@ class TransactionCleaner:
             )
         )
 
-    def find_locations(self) -> pl.Expr:
+    def find_locations(self) -> pl.LazyFrame:
         """
         Finds the location of the transaction by looking for country, state, and city names in the description field.
 
@@ -310,7 +311,7 @@ class TransactionCleaner:
         #     ),
         # )
 
-    def flag_exclusions(self) -> pl.Expr:
+    def flag_exclusions(self) -> pl.LazyFrame:
         """
         Flags transactions that are listed in the user exclusion configuration file or have amount values in the description field.
 

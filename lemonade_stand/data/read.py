@@ -205,7 +205,7 @@ class Statement:
             ]
         ]
 
-        return pl.DataFrame(
+        return pl.LazyFrame(
             data=data,
             schema=self.schema,
             orient="row",
