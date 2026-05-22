@@ -30,6 +30,12 @@ class AppDir:
         self.data_dir = self.root_dir / "shared" / "data"
         self.model_dir = self.root_dir / "shared" / "model"
 
+    def __str__(self):
+        """String representation of the class"""
+        print_str = [f"{x.name}: \n\t--> {getattr(self, x.name)}" for x in fields(self)]
+
+        return "\n".join(print_str)
+
     def get_os_home(self) -> Path:
         """Returns the home directory of the user's operating system"""
         return Path.home()
