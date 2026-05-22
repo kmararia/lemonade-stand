@@ -85,21 +85,20 @@ class UserConfig:
 class AppDir:
     """A dataclass for the applicaton directories"""
 
-    current_dir: Path = Path.cwd()
-    session_dir: Path = field(init=False)
     root_dir: Path = field(init=False)
     config_dir: Path = field(init=False)
     data_dir: Path = field(init=False)
+    model_dir: Path = field(init=False)
     metadata_path: Path = field(init=False)
 
     def __post_init__(self):
         """Post initialization variables set up"""
 
         self.root_dir = self.get_app_root_dir()
-        self.session_dir = self.get_os_home()
+        self.metadata_path = self.root_dir / "metadata.json"
+        self.config_dir = self.root_dir / "configs"
         self.data_dir = self.root_dir / "shared" / "data"
-        self.config_dir = self.root_dir / "shared" / "config"
-        self.metadata_path = self.root_dir / "shared" / "schema" / "metadata.json"
+        self.model_dir = self.root_dir / "shared" / "model"
 
     def get_os_home(self) -> Path:
         """Returns the home directory of the user's operating system"""
@@ -107,7 +106,7 @@ class AppDir:
 
     def get_app_root_dir(self) -> Path:
         """Returns the root working directory for the application"""
-        return self.get_os_home() / ".lemonade-stand" / "data"
+        return self.get_os_home() / ".lemonade-stand"
 
 
 @dataclass
