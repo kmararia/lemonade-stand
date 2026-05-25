@@ -35,7 +35,7 @@ class Statement:
                 "category": pl.String(),
                 "amount": pl.Decimal(None, 2),
                 "payment": pl.String(),
-                "description": pl.String(),
+                "detail": pl.String(),
                 "type": pl.String(),
                 "source_file": pl.String(),
                 "extract_date": pl.Datetime(),

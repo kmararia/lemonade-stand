@@ -34,10 +34,10 @@ def get_data(config: UserConfig) -> UserData | SimpleNamespace:
                 e,
             )
 
-            return UserData(statement_dir=config.statement_dir)
+            return UserData(user_config=config)
 
     else:
-        return UserData(statement_dir=config.statement_dir)
+        return UserData(user_config=config)
 
 
 # Expose only the user data

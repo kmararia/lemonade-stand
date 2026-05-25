@@ -8,6 +8,7 @@ from typing import overload
 import polars as pl
 
 from lemonade_stand.config import AppDir
+from lemonade_stand.config import UserConfig
 from lemonade_stand.data.read import Statement
 from lemonade_stand.data.support import TransactionCleaner
 from lemonade_stand.utils import read_delta
@@ -70,7 +71,7 @@ class Transactions:
 class UserData:
     """Dataclass for the user statement data"""
 
-    statement_dir: str | Path
+    user_config: UserConfig
     income: pl.DataFrame = field(init=False)
     savings: pl.DataFrame = field(init=False)
     expenses: pl.DataFrame = field(init=False)
@@ -78,13 +79,16 @@ class UserData:
 
     def __post_init__(self):
         """Post initialization variables set up"""
-        LOGGER.info("Loading statements from path: \n\t%s\n", str(self.statement_dir))
+        LOGGER.info(
+            "Loading statements from path: \n\t%s\n",
+            str(self.user_config.statement_dir),
+        )
 
         # Load all user transactions
         statements_list = []
         error_list = []
 
-        for file in Path(self.statement_dir).glob("*.pdf"):
+        for file in Path(self.user_config.statement_dir).glob("*.pdf"):
             try:
                 statements_list.append(Statement(file_path=file, engine="pymullm"))
             except DataLoadingError as e:
@@ -98,7 +102,9 @@ class UserData:
 
         # Get all transactions from the statements and clean them
         transactions = Transactions(statements_list=statements_list)
-        cleaner = TransactionCleaner(input_df=transactions.data)
+        cleaner = TransactionCleaner(
+            user_config=self.user_config, input_df=transactions.data
+        )
 
         # Break down transactions into individual table types
         tables = ["income", "savings", "expenses", "unknown"]
