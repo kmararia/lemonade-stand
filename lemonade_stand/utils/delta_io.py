@@ -72,9 +72,11 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
             )
             shutil.rmtree(parquet_path)
 
-        if not set(partition_by).issubset(set(data_df.columns)):
+        available_columns = set(data_df.collect_schema().names())
+
+        if not set(partition_by).issubset(available_columns):
             raise ValueError(
-                f"Partition columns {partition_by} are not all present in the dataframe columns {data_df.columns}"
+                f"Partition columns {partition_by} are not all present in the dataframe columns {available_columns}"
             )
 
         data_df.sink_delta(
