@@ -330,11 +330,11 @@ class TransactionCleaner:
         )
 
         return model_data.inference_data.with_columns(
-            type=pl.col("category").replace_strict(
+            payment_type=pl.col("category").replace_strict(
                 {
                     x: str(y[0]).lower()
                     for x, y in (
-                        model_data.train_data.select("category", "type")
+                        model_data.train_data.select("category", "payment_type")
                         .collect()
                         .rows_by_key(
                             key="category",

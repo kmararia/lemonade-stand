@@ -36,7 +36,7 @@ class Statement:
                 "amount": pl.Decimal(None, 2),
                 "payment": pl.String(),
                 "detail": pl.String(),
-                "type": pl.String(),
+                "payment_type": pl.String(),
                 "source_file": pl.String(),
                 "extract_date": pl.Datetime(),
             }

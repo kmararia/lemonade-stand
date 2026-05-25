@@ -112,11 +112,11 @@ class UserData:
 
         for table in tables:
             filter_condition = (
-                (pl.col("type") == table)
+                (pl.col("payment_type") == table)
                 if table != "unknown"
                 else (
-                    ~pl.col("type").is_in([x for x in tables if x != "unknown"])
-                    | pl.col("type").is_null()
+                    ~pl.col("payment_type").is_in([x for x in tables if x != "unknown"])
+                    | pl.col("payment_type").is_null()
                 )
             )
             table_dict[table] = {
