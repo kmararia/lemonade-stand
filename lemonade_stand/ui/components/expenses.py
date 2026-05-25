@@ -6,28 +6,21 @@ from lemonade_stand.ui.states.budget_state import BudgetState
 from lemonade_stand.ui.states.budget_state import Expense
 
 
-def status_badge(status: str) -> rx.Component:
+def status_badge(status: bool) -> rx.Component:
     """"""
     return rx.match(
         status,
         (
-            "Approved",
+            True,
             rx.el.span(
-                "Approved",
+                "Include",
                 class_name="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
             ),
         ),
         (
-            "Pending",
+            False,
             rx.el.span(
-                "Pending",
-                class_name="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-            ),
-        ),
-        (
-            "Rejected",
-            rx.el.span(
-                "Rejected",
+                "Exclude",
                 class_name="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
             ),
         ),
@@ -48,7 +41,7 @@ def expense_row(expense: Expense) -> rx.Component:
                     class_name="text-sm font-medium text-gray-900 dark:text-gray-100",
                 ),
                 rx.cond(
-                    expense.get("recurring_frequency", "One-time") != "One-time",
+                    expense.get("recurring_flag", False),
                     rx.el.div(
                         rx.icon(
                             "repeat",
@@ -56,15 +49,14 @@ def expense_row(expense: Expense) -> rx.Component:
                             class_name="text-indigo-500 dark:text-cyan-400",
                         ),
                         class_name="ml-2 p-1 bg-indigo-50 dark:bg-cyan-900/30 rounded-full",
-                        title=f"Recurring: {expense.get('recurring_frequency')}",
                     ),
                 ),
                 rx.cond(
-                    expense.get("has_attachment", False),
+                    expense.get("has_source_file", False),
                     rx.el.div(
                         rx.icon("paperclip", size=12, class_name="text-gray-400"),
                         class_name="ml-2",
-                        title="Has Attachment",
+                        title=expense.get("source_file", ""),
                     ),
                 ),
                 class_name="flex items-center",
@@ -91,7 +83,7 @@ def expense_row(expense: Expense) -> rx.Component:
         ),
         rx.el.td(
             rx.el.span(
-                expense["payment_method"],
+                expense["payment_type"],
                 class_name="text-sm text-gray-500 dark:text-gray-400",
             ),
             class_name="px-6 py-4 whitespace-nowrap",
@@ -103,10 +95,10 @@ def expense_row(expense: Expense) -> rx.Component:
                     class_name="text-sm text-gray-500 dark:text-gray-400 max-w-[200px] truncate block",
                 ),
                 rx.cond(
-                    expense.get("tags", []).length() > 0,
+                    expense.get("location", []).length() > 0,
                     rx.el.div(
                         rx.foreach(
-                            expense.get("tags", []),
+                            expense.get("location", []),
                             lambda tag: rx.el.span(
                                 tag,
                                 class_name="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
@@ -120,7 +112,7 @@ def expense_row(expense: Expense) -> rx.Component:
             class_name="px-6 py-4",
         ),
         rx.el.td(
-            status_badge(expense["approval_status"]),
+            status_badge(expense["exclude_flag"]),
             class_name="px-6 py-4 whitespace-nowrap",
         ),
         class_name="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors even:bg-gray-50/50 dark:even:bg-gray-800/30",
@@ -161,7 +153,7 @@ def expenses_table() -> rx.Component:
                                 class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                             ),
                             rx.el.th(
-                                "Payment",
+                                "Payment Type",
                                 class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
                             ),
                             rx.el.th(

@@ -17,9 +17,7 @@ class DashboardState(rx.State):
             insights.append(
                 "Spending velocity is high. Consider freezing non-essential expenses."
             )
-        pending_count = len(
-            [e for e in bs.expenses if e["approval_status"] == "Pending"]
-        )
+        pending_count = len([e for e in bs.expenses if e["exclude_flag"] == "Pending"])
         if pending_count > 5:
             insights.append(
                 f"You have {pending_count} pending approvals. Clearing these will update accurate spend data."

@@ -107,9 +107,9 @@ class SettingsState(rx.State):
                     expense["category"],
                     expense["description"],
                     expense["amount"],
-                    expense["payment_method"],
-                    expense["approval_status"],
-                    expense.get("recurring_frequency", "One-time"),
+                    expense["payment_type"],
+                    expense["exclude_flag"],
+                    expense.get("recurring_flag", False),
                 ]
             )
         csv_content = output.getvalue()

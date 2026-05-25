@@ -5,7 +5,13 @@ import logging
 import uuid
 from typing import TypedDict
 
+import polars as pl
 import reflex as rx
+
+from lemonade_stand.config import UserConfig
+from lemonade_stand.data import get_data
+
+USER_CONFIG = UserConfig()
 
 
 class Budget(TypedDict):
@@ -49,19 +55,20 @@ class Expense(TypedDict):
 
     id: str
     date: str
-    category: str
-    amount: float
-    payment_method: str
     description: str
-    approval_status: str
-    recurring_frequency: str
-    has_attachment: bool
-    tags: list[str]
+    amount: float
+    category: str
+    payment_type: str
+    location: list[str]
+    exclude_flag: str
+
+    recurring_flag: bool
+    has_source_file: bool
     splits: list[ExpenseSplit]
     comments: list[ExpenseComment]
     history: list[ExpenseHistory]
     assigned_approver_id: str
-    attachment_url: str
+    source_file: str
 
 
 class ChartData(TypedDict):
@@ -109,17 +116,17 @@ class BudgetState(rx.State):
         "date": "",
         "category": "",
         "amount": 0.0,
-        "payment_method": "Credit Card",
+        "payment_type": "Credit Card",
         "description": "",
-        "approval_status": "Pending",
-        "recurring_frequency": "One-time",
-        "has_attachment": False,
+        "exclude_flag": False,
+        "recurring_flag": False,
+        "has_source_file": False,
         "tags": [],
         "splits": [],
         "comments": [],
         "history": [],
         "assigned_approver_id": "",
-        "attachment_url": "",
+        "source_file": "",
     }
     selected_expense_ids: list[str] = []
     available_tags: list[str] = [
@@ -205,282 +212,26 @@ class BudgetState(rx.State):
             "period": "Q2",
         },
     ]
-    expenses: list[Expense] = [
-        {
-            "id": "e1",
-            "date": "2024-01-15",
-            "category": "Software Licenses",
-            "amount": 5000.0,
-            "payment_method": "Bank Transfer",
-            "description": "Annual Enterprise License Renewal",
-            "approval_status": "Approved",
-            "recurring_frequency": "Annual",
-            "has_attachment": True,
-            "tags": ["Software", "Internal"],
-            "splits": [],
-            "comments": [
-                {
-                    "id": "c1",
-                    "user": "Sarah Marketing",
-                    "avatar": "Sarah",
-                    "text": "Approved for annual renewal.",
-                    "timestamp": "2024-01-16 10:00",
-                }
-            ],
-            "history": [
-                {
-                    "action": "Approved",
-                    "user": "Sarah Marketing",
-                    "timestamp": "2024-01-16 10:00",
-                    "note": "Annual renewal",
-                }
-            ],
-            "assigned_approver_id": "",
-            "attachment_url": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000",
-        },
-        {
-            "id": "e2",
-            "date": "2024-01-20",
-            "category": "Marketing",
-            "amount": 1200.0,
-            "payment_method": "Credit Card",
-            "description": "Q1 Planning Workshop",
-            "approval_status": "Approved",
-            "recurring_frequency": "One-time",
-            "has_attachment": False,
-            "tags": ["Internal"],
-            "splits": [],
-            "comments": [],
-            "history": [],
-            "assigned_approver_id": "",
-            "attachment_url": "",
-        },
-        {
-            "id": "e3",
-            "date": "2024-01-25",
-            "category": "Engineering",
-            "amount": 800.0,
-            "payment_method": "Credit Card",
-            "description": "DevOps Tools",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e4",
-            "date": "2024-02-05",
-            "category": "Engineering",
-            "amount": 3500.0,
-            "payment_method": "Bank Transfer",
-            "description": "AWS Cloud Services - Jan",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e5",
-            "date": "2024-02-10",
-            "category": "Sales",
-            "amount": 1500.0,
-            "payment_method": "Credit Card",
-            "description": "Client Visit - Chicago",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e6",
-            "date": "2024-02-14",
-            "category": "Team Events",
-            "amount": 800.0,
-            "payment_method": "Reimbursement",
-            "description": "Valentine's Day Team Lunch",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e7",
-            "date": "2024-02-28",
-            "category": "Operations",
-            "amount": 450.0,
-            "payment_method": "Credit Card",
-            "description": "Office Supplies Restock",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e8",
-            "date": "2024-03-01",
-            "category": "Marketing",
-            "amount": 1200.5,
-            "payment_method": "Credit Card",
-            "description": "Q1 Ad Campaign Launch",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e9",
-            "date": "2024-03-02",
-            "category": "Engineering",
-            "amount": 3400.0,
-            "payment_method": "Bank Transfer",
-            "description": "AWS Cloud Services - Feb",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e10",
-            "date": "2024-03-05",
-            "category": "Office Renovation",
-            "amount": 850.0,
-            "payment_method": "Invoice",
-            "description": "New Ergonomic Chairs",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e11",
-            "date": "2024-03-10",
-            "category": "HR",
-            "amount": 2500.0,
-            "payment_method": "Invoice",
-            "description": "Recruitment Agency Fee",
-            "approval_status": "Pending",
-        },
-        {
-            "id": "e12",
-            "date": "2024-03-15",
-            "category": "Sales",
-            "amount": 3200.0,
-            "payment_method": "Credit Card",
-            "description": "Q1 Sales Conference Tickets",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e13",
-            "date": "2024-03-20",
-            "category": "Engineering",
-            "amount": 2100.0,
-            "payment_method": "Credit Card",
-            "description": "New Test Devices",
-            "approval_status": "Rejected",
-        },
-        {
-            "id": "e14",
-            "date": "2024-04-02",
-            "category": "Marketing",
-            "amount": 8000.0,
-            "payment_method": "Invoice",
-            "description": "Q2 Media Buy",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e15",
-            "date": "2024-04-05",
-            "category": "Engineering",
-            "amount": 3600.0,
-            "payment_method": "Bank Transfer",
-            "description": "AWS Cloud Services - Mar",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e16",
-            "date": "2024-04-10",
-            "category": "Website Redesign",
-            "amount": 5000.0,
-            "payment_method": "Bank Transfer",
-            "description": "Design Agency Deposit",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e17",
-            "date": "2024-04-15",
-            "category": "Q2 Hiring Push",
-            "amount": 2000.0,
-            "payment_method": "Credit Card",
-            "description": "LinkedIn Job Slots",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e18",
-            "date": "2024-04-22",
-            "category": "Operations",
-            "amount": 1200.0,
-            "payment_method": "Invoice",
-            "description": "HVAC Maintenance",
-            "approval_status": "Pending",
-        },
-        {
-            "id": "e19",
-            "date": "2024-05-03",
-            "category": "Engineering",
-            "amount": 4000.0,
-            "payment_method": "Bank Transfer",
-            "description": "AWS Cloud Services - Apr",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e20",
-            "date": "2024-05-10",
-            "category": "HR",
-            "amount": 1500.0,
-            "payment_method": "Credit Card",
-            "description": "Manager Training Workshop",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e21",
-            "date": "2024-05-15",
-            "category": "Website Redesign",
-            "amount": 8000.0,
-            "payment_method": "Bank Transfer",
-            "description": "Development Milestone 1",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e22",
-            "date": "2024-05-20",
-            "category": "Marketing",
-            "amount": 450.0,
-            "payment_method": "Reimbursement",
-            "description": "Client Gifts",
-            "approval_status": "Rejected",
-        },
-        {
-            "id": "e23",
-            "date": "2024-06-01",
-            "category": "Team Events",
-            "amount": 1200.0,
-            "payment_method": "Credit Card",
-            "description": "Summer Team Outing",
-            "approval_status": "Pending",
-        },
-        {
-            "id": "e24",
-            "date": "2024-06-05",
-            "category": "Engineering",
-            "amount": 4200.0,
-            "payment_method": "Bank Transfer",
-            "description": "AWS Cloud Services - May",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e25",
-            "date": "2024-06-12",
-            "category": "Sales",
-            "amount": 4000.0,
-            "payment_method": "Credit Card",
-            "description": "Annual Client Dinner",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e26",
-            "date": "2024-06-25",
-            "category": "Office Renovation",
-            "amount": 5500.0,
-            "payment_method": "Invoice",
-            "description": "Painting and Flooring",
-            "approval_status": "Approved",
-        },
-        {
-            "id": "e27",
-            "date": "2024-06-28",
-            "category": "Q2 Hiring Push",
-            "amount": 3500.0,
-            "payment_method": "Invoice",
-            "description": "Headhunter Success Fee",
-            "approval_status": "Pending",
-        },
-    ]
+    expenses: list[Expense] = list(
+        get_data(config=USER_CONFIG)
+        .expenses.sort("date", "amount", descending=[True, True])
+        .select(
+            "date",
+            "description",
+            "amount",
+            "category",
+            "payment_type",
+            "exclude_flag",
+            "recurring_flag",
+            "source_file",
+            pl.col("source_file").is_not_null().alias("has_source_file"),
+            pl.concat_list("state", "city").list.drop_nulls().alias("location"),
+        )
+        .limit(6)
+        .collect()
+        .iter_rows(named=True)
+    )
+
     departments: list[str] = ["Marketing", "Engineering", "HR", "Sales", "Operations"]
     projects: list[str] = ["Office Renovation", "Website Redesign", "Q2 Hiring Push"]
     warning_threshold: int = 75
@@ -498,7 +249,7 @@ class BudgetState(rx.State):
         """"""
 
         return sum(
-            e["amount"] for e in self.expenses if e["approval_status"] != "Rejected"
+            e["amount"] for e in self.expenses if e["exclude_flag"] != "Rejected"
         )
 
     @rx.var
@@ -542,8 +293,7 @@ class BudgetState(rx.State):
             category_spent = sum(
                 e["amount"]
                 for e in self.expenses
-                if e["category"] == budget["name"]
-                and e["approval_status"] != "Rejected"
+                if e["category"] == budget["name"] and e["exclude_flag"] != "Rejected"
             )
             data.append(
                 {
@@ -563,10 +313,10 @@ class BudgetState(rx.State):
             spent = sum(
                 e["amount"]
                 for e in self.expenses
-                if e["category"] == b["name"] and e["approval_status"] != "Rejected"
+                if e["category"] == b["name"] and e["exclude_flag"]
             )
             total = b["allocated_amount"]
-            utilization = spent / total * 100 if total > 0 else 0.0
+            utilization = (spent / total * 100) if total > 0 else 0.0
             stats.append(
                 {
                     "id": b["id"],
@@ -599,14 +349,14 @@ class BudgetState(rx.State):
     @rx.var
     def pending_approvals_count(self) -> int:
         """Returns the count of expenses pending approval."""
-        return len([e for e in self.expenses if e["approval_status"] == "Pending"])
+        return len([e for e in self.expenses if e["exclude_flag"] == "Pending"])
 
     @rx.var
     def category_distribution(self) -> list[dict]:
         """Returns data for pie chart distribution."""
         distribution = {}
         for e in self.expenses:
-            if e["approval_status"] == "Rejected":
+            if e["exclude_flag"] == "Rejected":
                 continue
             cat = e["category"]
             distribution[cat] = distribution.get(cat, 0) + e["amount"]
@@ -620,10 +370,10 @@ class BudgetState(rx.State):
         trends = {}
         all_categories = set()
         for e in self.expenses:
-            if e["approval_status"] == "Rejected":
+            if e["exclude_flag"] == "Rejected":
                 continue
             try:
-                date_obj = datetime.datetime.strptime(e["date"], "%Y-%m-%d")
+                date_obj = e["date"]
                 month_key = date_obj.strftime("%b")
                 if month_key not in trends:
                     trends[month_key] = {"name": month_key}
@@ -706,10 +456,10 @@ class BudgetState(rx.State):
             month_name = calendar.month_abbr[m]
             monthly_data[month_name] = {"actual": 0, "projected": 0}
         for e in self.expenses:
-            if e["approval_status"] == "Rejected":
+            if e["exclude_flag"] == "Rejected":
                 continue
             try:
-                date_obj = datetime.datetime.strptime(e["date"], "%Y-%m-%d")
+                date_obj = e["date"]
                 if date_obj.year == current_year:
                     month_name = date_obj.strftime("%b")
                     monthly_data[month_name]["actual"] += e["amount"]
@@ -743,7 +493,7 @@ class BudgetState(rx.State):
                 spent = sum(
                     e["amount"]
                     for e in self.expenses
-                    if e["category"] == b["name"] and e["approval_status"] != "Rejected"
+                    if e["category"] == b["name"] and e["exclude_flag"] != "Rejected"
                 )
                 data.append(
                     {"name": b["name"], "Budget": b["allocated_amount"], "Spent": spent}
@@ -821,11 +571,11 @@ class BudgetState(rx.State):
             "date": datetime.date.today().isoformat(),
             "category": default_category,
             "amount": 0.0,
-            "payment_method": "Credit Card",
+            "payment_type": "Credit Card",
             "description": "",
-            "approval_status": "Pending",
-            "recurring_frequency": "One-time",
-            "has_attachment": False,
+            "exclude_flag": False,
+            "recurring_flag": False,
+            "has_source_file": False,
             "tags": [],
             "splits": [],
             "comments": [],
@@ -887,7 +637,8 @@ class BudgetState(rx.State):
         new_expense["id"] = str(uuid.uuid4())
         new_expense["description"] = f"Copy of {expense['description']}"
         new_expense["date"] = datetime.date.today().isoformat()
-        new_expense["approval_status"] = "Pending"
+        new_expense["exclude_flag"] = "Pending"
+        new_expense["recurring_flag"] = False
         new_expense["history"] = []
         new_expense["comments"] = []
         self.expenses.insert(0, new_expense)
@@ -951,7 +702,7 @@ class BudgetState(rx.State):
         if self.current_expense["attachment_url"]:
             self.attachment_zoom = 100
             self.is_attachment_preview_open = True
-        elif self.current_expense["has_attachment"]:
+        elif self.current_expense["has_source_file"]:
             self.current_expense["attachment_url"] = (
                 "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=1000"
             )
@@ -1108,7 +859,7 @@ class BudgetState(rx.State):
 
         for e in self.expenses:
             if e["id"] in self.selected_expense_ids:
-                e["approval_status"] = "Approved"
+                e["exclude_flag"] = "Approved"
         self.selected_expense_ids = []
         return rx.toast("Selected expenses approved.")
 
@@ -1118,7 +869,7 @@ class BudgetState(rx.State):
 
         for e in self.expenses:
             if e["id"] in self.selected_expense_ids:
-                e["approval_status"] = "Rejected"
+                e["exclude_flag"] = "Rejected"
         self.selected_expense_ids = []
         return rx.toast("Selected expenses rejected.")
 
@@ -1166,4 +917,4 @@ class BudgetState(rx.State):
     def toggle_current_expense_attachment(self, checked: bool):
         """"""
 
-        self.current_expense["has_attachment"] = checked
+        self.current_expense["has_source_file"] = checked
