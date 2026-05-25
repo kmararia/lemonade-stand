@@ -33,7 +33,7 @@ class Statement:
             {
                 "date": pl.Date(),
                 "category": pl.String(),
-                "amount": pl.Decimal(None, 2),
+                "amount": pl.Float64(),
                 "payment": pl.String(),
                 "detail": pl.String(),
                 "payment_type": pl.String(),
