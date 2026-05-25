@@ -131,6 +131,7 @@ class TransactionCleaner:
         self.output_df = self.find_category_type()
         self.output_df = self.find_locations()
         self.output_df = self.find_merchant()
+        self.output_df = self.flag_recurring_transactions()
         self.output_df = self.flag_exclusions()
 
     def _get_field_value_list(self, data_df: pl.LazyFrame, col_name: str) -> list:
@@ -348,12 +349,45 @@ class TransactionCleaner:
             )
         )
 
+    def flag_recurring_transactions(self) -> pl.LazyFrame:
+        """
+        Flags recurring transactions based on historical patterns.
+
+        Returns:
+            A polars dataframe with a recurring flag column added
+        """
+
+        return self.output_df.with_columns(
+            pl.len().over(partition_by="merchant").alias("total_count"),
+            pl.col("amount").mean().over(partition_by="merchant").alias("avg_amount"),
+            pl.col("amount").std().over(partition_by="merchant").alias("std_amount"),
+            pl.col("date")
+            .sort()
+            .diff()
+            .dt.total_days()
+            .mean()
+            .over(partition_by="merchant")
+            .alias("avg_days_between"),
+        ).with_columns(
+            recurring_flag=pl.when(
+                (pl.col("total_count") >= 3)  # Must have a history
+                & (
+                    pl.col("avg_days_between").is_between(27, 32)
+                )  # Happens roughly every month
+                & (
+                    (pl.col("std_amount") / pl.col("avg_amount")).fill_null(0) < 0.06
+                )  # Amount varies by less than 6%
+            )
+            .then(True)
+            .otherwise(False)
+        )
+
     def flag_exclusions(self) -> pl.LazyFrame:
         """
         Flags transactions that are listed in the user exclusion configuration file.
 
         Returns:
-            A polars expression for filtering out the "bad" records
+            A polars dataframe with an exclusion flag column added
         """
 
         config_path = APP_PATHS.config_dir / "exclusions.json"
