@@ -53,6 +53,7 @@ class UserConfig:
     always_refresh_data: bool = field(init=False)
     always_skip_login: bool = field(init=False)
     statement_dir: Path = field(init=False)
+    training_file: Path = field(init=False)
     dev_mode: bool = field(default=False)
 
     def __post_init__(self):
@@ -70,6 +71,11 @@ class UserConfig:
             USER_CONFIG["statement-dir"]
             if self.dev_mode
             else config_dict["statement-dir"]
+        )
+        self.training_file = Path(
+            USER_CONFIG["training-file"]
+            if self.dev_mode
+            else config_dict["training-file"]
         )
 
     def __str__(self):

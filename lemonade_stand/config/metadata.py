@@ -16,6 +16,9 @@ USER_CONFIG = {
     "statement-dir": str(
         Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
     ),
+    "training-file": str(
+        Path(lemonade_stand.__file__).parents[1] / "tests" / "model" / "training.csv"
+    ),
 }
 
 MODEL_CONFIG = {
