@@ -14,6 +14,8 @@ from countrystatecity_countries import get_state_by_code
 from countrystatecity_countries import get_states_of_country
 
 from lemonade_stand.config import AppDir
+from lemonade_stand.config import UserConfig
+from lemonade_stand.model import predict_buckets
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
@@ -115,6 +117,7 @@ class StateCities:
 class TransactionCleaner:
     """Filters out transactions that are most likely invalid"""
 
+    user_config: UserConfig
     input_df: pl.LazyFrame
     output_df: pl.LazyFrame = field(init=False)
     state_data: StateCities = field(default_factory=StateCities)
@@ -124,12 +127,11 @@ class TransactionCleaner:
 
         LOGGER.debug("Adding processed fields to the dataset...")
 
-        self.output_df = self.input_df
-
-        self.output_df = self.flag_exclusions()
-        self.output_df = self.clean_description()
+        self.output_df = TransactionCleaner.add_description(self.input_df)
+        self.output_df = self.find_category_type()
         self.output_df = self.find_locations()
         self.output_df = self.find_merchant()
+        self.output_df = self.flag_exclusions()
 
     def _get_field_value_list(self, data_df: pl.LazyFrame, col_name: str) -> list:
         """Gets a list of column values"""
@@ -143,9 +145,10 @@ class TransactionCleaner:
             .to_list()
         )
 
-    def clean_description(self) -> pl.LazyFrame:
+    @staticmethod
+    def add_description(input_df: pl.LazyFrame) -> pl.LazyFrame:
         """
-        Cleans the description field of the transaction.
+        Adds a cleaned description field to the transaction dataframe.
 
         Returns:
             A polars dataframe with the cleaned description
@@ -171,16 +174,16 @@ class TransactionCleaner:
             r"|[^\w\s']+"  #            all symbols EXCEPT letters, numbers, spaces, and apostrophes
         )
 
-        return self.output_df.with_columns(
-            clean_description=(
-                pl.col("description")
+        return input_df.with_columns(
+            description=(
+                pl.col("detail")
                 .str.replace_all(delete_regex, "")
                 .str.replace_all(replace_regex, " ")
                 .str.replace_all(r"\s+", " ")
                 .str.strip_chars()
                 .replace("", None)
             )
-        ).filter(pl.col("clean_description").is_not_null())
+        ).filter(pl.col("description").is_not_null())
 
     def find_merchant(self) -> pl.LazyFrame:
         """
@@ -209,7 +212,7 @@ class TransactionCleaner:
 
         return self.output_df.with_columns(
             merchant=(
-                pl.col("clean_description")
+                pl.col("description")
                 .str.replace_all(self.state_data.state_code_regex, "")
                 .str.replace_all(self.state_data.state_name_regex, "")
                 .str.replace_all(delete_regex, "")
@@ -232,10 +235,10 @@ class TransactionCleaner:
             state=(
                 pl.coalesce(
                     [
-                        pl.col("clean_description").str.extract(
+                        pl.col("description").str.extract(
                             self.state_data.state_name_regex, 1
                         ),
-                        pl.col("clean_description")
+                        pl.col("description")
                         .str.extract(self.state_data.state_code_regex, 1)
                         .replace_strict(self.state_data.code_to_name_map, default=None),
                     ]
@@ -248,7 +251,7 @@ class TransactionCleaner:
                 pl.when(pl.col("state").is_not_null())
                 .then(
                     # Check for a city name match based on the found state
-                    pl.col("clean_description").str.extract(
+                    pl.col("description").str.extract(
                         pl.col("state").replace_strict(
                             self.state_data.regexmap_sname_city, default=None
                         ),
@@ -276,7 +279,7 @@ class TransactionCleaner:
         #                 [
         #                     pl.coalesce(
         #                         [
-        #                             pl.col("clean_description").str.extract(
+        #                             pl.col("description").str.extract(
         #                                 cities_regex, 1
         #                             )
         #                             for cities_regex in self.state_data.regex_cities_generator
@@ -311,9 +314,43 @@ class TransactionCleaner:
         #     ),
         # )
 
+    def find_category_type(self):
+        """
+        Finds the category and type of the transaction by using the description field.
+
+        Returns:
+            A polars dataframe with the category and type of the transaction
+        """
+
+        # Assign predicted buckets (Category and Type) to the transactions
+        model_data = predict_buckets(
+            config=self.user_config,
+            input_data=self.output_df,
+            func_field_cleaner=TransactionCleaner.add_description,
+        )
+
+        return model_data.inference_data.with_columns(
+            type=pl.col("category").replace_strict(
+                {
+                    x: str(y[0]).lower()
+                    for x, y in (
+                        model_data.train_data.select("category", "type")
+                        .collect()
+                        .rows_by_key(
+                            key="category",
+                            unique=True,
+                        )
+                        .items()
+                    )
+                    if x is not None and y[0] is not None
+                },
+                default=None,
+            )
+        )
+
     def flag_exclusions(self) -> pl.LazyFrame:
         """
-        Flags transactions that are listed in the user exclusion configuration file or have amount values in the description field.
+        Flags transactions that are listed in the user exclusion configuration file.
 
         Returns:
             A polars expression for filtering out the "bad" records
@@ -335,17 +372,10 @@ class TransactionCleaner:
         )
 
         return self.output_df.with_columns(
-            (
-                (
-                    pl.col("description")
-                    .str.to_lowercase()
-                    .str.count_matches(rf"{exclude_pattern}")
-                    > 0
-                )
-                | (
-                    pl.col("description")
-                    .str.extract(r"(\b-?\d*,?\d+\.\d{2}\b)", 1)
-                    .is_not_null()
-                )
-            ).alias("exclude_flag")
+            exclude_flag=(
+                pl.col("description")
+                .str.to_lowercase()
+                .str.count_matches(rf"{exclude_pattern}")
+                > 0
+            )
         )
