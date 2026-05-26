@@ -128,6 +128,7 @@ class TransactionCleaner:
         LOGGER.debug("Adding processed fields to the dataset...")
 
         self.output_df = TransactionCleaner.add_description(self.input_df)
+        self.output_df = self.adjust_amount_sign()
         self.output_df = self.find_category_type()
         self.output_df = self.find_locations()
         self.output_df = self.find_merchant()
@@ -164,6 +165,7 @@ class TransactionCleaner:
             r"|\b(CARD|CARD\s+ENDING\s+IN|AUT)\s+\d+[\s\S]*"  #     strings that look like card or authorization numbers
             r"|\bPAYMENT\s+\d+[\s\S]*"  #                           strings that look like payment confirmations
             # r"|\b\-+\b"                                     #     hyphens strictly between characters
+            r"|\b(ELECTRONIC PMT WEB|PAYMENT SENT|ACH WITHDRAWAL|PAYMENT THANK YOU - WEB|DEBIT PURCHASE)"  # strings that look like electronic payment confirmations
         )
 
         replace_regex = (
@@ -185,6 +187,20 @@ class TransactionCleaner:
                 .replace("", None)
             )
         ).filter(pl.col("description").is_not_null())
+
+    def adjust_amount_sign(self) -> pl.LazyFrame:
+        """
+        Update the amount field if the statement source has a majority of negative amounts.
+
+        Returns:
+            A polars dataframe with the amount field updated to have the correct sign
+        """
+
+        return self.output_df.with_columns(
+            amount=pl.when((pl.col("amount") < 0).mean().over("source_file") >= 0.7)
+            .then(pl.col("amount").abs())
+            .otherwise(pl.col("amount"))
+        )
 
     def find_merchant(self) -> pl.LazyFrame:
         """
@@ -357,29 +373,44 @@ class TransactionCleaner:
             A polars dataframe with a recurring flag column added
         """
 
-        return self.output_df.with_columns(
-            pl.len().over(partition_by="merchant").alias("total_count"),
-            pl.col("amount").mean().over(partition_by="merchant").alias("avg_amount"),
-            pl.col("amount").std().over(partition_by="merchant").alias("std_amount"),
-            pl.col("date")
-            .sort()
-            .diff()
-            .dt.total_days()
-            .mean()
-            .over(partition_by="merchant")
-            .alias("avg_days_between"),
-        ).with_columns(
-            recurring_flag=pl.when(
-                (pl.col("total_count") >= 3)  # Must have a history
-                & (
-                    pl.col("avg_days_between").is_between(27, 32)
-                )  # Happens roughly every month
-                & (
-                    (pl.col("std_amount") / pl.col("avg_amount")).fill_null(0) < 0.06
-                )  # Amount varies by less than 6%
+        return (
+            self.output_df.with_columns(
+                pl.len().over(partition_by="merchant").alias("total_count"),
+                (pl.col("amount").abs().mean().over(partition_by="merchant")).alias(
+                    "avg_amount"
+                ),
+                (pl.col("amount").abs().std().over(partition_by="merchant")).alias(
+                    "std_amount"
+                ),
+                (
+                    pl.col("date")
+                    .sort()
+                    .diff()
+                    .dt.total_days()
+                    .mean()
+                    .over(partition_by="merchant")
+                ).alias("avg_days_between"),
             )
-            .then(True)
-            .otherwise(False)
+            .with_columns(
+                recurring_flag=pl.when(
+                    (pl.col("total_count") >= 3)  # Must have a history
+                    & (
+                        pl.col("avg_days_between").is_between(27, 32)
+                    )  # Happens roughly every month
+                    & (
+                        (pl.col("std_amount") / pl.col("avg_amount")).fill_null(0)
+                        < 0.06
+                    )  # Amount varies by less than 6%
+                )
+                .then(True)
+                .otherwise(False)
+            )
+            .drop(
+                "total_count",
+                "avg_amount",
+                "std_amount",
+                "avg_days_between",
+            )
         )
 
     def flag_exclusions(self) -> pl.LazyFrame:
