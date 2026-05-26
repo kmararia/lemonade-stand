@@ -5,13 +5,17 @@ import logging
 import uuid
 from typing import TypedDict
 
-import polars as pl
 import reflex as rx
 
 from lemonade_stand.config import UserConfig
 from lemonade_stand.data import get_data
 
+from .utils import DataManager
+
 USER_CONFIG = UserConfig()
+DATA_CONFIG = DataManager(
+    name="expenses", input_data=get_data(config=USER_CONFIG).expenses
+)
 
 
 class Budget(TypedDict):
@@ -102,141 +106,23 @@ class BudgetState(rx.State):
     is_expense_modal_open: bool = False
     is_attachment_preview_open: bool = False
     active_expense_tab: str = "details"
-    new_comment_text: str = ""
-    attachment_zoom: int = 100
-    current_budget: Budget = {
-        "id": "",
-        "name": "",
-        "type": "Department",
-        "allocated_amount": 0.0,
-        "period": "Annual",
-    }
-    current_expense: Expense = {
-        "id": "",
-        "date": "",
-        "category": "",
-        "amount": 0.0,
-        "payment_type": "Credit Card",
-        "description": "",
-        "exclude_flag": False,
-        "recurring_flag": False,
-        "has_source_file": False,
-        "tags": [],
-        "splits": [],
-        "comments": [],
-        "history": [],
-        "assigned_approver_id": "",
-        "source_file": "",
-    }
     selected_expense_ids: list[str] = []
-    available_tags: list[str] = [
-        "Travel",
-        "Software",
-        "Equipment",
-        "Food",
-        "Office",
-        "Client",
-        "Internal",
-    ]
+    attachment_zoom: int = 100
+    new_comment_text: str = ""
     expense_search: str = ""
     expense_category_filter: str = "All"
-    budgets: list[Budget] = [
-        {
-            "id": "b1",
-            "name": "Marketing",
-            "type": "Department",
-            "allocated_amount": 50000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b2",
-            "name": "Engineering",
-            "type": "Department",
-            "allocated_amount": 120000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b3",
-            "name": "Office Renovation",
-            "type": "Project",
-            "allocated_amount": 15000.0,
-            "period": "One-time",
-        },
-        {
-            "id": "b4",
-            "name": "Software Licenses",
-            "type": "Category",
-            "allocated_amount": 8000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b5",
-            "name": "Team Events",
-            "type": "Category",
-            "allocated_amount": 5000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b6",
-            "name": "HR",
-            "type": "Department",
-            "allocated_amount": 30000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b7",
-            "name": "Sales",
-            "type": "Department",
-            "allocated_amount": 80000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b8",
-            "name": "Operations",
-            "type": "Department",
-            "allocated_amount": 45000.0,
-            "period": "Annual",
-        },
-        {
-            "id": "b9",
-            "name": "Website Redesign",
-            "type": "Project",
-            "allocated_amount": 25000.0,
-            "period": "One-time",
-        },
-        {
-            "id": "b10",
-            "name": "Q2 Hiring Push",
-            "type": "Project",
-            "allocated_amount": 12000.0,
-            "period": "Q2",
-        },
-    ]
-    expenses: list[Expense] = list(
-        get_data(config=USER_CONFIG)
-        .expenses.sort("date", "amount", descending=[True, True])
-        .select(
-            "date",
-            "description",
-            "amount",
-            "category",
-            "payment_type",
-            "exclude_flag",
-            "recurring_flag",
-            "source_file",
-            pl.col("source_file").is_not_null().alias("has_source_file"),
-            pl.concat_list("state", "city").list.drop_nulls().alias("location"),
-        )
-        .limit(6)
-        .collect()
-        .iter_rows(named=True)
-    )
+
+    available_tags: list[str] = DATA_CONFIG.available_categories
+    budgets: list[Budget] = DATA_CONFIG.budget_allocations
+    expenses: list[Expense] = list(DATA_CONFIG.get_row_iterable)
+    current_budget: Budget = DATA_CONFIG.current_allocation
+    current_expense: Expense = DATA_CONFIG.current_row
 
     departments: list[str] = ["Marketing", "Engineering", "HR", "Sales", "Operations"]
     projects: list[str] = ["Office Renovation", "Website Redesign", "Q2 Hiring Push"]
+    report_date_range: str = "Year to Date"
     warning_threshold: int = 75
     critical_threshold: int = 90
-    report_date_range: str = "Year to Date"
 
     @rx.var
     def total_budget(self) -> float:
@@ -267,25 +153,7 @@ class BudgetState(rx.State):
         return round(self.total_spent / self.total_budget * 100, 1)
 
     @rx.var
-    def budget_health_color(self) -> str:
-        """Returns a tailwind color class based on budget health."""
-        if self.utilization_percentage > self.critical_threshold:
-            return "text-red-600"
-        elif self.utilization_percentage > self.warning_threshold:
-            return "text-orange-500"
-        return "text-emerald-600"
-
-    @rx.var
-    def budget_health_bg(self) -> str:
-        """Returns a tailwind bg class based on budget health."""
-        if self.utilization_percentage > self.critical_threshold:
-            return "bg-red-100"
-        elif self.utilization_percentage > self.warning_threshold:
-            return "bg-orange-100"
-        return "bg-emerald-100"
-
-    @rx.var
-    def budget_vs_actual_data(self) -> list[ChartData]:
+    def budget_vs_actual_spend(self) -> list[ChartData]:
         """"""
 
         data = []
@@ -317,9 +185,16 @@ class BudgetState(rx.State):
             )
             total = b["allocated_amount"]
             utilization = (spent / total * 100) if total > 0 else 0.0
+            color = (
+                "red"
+                if utilization > self.critical_threshold
+                else "orange"
+                if utilization > self.warning_threshold
+                else "emerald"
+            )
+
             stats.append(
                 {
-                    "id": b["id"],
                     "name": b["name"],
                     "type": b["type"],
                     "allocated_amount": total,
@@ -327,29 +202,13 @@ class BudgetState(rx.State):
                     "spent": spent,
                     "remaining": total - spent,
                     "utilization": round(utilization, 1),
-                    "health_color": "text-red-600"
-                    if utilization > self.critical_threshold
-                    else "text-orange-500"
-                    if utilization > self.warning_threshold
-                    else "text-emerald-600",
-                    "health_bg": "bg-red-50"
-                    if utilization > self.critical_threshold
-                    else "bg-orange-50"
-                    if utilization > self.warning_threshold
-                    else "bg-emerald-50",
-                    "progress_color": "bg-red-600"
-                    if utilization > self.critical_threshold
-                    else "bg-orange-500"
-                    if utilization > self.warning_threshold
-                    else "bg-emerald-600",
+                    "health_color": f"text-{color}-500",
+                    "health_bg": f"bg-{color}-50",
+                    "progress_color": f"bg-{color}-500",
                 }
             )
-        return stats
 
-    @rx.var
-    def pending_approvals_count(self) -> int:
-        """Returns the count of expenses pending approval."""
-        return len([e for e in self.expenses if e["exclude_flag"] == "Pending"])
+        return stats
 
     @rx.var
     def category_distribution(self) -> list[dict]:
@@ -363,68 +222,6 @@ class BudgetState(rx.State):
         return [
             {"name": k, "value": v} for i, (k, v) in enumerate(distribution.items())
         ]
-
-    @rx.var
-    def monthly_trends(self) -> list[dict]:
-        """Returns data for line chart trends."""
-        trends = {}
-        all_categories = set()
-        for e in self.expenses:
-            if e["exclude_flag"] == "Rejected":
-                continue
-            try:
-                date_obj = e["date"]
-                month_key = date_obj.strftime("%b")
-                if month_key not in trends:
-                    trends[month_key] = {"name": month_key}
-                cat = e["category"]
-                all_categories.add(cat)
-                trends[month_key][cat] = trends[month_key].get(cat, 0) + e["amount"]
-            except Exception as e:
-                logging.exception("Error processing expense date: %s", e)
-                continue
-        months_order = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-        ]
-        result = []
-        for m in months_order:
-            if m in trends:
-                for cat in all_categories:
-                    if cat not in trends[m]:
-                        trends[m][cat] = 0
-                result.append(trends[m])
-        return result
-
-    @rx.var
-    def top_spending_category(self) -> str:
-        """"""
-
-        if not self.category_distribution:
-            return "None"
-        return max(self.category_distribution, key=lambda x: x["value"])["name"]
-
-    @rx.var
-    def current_split_total(self) -> float:
-        """"""
-
-        return sum(s["amount"] for s in self.current_expense["splits"])
-
-    @rx.var
-    def split_difference(self) -> float:
-        """"""
-
-        return self.current_expense["amount"] - self.current_split_total
 
     @rx.var
     def filtered_expenses(self) -> list[Expense]:
