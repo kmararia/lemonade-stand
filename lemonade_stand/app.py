@@ -6,9 +6,6 @@ from lemonade_stand.ui.components.header import header
 from lemonade_stand.ui.components.sidebar import sidebar
 from lemonade_stand.ui.pages.budgets import budgets_page
 from lemonade_stand.ui.pages.dashboard import dashboard_content
-from lemonade_stand.ui.pages.goals import goals_page
-from lemonade_stand.ui.pages.reports import reports_page
-from lemonade_stand.ui.pages.settings import settings_page
 
 
 def index() -> rx.Component:
@@ -46,7 +43,6 @@ def index() -> rx.Component:
 
 # Build and deploy the app
 app = rx.App(
-    theme=rx.theme(appearance="inherit"),
     stylesheets=[
         "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
     ],
@@ -54,6 +50,3 @@ app = rx.App(
 
 app.add_page(index, route="/")
 app.add_page(budgets_page, route="/budgets")
-app.add_page(goals_page, route="/goals")
-app.add_page(reports_page, route="/reports")
-app.add_page(settings_page, route="/settings")

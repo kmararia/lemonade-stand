@@ -4,13 +4,11 @@ import reflex as rx
 
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.expenses import expenses_table
-from lemonade_stand.ui.components.goals_widget import goals_widget
 from lemonade_stand.ui.components.stats import stats_grid
 from lemonade_stand.ui.pages.budgets import budget_modal
 from lemonade_stand.ui.states.budget_state import BudgetState
 from lemonade_stand.ui.states.budget_state import BudgetStats
 from lemonade_stand.ui.states.dashboard_state import ActivityState
-from lemonade_stand.ui.states.settings_state import SettingsState
 
 
 def quick_actions_panel() -> rx.Component:
@@ -49,9 +47,9 @@ def quick_actions_panel() -> rx.Component:
             action_button(
                 "New Budget", "wallet", BudgetState.open_add_budget_modal, "emerald"
             ),
-            action_button(
-                "Export Report", "file-down", SettingsState.export_data, "purple"
-            ),
+            # action_button(
+            #     "Export Report", "file-down", SettingsState.export_data, "purple"
+            # ),
             action_button("View Team", "users", rx.redirect("/team"), "orange"),
             class_name="grid grid-cols-2 sm:grid-cols-4 gap-4",
         ),
@@ -177,7 +175,7 @@ def dashboard_content() -> rx.Component:
         ),
         rx.el.div(
             rx.el.div(budget_health_widget(), class_name="lg:col-span-2"),
-            rx.el.div(goals_widget(), class_name="lg:col-span-1"),
+            # rx.el.div(goals_widget(), class_name="lg:col-span-1"),
             class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         rx.el.div(
