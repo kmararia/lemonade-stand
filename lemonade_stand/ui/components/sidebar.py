@@ -78,6 +78,6 @@ def sidebar() -> rx.Component:
         class_name=rx.cond(
             UIState.is_sidebar_collapsed,
             "w-20 border-r border-white/20 dark:border-gray-800/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] bg-white/80 dark:bg-gray-900/80 h-screen sticky top-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] z-30",
-            "w-72 border-r border-white/20 dark:border-gray-800/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] bg-white/80 dark:bg-gray-900/80 h-screen sticky top-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] z-30",
+            "w-56 border-r border-white/20 dark:border-gray-800/50 shadow-[4px_0_24px_rgba(0,0,0,0.02)] bg-white/80 dark:bg-gray-900/80 h-screen sticky top-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] z-30",
         ),
     )

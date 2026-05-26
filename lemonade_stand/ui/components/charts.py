@@ -105,7 +105,7 @@ def budget_chart() -> rx.Component:
                     radius=[6, 6, 0, 0],
                     bar_size=24,
                 ),
-                data=BudgetState.budget_vs_actual_data,
+                data=BudgetState.budget_vs_actual_spend,
                 height=320,
                 width="100%",
                 margin={"top": 10, "right": 0, "left": -20, "bottom": 0},

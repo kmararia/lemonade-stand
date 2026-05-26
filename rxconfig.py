@@ -10,6 +10,7 @@ config = rx.Config(
     app_module_import="lemonade_stand.app",
     disable_plugins=[SitemapPlugin],
     plugins=[
+        rx.plugins.RadixThemesPlugin(theme=rx.theme(appearance="inherit")),
         rx.plugins.TailwindV3Plugin(
             config={
                 "plugins": [
@@ -20,6 +21,6 @@ config = rx.Config(
                     "extend": {},
                 },
             }
-        )
+        ),
     ],
 )
