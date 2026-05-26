@@ -47,6 +47,7 @@
         ".ruff_cache",
         ".venv",
         ".vscode",
+        ".web",
         "__pypackages__",
         "_build",
         "build",
