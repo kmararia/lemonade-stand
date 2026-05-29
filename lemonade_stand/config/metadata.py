@@ -8,20 +8,23 @@ import lemonade_stand
 
 __version__ = importlib.metadata.version("lemonade-stand")
 
-USER_CONFIG = {
+BASE_CONFIG = {
     "app-version": __version__,
     "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    "always-refresh-data": True,
-    "always-skip-login": False,
-    "statement-dir": str(
-        Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
-    ),
-    "training-file": str(
-        Path(lemonade_stand.__file__).parents[1] / "tests" / "model" / "training.csv"
-    ),
-}
-
-MODEL_CONFIG = {
-    "version": __version__,
-    "embeddings_url": "https://nlp.stanford.edu/data/wordvecs/glove.2024.dolma.300d.zip",
+    "data": {
+        "always-refresh-data": True,
+        "statement-dir": str(
+            Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
+        ),
+    },
+    "model": {
+        "embeddings_url": "https://nlp.stanford.edu/data/wordvecs/glove.2024.dolma.300d.zip",
+        "training-file": str(
+            Path(lemonade_stand.__file__).parents[1]
+            / "tests"
+            / "model"
+            / "training.csv"
+        ),
+    },
+    "ui": {"always-skip-login": False, "dark-mode": True},
 }

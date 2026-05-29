@@ -5,14 +5,13 @@ from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
 from pathlib import Path
+from types import SimpleNamespace
 
-from lemonade_stand.config.setup import get_user_configs
-
-from .metadata import USER_CONFIG
+from .metadata import BASE_CONFIG
 
 
 @dataclass
-class AppDir:
+class AppPaths:
     """A dataclass for the applicaton directories"""
 
     root_dir: Path = field(init=False)
@@ -50,39 +49,72 @@ class UserConfig:
     """A dataclass for the applicaton configs"""
 
     app_version: str = field(init=False)
-    always_refresh_data: bool = field(init=False)
-    always_skip_login: bool = field(init=False)
-    statement_dir: Path = field(init=False)
-    training_file: Path = field(init=False)
-    dev_mode: bool = field(default=False)
+    data: SimpleNamespace = field(init=False)
+    model: SimpleNamespace = field(init=False)
+    ui: SimpleNamespace = field(init=False)
 
     def __post_init__(self):
         """Post initialization variables set up"""
-        dirs = AppDir()
 
-        # Set up the configurations
-        config_dict = get_user_configs(user_config=dirs.config_dir / "user_config.json")
+        def clean_dict_key(input_dict):
+            return {k.replace("-", "_"): v for k, v in input_dict.items()}
+
+        config_dict = self.get_user_configs()
 
         # Update object fields variables
         self.app_version = config_dict["app-version"]
-        self.always_refresh_data = bool(config_dict["always-refresh-data"])
-        self.always_skip_login = self.dev_mode or bool(config_dict["always-skip-login"])
-        self.statement_dir = Path(
-            USER_CONFIG["statement-dir"]
-            if self.dev_mode
-            else config_dict["statement-dir"]
-        )
-        self.training_file = Path(
-            USER_CONFIG["training-file"]
-            if self.dev_mode
-            else config_dict["training-file"]
-        )
+        self.data = SimpleNamespace(**clean_dict_key(config_dict["data"]))
+        self.model = SimpleNamespace(**clean_dict_key(config_dict["model"]))
+        self.ui = SimpleNamespace(**clean_dict_key(config_dict["ui"]))
 
     def __str__(self):
         """String representation of the class"""
-        print_str = [f"\t{x.name}: --> {getattr(self, x.name)}" for x in fields(self)]
+        print_str = [
+            (
+                f"\t{x.name}: --> {getattr(self, x.name)}"
+                if not isinstance(getattr(self, x.name), SimpleNamespace)
+                else f"\t{x.name}: -->\n"
+                + "\n".join(
+                    [f"\t\t{x}: {y}" for x, y in getattr(self, x.name).__dict__.items()]
+                )
+            )
+            for x in fields(self)
+        ]
 
         return "\n".join(print_str)
+
+    def get_user_configs(self):
+        """Sets up application configurations. Uses saved configs or user input configs"""
+
+        user_config = AppPaths().config_dir / "user_config.json"
+
+        # Search for the configuration file in the path
+        if user_config.exists():
+            with user_config.open("r") as file:
+                config_dict = json.load(file)
+
+            # Add configurations if missing
+            for key, val in BASE_CONFIG.items():
+                if key not in config_dict:
+                    config_dict[key] = val
+                if isinstance(val, dict):
+                    for sub_key, sub_val in val.items():
+                        if sub_key not in config_dict[key]:
+                            config_dict[key][sub_key] = sub_val
+                        elif isinstance(sub_val, Path):
+                            config_dict[key][sub_key] = Path(config_dict[key][sub_key])
+                        elif isinstance(sub_val, bool):
+                            config_dict[key][sub_key] = bool(config_dict[key][sub_key])
+        else:
+            config_dict = BASE_CONFIG
+
+        # Write out to json file
+        user_config.parent.mkdir(parents=True, exist_ok=True)
+
+        with user_config.open("w") as file:
+            json.dump(config_dict, file, indent=4)
+
+        return config_dict
 
     def update_attribute(self, mappings: dict) -> None:
         """Class method to update the object attributes
@@ -94,25 +126,42 @@ class UserConfig:
             None
 
         """
+
         # Update the object variables
         for attr, new_val in mappings.items():
-            object.__setattr__(self, attr, new_val)
+            attr = attr.replace("-", "_")
 
-        # Initialize application directory object
-        dirs = AppDir()
+            for class_attr in fields(self):
+                if attr == class_attr.name:
+                    object.__setattr__(self, class_attr.name, new_val)
+
+                elif isinstance(getattr(self, class_attr.name), SimpleNamespace):
+                    class_attr_dict = getattr(self, class_attr.name).__dict__
+
+                    if attr in class_attr_dict:
+                        new_dict = {**class_attr_dict, attr: new_val}
+                        object.__setattr__(
+                            self, class_attr.name, SimpleNamespace(**new_dict)
+                        )
+                else:
+                    continue
+                break
+            break
 
         # Write out new mappings to json file conditionally
-        if not self.dev_mode:
-            config_dict = {
-                x.name.replace("_", "-"): (
-                    str(getattr(self, x.name))
-                    if x.name == "statement_dir"
-                    else getattr(self, x.name)
-                )
-                for x in fields(self)
-                if x.name not in ["dev_mode", "category_mappings"]
-            }
+        config_dict = {
+            x.name.replace("_", "-"): (
+                getattr(self, x.name)
+                if not isinstance(getattr(self, x.name), SimpleNamespace)
+                else {
+                    x: (y if not isinstance(y, Path) else str(y))
+                    for x, y in getattr(self, x.name).__dict__.items()
+                }
+            )
+            for x in fields(self)
+        }
 
-            # Dump user configurations into file
-            with (dirs.config_dir / "user_config.json").open("w") as file:
-                json.dump(config_dict, file, indent=4)
+        # Dump user configurations into json file
+        user_config = AppPaths().config_dir / "user_config.json"
+        with user_config.open("w") as file:
+            json.dump(config_dict, file, indent=4)
