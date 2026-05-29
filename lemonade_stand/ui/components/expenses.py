@@ -2,7 +2,6 @@
 
 import reflex as rx
 
-from lemonade_stand.ui.states.budget_state import BudgetState
 from lemonade_stand.ui.states.budget_state import Expense
 
 
@@ -119,7 +118,7 @@ def expense_row(expense: Expense) -> rx.Component:
     )
 
 
-def expenses_table() -> rx.Component:
+def expenses_table(expense_data: list[Expense]) -> rx.Component:
     """"""
     return rx.el.div(
         rx.el.div(
@@ -135,7 +134,7 @@ def expenses_table() -> rx.Component:
             class_name="flex items-center justify-between mb-6",
         ),
         rx.cond(
-            BudgetState.expenses.length() > 0,
+            expense_data.length() > 0,
             rx.el.div(
                 rx.el.table(
                     rx.el.thead(
@@ -168,7 +167,7 @@ def expenses_table() -> rx.Component:
                         )
                     ),
                     rx.el.tbody(
-                        rx.foreach(BudgetState.expenses, lambda e, _: expense_row(e)),
+                        rx.foreach(expense_data, lambda e, _: expense_row(e)),
                         class_name="bg-white/50 dark:bg-transparent divide-y divide-gray-100 dark:divide-gray-700/50",
                     ),
                     class_name="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50",

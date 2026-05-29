@@ -2,8 +2,6 @@
 
 import reflex as rx
 
-from lemonade_stand.ui.states.budget_state import BudgetState
-
 
 def legend_item(name: str, color: str) -> rx.Component:
     """"""
@@ -27,7 +25,7 @@ def chart_legend() -> rx.Component:
     )
 
 
-def budget_chart() -> rx.Component:
+def budget_chart(display_data) -> rx.Component:
     """"""
 
     return rx.el.div(
@@ -105,7 +103,7 @@ def budget_chart() -> rx.Component:
                     radius=[6, 6, 0, 0],
                     bar_size=24,
                 ),
-                data=BudgetState.budget_vs_actual_spend,
+                data=display_data,
                 height=320,
                 width="100%",
                 margin={"top": 10, "right": 0, "left": -20, "bottom": 0},

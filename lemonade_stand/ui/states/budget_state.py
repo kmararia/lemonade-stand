@@ -173,7 +173,7 @@ class BudgetState(rx.State):
         return data
 
     @rx.var
-    def budget_stats(self) -> list[BudgetStats]:
+    def budget_health_stats(self) -> list[BudgetStats]:
         """"""
 
         stats = []

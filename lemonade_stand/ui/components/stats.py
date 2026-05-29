@@ -2,8 +2,6 @@
 
 import reflex as rx
 
-from lemonade_stand.ui.states.budget_state import BudgetState
-
 
 def stat_card(
     title: str,
@@ -87,13 +85,18 @@ def stat_card(
     )
 
 
-def stats_grid() -> rx.Component:
+def stats_grid(
+    total_budget: float,
+    total_spent: float,
+    remaining_budget: float,
+    utilization_pct: float,
+) -> rx.Component:
     """"""
 
     return rx.el.div(
         stat_card(
             "Total Budget",
-            f"${BudgetState.total_budget:,.0f}",
+            f"${total_budget:,.0f}",
             "wallet",
             trend="+12% from last Q",
             color="blue",
@@ -101,7 +104,7 @@ def stats_grid() -> rx.Component:
         ),
         stat_card(
             "Total Spent",
-            f"${BudgetState.total_spent:,.0f}",
+            f"${total_spent:,.0f}",
             "credit-card",
             trend="+5% vs target",
             color="indigo",
@@ -109,17 +112,17 @@ def stats_grid() -> rx.Component:
         ),
         stat_card(
             "Remaining Budget",
-            f"${BudgetState.remaining_budget:,.0f}",
+            f"${remaining_budget:,.0f}",
             "piggy-bank",
             color="indigo",
-            progress=BudgetState.utilization_percentage,
+            progress=utilization_pct,
         ),
         stat_card(
             "Utilization",
-            f"{BudgetState.utilization_percentage}%",
+            f"{utilization_pct}%",
             "pie-chart",
             color="purple",
-            progress=BudgetState.utilization_percentage,
+            progress=utilization_pct,
         ),
         class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
     )
