@@ -7,7 +7,7 @@ from typing import overload
 
 import polars as pl
 
-from lemonade_stand.config import AppDir
+from lemonade_stand.config import AppPaths
 from lemonade_stand.config import UserConfig
 from lemonade_stand.data.read import Statement
 from lemonade_stand.data.support import TransactionCleaner
@@ -126,7 +126,7 @@ class UserData:
         # Write out to delta lake
         write_path = write_delta(
             write_info_dict=table_dict,
-            write_dir=AppDir().data_dir,
+            write_dir=AppPaths().data_dir,
         )
 
         LOGGER.info("Written tables to delta lake path:\n\t%s", write_path)

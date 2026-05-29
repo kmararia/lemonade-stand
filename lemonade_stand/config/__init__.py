@@ -1,9 +1,9 @@
 """Bring up functions from the modules"""
 
-from .utils import AppDir
+from .utils import AppPaths
 from .utils import UserConfig
 
 __all__ = [
-    "AppDir",
+    "AppPaths",
     "UserConfig",
 ]

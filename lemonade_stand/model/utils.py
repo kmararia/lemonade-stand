@@ -7,9 +7,9 @@ from pathlib import Path
 
 import polars as pl
 
-from lemonade_stand.config import AppDir
+from lemonade_stand.config import AppPaths
 
-APP_PATHS = AppDir()
+APP_PATHS = AppPaths()
 
 
 @dataclass

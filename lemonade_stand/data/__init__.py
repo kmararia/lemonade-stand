@@ -3,7 +3,7 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-from lemonade_stand.config import AppDir
+from lemonade_stand.config import AppPaths
 from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
@@ -21,7 +21,7 @@ def get_data(config: UserConfig) -> UserData | SimpleNamespace:
         LOGGER.info("Reading pre-processed tables from data directory")
 
         try:
-            read_dir = AppDir().data_dir
+            read_dir = AppPaths().data_dir
             return SimpleNamespace(
                 income=read_delta(table="income", search_dir=read_dir),
                 savings=read_delta(table="savings", search_dir=read_dir),

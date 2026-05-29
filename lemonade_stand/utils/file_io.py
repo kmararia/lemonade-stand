@@ -11,11 +11,11 @@ import certifi
 import urllib3
 from tqdm import tqdm
 
-from lemonade_stand.config import AppDir
+from lemonade_stand.config import AppPaths
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-DIRECTORIES = AppDir()
+DIRECTORIES = AppPaths()
 
 
 def unzip_file(zip_path: Path, extract_to: Path = None) -> None:

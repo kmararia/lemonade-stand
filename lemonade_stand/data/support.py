@@ -13,13 +13,13 @@ from countrystatecity_countries import get_cities_of_state
 from countrystatecity_countries import get_state_by_code
 from countrystatecity_countries import get_states_of_country
 
-from lemonade_stand.config import AppDir
+from lemonade_stand.config import AppPaths
 from lemonade_stand.config import UserConfig
 from lemonade_stand.model import predict_buckets
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-APP_PATHS = AppDir()
+APP_PATHS = AppPaths()
 
 
 @dataclass

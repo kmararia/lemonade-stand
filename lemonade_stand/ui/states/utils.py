@@ -8,11 +8,11 @@ from pathlib import Path
 
 import polars as pl
 
-from lemonade_stand.config import AppDir
+from lemonade_stand.config import AppPaths
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(Path(__file__).stem)
-APP_PATHS = AppDir()
+APP_PATHS = AppPaths()
 
 
 @dataclass
