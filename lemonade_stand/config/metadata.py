@@ -13,13 +13,13 @@ BASE_CONFIG = {
     "last-updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     "data": {
         "always-refresh-data": True,
-        "statement-dir": str(
+        "statement-dir": (
             Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
         ),
     },
     "model": {
         "embeddings_url": "https://nlp.stanford.edu/data/wordvecs/glove.2024.dolma.300d.zip",
-        "training-file": str(
+        "training-file": (
             Path(lemonade_stand.__file__).parents[1]
             / "tests"
             / "model"
