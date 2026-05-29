@@ -7,7 +7,7 @@ from lemonade_stand.ui.components.expenses import expenses_table
 from lemonade_stand.ui.components.stats import stats_grid
 from lemonade_stand.ui.states.budget_state import BudgetState
 from lemonade_stand.ui.states.budget_state import BudgetStats
-from lemonade_stand.ui.states.dashboard_state import ActivityState
+from lemonade_stand.ui.states.ui_state import ActivityState
 
 
 def quick_actions_panel(
