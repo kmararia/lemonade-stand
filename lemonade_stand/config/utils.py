@@ -67,6 +67,8 @@ class UserConfig:
         self.model = SimpleNamespace(**clean_dict_key(config_dict["model"]))
         self.ui = SimpleNamespace(**clean_dict_key(config_dict["ui"]))
 
+        self.save_config()
+
     def __str__(self):
         """String representation of the class"""
         print_str = [
@@ -82,6 +84,28 @@ class UserConfig:
         ]
 
         return "\n".join(print_str)
+
+    def save_config(self):
+        """Saves the user configuration to a json file"""
+
+        config_dict = {
+            x.name.replace("_", "-"): (
+                getattr(self, x.name)
+                if not isinstance(getattr(self, x.name), SimpleNamespace)
+                else {
+                    x.replace("_", "-"): (y if not isinstance(y, Path) else str(y))
+                    for x, y in getattr(self, x.name).__dict__.items()
+                }
+            )
+            for x in fields(self)
+        }
+
+        # Dump user configurations into json file
+        user_config = AppPaths().config_dir / "user_config.json"
+        user_config.parent.mkdir(parents=True, exist_ok=True)
+
+        with user_config.open("w") as file:
+            json.dump(config_dict, file, indent=4)
 
     def get_user_configs(self):
         """Sets up application configurations. Uses saved configs or user input configs"""
@@ -107,12 +131,6 @@ class UserConfig:
                             config_dict[key][sub_key] = bool(config_dict[key][sub_key])
         else:
             config_dict = BASE_CONFIG
-
-        # Write out to json file
-        user_config.parent.mkdir(parents=True, exist_ok=True)
-
-        with user_config.open("w") as file:
-            json.dump(config_dict, file, indent=4)
 
         return config_dict
 
@@ -148,20 +166,4 @@ class UserConfig:
                 break
             break
 
-        # Write out new mappings to json file conditionally
-        config_dict = {
-            x.name.replace("_", "-"): (
-                getattr(self, x.name)
-                if not isinstance(getattr(self, x.name), SimpleNamespace)
-                else {
-                    x: (y if not isinstance(y, Path) else str(y))
-                    for x, y in getattr(self, x.name).__dict__.items()
-                }
-            )
-            for x in fields(self)
-        }
-
-        # Dump user configurations into json file
-        user_config = AppPaths().config_dir / "user_config.json"
-        with user_config.open("w") as file:
-            json.dump(config_dict, file, indent=4)
+        self.save_config()
