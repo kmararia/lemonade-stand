@@ -1,4 +1,4 @@
-"""Sets up the application configurations"""
+""" """
 
 import json
 from pathlib import Path
@@ -8,7 +8,7 @@ from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils.exceptions import VersionMismatchError
 
 LOGGER = set_up_logger(Path(__file__).stem)
-USER_CONFIG = metadata.USER_CONFIG
+BASE_CONFIG = metadata.BASE_CONFIG
 
 
 def check_version(config_path: Path, config_dict: dict):
@@ -40,26 +40,3 @@ def check_version(config_path: Path, config_dict: dict):
         except VersionMismatchError:
             _write_config(config_dict)
             return True
-
-
-def get_user_configs(user_config: Path):
-    """Sets up application configurations. Uses saved configs or user input configs"""
-    # Search for the configuration file in the path
-    if user_config.exists():
-        with user_config.open("r") as file:
-            config_dict = json.load(file)
-
-        # Add configurations if missing
-        for key, val in USER_CONFIG.items():
-            if key not in config_dict:
-                config_dict[key] = val
-    else:
-        config_dict = USER_CONFIG
-
-    # Write out to json file
-    user_config.parent.mkdir(parents=True, exist_ok=True)
-
-    with user_config.open("w") as file:
-        json.dump(config_dict, file, indent=4)
-
-    return config_dict
