@@ -30,6 +30,13 @@
     module-name = "lemonade_stand"
     module-root = ""
 
+[tool.coverage.report]
+    exclude_also = [
+        "def __repr__",
+        "def __str__",
+        "\\A(?s:.*# pragma: exclude file.*)\\Z",
+    ]
+
 [tool.ruff]
     # Same as Black.
     indent-width   = 4

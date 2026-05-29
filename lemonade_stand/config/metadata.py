@@ -1,3 +1,4 @@
+# pragma: exclude file
 """Holds metadata configurations for different module steps"""
 
 import importlib.metadata
