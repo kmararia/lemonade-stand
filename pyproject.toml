@@ -19,8 +19,15 @@
     ]
 
 [dependency-groups]
-    formatters = ["pre-commit>=4.5.0", "ruff>=0.14.9"]
-    dev        = ["ipykernel>=7.2.0", "pyright>=1.1.409", "pytest>=9.0.2"]
+    linter = ["ruff>=0.14.9"]
+    formatters = ["pre-commit>=4.5.0"]
+    dev = [
+        { include-group = "linter" },
+        { include-group = "formatters" },
+        "ipykernel>=7.2.0",
+        "pyright>=1.1.409",
+        "pytest>=9.0.2",
+    ]
 
 [build-system]
     requires      = ["uv_build>=0.11.12,<0.12"]
@@ -36,6 +43,7 @@
         "def __str__",
         "\\A(?s:.*# pragma: exclude file.*)\\Z",
     ]
+
 
 [tool.ruff]
     # Same as Black.
