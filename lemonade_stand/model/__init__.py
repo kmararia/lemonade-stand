@@ -22,7 +22,7 @@ def predict_buckets(
 
     model_data = ModelData(
         inference_data=input_data,
-        train_data=config.training_file,
+        train_data=config.model.training_file,
         func_field_cleaner=func_field_cleaner,
     )
 

@@ -17,7 +17,7 @@ LOGGER = set_up_logger(Path(__file__).stem)
 def get_data(config: UserConfig) -> UserData | SimpleNamespace:
     """A function to read data from database if exists otherwise process from start"""
 
-    if not config.always_refresh_data:
+    if not config.data.always_refresh_data:
         LOGGER.info("Reading pre-processed tables from data directory")
 
         try:

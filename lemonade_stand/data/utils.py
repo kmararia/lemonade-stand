@@ -81,14 +81,14 @@ class UserData:
         """Post initialization variables set up"""
         LOGGER.info(
             "Loading statements from path: \n\t%s\n",
-            str(self.user_config.statement_dir),
+            str(self.user_config.data.statement_dir),
         )
 
         # Load all user transactions
         statements_list = []
         error_list = []
 
-        for file in Path(self.user_config.statement_dir).glob("*.pdf"):
+        for file in Path(self.user_config.data.statement_dir).glob("*.pdf"):
             try:
                 statements_list.append(Statement(file_path=file, engine="pymullm"))
             except DataLoadingError as e:

@@ -40,9 +40,11 @@ class ModelData:
         else:
             ModelData.save_csv(
                 *[self.train_data],
-                write_path=APP_PATHS.model_dir
-                / "outputs"
-                / f"train_{self.label_field}_dataframe.csv",
+                write_path=(
+                    APP_PATHS.model_dir
+                    / "outputs"
+                    / f"train_{self.label_field}_dataframe.csv"
+                ),
                 write_args={"separator": ",", "include_header": True},
             )
 
