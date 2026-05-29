@@ -1,0 +1,15 @@
+{
+    "app-version": "0.0.0",
+    "data": {
+        "always-refresh-data": true,
+        "statement-dir": "/path/to/statement/dir"
+    },
+    "model": {
+        "embeddings-url": "https://nlp.stanford.edu/data/wordvecs/glove.2024.dolma.300d.zip",
+        "training-file": "/path/to/training/file.csv"
+    },
+    "ui": {
+        "always-skip-login": false,
+        "theme": "dark"
+    }
+}
