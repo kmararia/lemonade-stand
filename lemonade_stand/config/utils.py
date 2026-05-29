@@ -151,19 +151,27 @@ class UserConfig:
 
             for class_attr in fields(self):
                 if attr == class_attr.name:
-                    object.__setattr__(self, class_attr.name, new_val)
+                    typed_val = (
+                        new_val
+                        if not isinstance(getattr(self, class_attr.name), Path)
+                        else Path(new_val)
+                    )
+                    object.__setattr__(self, class_attr.name, typed_val)
+                    break
 
                 elif isinstance(getattr(self, class_attr.name), SimpleNamespace):
                     class_attr_dict = getattr(self, class_attr.name).__dict__
 
                     if attr in class_attr_dict:
-                        new_dict = {**class_attr_dict, attr: new_val}
+                        typed_val = (
+                            new_val
+                            if not isinstance(class_attr_dict[attr], Path)
+                            else Path(new_val)
+                        )
+                        new_dict = {**class_attr_dict, attr: typed_val}
                         object.__setattr__(
                             self, class_attr.name, SimpleNamespace(**new_dict)
                         )
-                else:
-                    continue
-                break
-            break
+                        break
 
         self.save_config()
