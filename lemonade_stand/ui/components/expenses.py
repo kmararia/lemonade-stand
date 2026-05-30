@@ -123,7 +123,7 @@ def expense_row(expense: Expense) -> rx.Component:
     )
 
 
-def expenses_table(expense_data: list[Expense]) -> rx.Component:
+def expenses_table(expense_data: rx.Var[list[Expense]]) -> rx.Component:
     """"""
     return rx.el.div(
         rx.el.div(

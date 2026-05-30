@@ -64,7 +64,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                     ),
                     rx.recharts.y_axis(
                         type_="category",
-                        data_key="category_name",
+                        data_key="category",
                         width=150,
                         tick=rx.color_mode_cond(
                             {"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},

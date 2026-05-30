@@ -89,7 +89,7 @@ def budget_health_widget(health_stats: rx.Var[list[BudgetHealthStats]]) -> rx.Co
         return rx.el.div(
             rx.el.div(
                 rx.el.span(
-                    budget.name,
+                    budget.category,
                     class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 w-32 truncate",
                 ),
                 rx.el.div(

@@ -4,37 +4,24 @@ import typing
 from dataclasses import dataclass
 from dataclasses import field
 
+import polars as pl
 import reflex as rx
 
 from lemonade_stand.config import UserConfig
+from lemonade_stand.data import UserData
 from lemonade_stand.data import get_data
 
-from .utils import DataManager
-
 USER_CONFIG = UserConfig()
-DATA_CONFIG = DataManager(
-    name="expenses", input_data=get_data(config=USER_CONFIG).expenses
-)
-
-
-@dataclass
-class Budget:
-    """"""
-
-    name: str
-    allocated_amount: float
-    period: str
 
 
 @dataclass
 class BudgetHealthStats:
     """"""
 
-    name: str
+    category: str
     allocated_amount: float
-    period: str
-    spent: float
-    remaining: float
+    spent_amount: float
+    remaining_amount: float
     utilization: float
     health_color: str
     health_bg: str
@@ -61,20 +48,103 @@ class Expense:
 class BudgetState(rx.State):
     """Core state for budget and expense data."""
 
-    budgets: list[Budget] = [Budget(**x) for x in DATA_CONFIG.get_budget_allocations]
-    expenses: list[Expense] = [Expense(**x) for x in list(DATA_CONFIG.get_row_iterable)]
+    user_data: UserData = get_data(config=USER_CONFIG)
     warning_threshold: int = 75
     critical_threshold: int = 90
 
     @rx.var
+    def expenses(self) -> list[Expense]:
+        """"""
+        row_iterable = typing.cast(
+            pl.DataFrame,
+            (
+                self.user_data.expenses.select(
+                    "date",
+                    "description",
+                    "amount",
+                    "category",
+                    "payment_type",
+                    "exclude_flag",
+                    "recurring_flag",
+                    "source_file",
+                    pl.col("source_file").is_not_null().alias("has_source_file"),
+                    pl.concat_list("state", "city").list.drop_nulls().alias("location"),
+                )
+                .sort("date", "amount", descending=[True, True])
+                .limit(6)
+                .collect()
+            ),
+        ).iter_rows(named=True)
+
+        return [Expense(**x) for x in row_iterable]
+
+    @rx.var
+    def home_page_data(self) -> pl.DataFrame:
+        """"""
+        return typing.cast(
+            pl.DataFrame,
+            (
+                self.user_data.expenses.group_by(
+                    payment_type=pl.col("payment_type"),
+                    category=(
+                        pl.when(pl.col("category").str.len_chars() <= 20)
+                        .then(pl.col("category"))
+                        .otherwise(pl.col("category").str.slice(0, 19) + "...")
+                        .str.replace_all(r"(?i)\s+\b(AND)\b\s+", " & ")
+                    ),
+                    allocated_amount=(
+                        pl.col("amount").abs().mean().over("category")
+                    ).round(0),
+                )
+                .agg(
+                    spent_amount=(
+                        pl.when(pl.col("exclude_flag"))
+                        .then(pl.col("amount"))
+                        .otherwise(0)
+                        .sum()
+                    )
+                )
+                .with_columns(
+                    remaining_amount=(
+                        pl.col("allocated_amount") - pl.col("spent_amount")
+                    ),
+                    utilization=(
+                        pl.when(pl.col("allocated_amount") > 0)
+                        .then(
+                            (
+                                pl.col("spent_amount")
+                                / pl.col("allocated_amount")
+                                * 100
+                            ).round(1)
+                        )
+                        .otherwise(0.0)
+                    ),
+                )
+                .with_columns(
+                    color=(
+                        pl.when(pl.col("utilization") > self.critical_threshold)
+                        .then(pl.lit("red"))
+                        .otherwise(
+                            pl.when(pl.col("utilization") > self.warning_threshold)
+                            .then(pl.lit("orange"))
+                            .otherwise(pl.lit("emerald"))
+                        )
+                    )
+                )
+                .sort("allocated_amount", descending=False)
+                .collect()
+            ),
+        )
+
+    @rx.var
     def total_budget(self) -> float:
         """"""
-        return sum(b.allocated_amount for b in self.budgets)
+        return self.home_page_data.select(pl.col("allocated_amount").sum()).item(0, 0)
 
     @rx.var
     def total_spent(self) -> float:
         """"""
-        return sum(e.amount for e in self.expenses if not e.exclude_flag)
+        return self.home_page_data.select(pl.col("spent_amount").sum()).item(0, 0)
 
     @rx.var
     def remaining_budget(self) -> float:
@@ -92,58 +162,31 @@ class BudgetState(rx.State):
     def budget_vs_actual_spend(self) -> list[dict[str, typing.Any]]:
         """"""
 
-        data = []
-        for budget in self.budgets:
-            category_spent = sum(
-                e.amount
-                for e in self.expenses
-                if e.category == budget.name and not e.exclude_flag
-            )
-            data.append(
-                {
-                    "category_name": budget.name,
-                    "allocated_amount": budget.allocated_amount,
-                    "spent_amount": category_spent,
-                }
-            )
-        return data
+        return self.home_page_data.select(
+            "category", "allocated_amount", "spent_amount"
+        ).to_dicts()
 
     @rx.var
     def budget_health_stats(self) -> list[BudgetHealthStats]:
         """"""
 
-        stats = []
-        for b in self.budgets:
-            spent = sum(
-                e.amount
-                for e in self.expenses
-                if e.category == b.name and not e.exclude_flag
-            )
-            total = b.allocated_amount
-            utilization = (spent / total * 100) if total > 0 else 0.0
-            color = (
-                "red"
-                if utilization > self.critical_threshold
-                else "orange"
-                if utilization > self.warning_threshold
-                else "emerald"
-            )
-
-            stats.append(
-                BudgetHealthStats(
-                    name=b.name,
-                    allocated_amount=total,
-                    period=b.period,
-                    spent=spent,
-                    remaining=total - spent,
-                    utilization=round(utilization, 1),
-                    health_color=f"text-{color}-500",
-                    health_bg=f"bg-{color}-50",
-                    progress_color=f"bg-{color}-500",
-                )
-            )
-
-        return stats
+        return [
+            BudgetHealthStats(**x)
+            for x in self.home_page_data.select(
+                "category",
+                "allocated_amount",
+                "spent_amount",
+                "remaining_amount",
+                "utilization",
+                health_color=pl.concat_str(
+                    pl.lit("text-"), pl.col("color"), pl.lit("-500")
+                ),
+                health_bg=pl.concat_str(pl.lit("bg-"), pl.col("color"), pl.lit("-50")),
+                progress_color=pl.concat_str(
+                    pl.lit("bg-"), pl.col("color"), pl.lit("-500")
+                ),
+            ).to_dicts()
+        ]
 
     @rx.event
     def open_add_budget_modal(self):
