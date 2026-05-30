@@ -97,15 +97,22 @@ class DataManager:
         else:
             return typing.cast(
                 pl.DataFrame,
-                self.input_data.select(
-                    name=pl.col("category"),
-                    type=pl.col("payment_type"),
-                    allocated_amount=(
-                        pl.col("amount").abs().mean().over("category")
-                    ).round(0),
-                    period=pl.lit("monthly"),
-                )
-                .unique()
-                .sort("allocated_amount", descending=True)
-                .collect(),
+                (
+                    self.input_data.select(
+                        name=(
+                            pl.when(pl.col("category").str.len_chars() <= 20)
+                            .then(pl.col("category"))
+                            .otherwise(pl.col("category").str.slice(0, 19) + "...")
+                            .str.replace_all(r"(?i)\s+\b(AND)\b\s+", " & ")
+                        ),
+                        type=pl.col("payment_type"),
+                        allocated_amount=(
+                            pl.col("amount").abs().mean().over("category")
+                        ).round(0),
+                        period=pl.lit("monthly"),
+                    )
+                    .unique()
+                    .sort("allocated_amount", descending=True)
+                    .collect()
+                ),
             ).to_dicts()
