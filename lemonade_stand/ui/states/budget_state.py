@@ -103,9 +103,9 @@ class BudgetState(rx.State):
             )
             data.append(
                 {
-                    "name": budget.name,
-                    "allocated": budget.allocated_amount,
-                    "spent": category_spent,
+                    "category_name": budget.name,
+                    "allocated_amount": budget.allocated_amount,
+                    "spent_amount": category_spent,
                 }
             )
         return data
