@@ -45,72 +45,82 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
         ),
         chart_legend(),
         rx.el.div(
-            rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(
-                    stroke_dasharray="3 3",
-                    vertical=False,
-                    class_name="stroke-gray-100 dark:stroke-gray-700/50",
-                ),
-                rx.recharts.x_axis(
-                    data_key="name",
-                    axis_line=False,
-                    tick_line=False,
-                    tick={
-                        "fontSize": 12,
-                        "fill": rx.color_mode_cond("#9ca3af", "#6b7280"),
-                        "fontWeight": 500,
-                    },
-                    dy=10,
-                ),
-                rx.recharts.y_axis(
-                    axis_line=False,
-                    tick_line=False,
-                    tick={
-                        "fontSize": 12,
-                        "fill": rx.color_mode_cond("#9ca3af", "#6b7280"),
-                        "fontWeight": 500,
-                    },
-                ),
-                rx.recharts.tooltip(
-                    cursor={"fill": rx.color_mode_cond("#f8fafc", "#374151")},
-                    content_style={
-                        "backgroundColor": rx.color_mode_cond(
-                            "rgba(255, 255, 255, 0.9)", "rgba(31, 41, 55, 0.9)"
+            rx.recharts.responsive_container(
+                rx.recharts.bar_chart(
+                    rx.recharts.cartesian_grid(
+                        stroke_dasharray="3 3",
+                        vertical=False,
+                        class_name="stroke-gray-100 dark:stroke-gray-700/50",
+                    ),
+                    rx.recharts.x_axis(
+                        type_="number",
+                        axis_line=False,
+                        tick_line=False,
+                        tick=rx.color_mode_cond(
+                            {"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},
+                            {"fontSize": 12, "fill": "#6b7280", "fontWeight": 500},
                         ),
-                        "borderRadius": "12px",
-                        "border": rx.color_mode_cond(
-                            "1px solid rgba(255, 255, 255, 0.5)",
-                            "1px solid rgba(55, 65, 81, 0.5)",
+                        dy=10,
+                    ),
+                    rx.recharts.y_axis(
+                        type_="category",
+                        data_key="category_name",
+                        width=150,
+                        tick=rx.color_mode_cond(
+                            {"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},
+                            {"fontSize": 12, "fill": "#6b7280", "fontWeight": 500},
                         ),
-                        "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                        "backdropFilter": "blur(10px)",
-                        "padding": "12px",
-                        "color": rx.color_mode_cond("#1f2937", "#f3f4f6"),
-                    },
-                    item_style={
-                        "color": rx.color_mode_cond("#1f2937", "#e5e7eb"),
-                    },
+                    ),
+                    rx.recharts.tooltip(
+                        cursor=rx.color_mode_cond(
+                            {"fill": "#f8fafc"}, {"fill": "#374151"}
+                        ),
+                        content_style=rx.color_mode_cond(
+                            {
+                                "backgroundColor": "rgba(255, 255, 255, 0.9)",
+                                "borderRadius": "12px",
+                                "border": "1px solid rgba(255, 255, 255, 0.5)",
+                                "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                                "backdropFilter": "blur(10px)",
+                                "padding": "12px",
+                                "color": "#1f2937",
+                            },
+                            {
+                                "backgroundColor": "rgba(31, 41, 55, 0.9)",
+                                "borderRadius": "12px",
+                                "border": "1px solid rgba(55, 65, 81, 0.5)",
+                                "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                                "backdropFilter": "blur(10px)",
+                                "padding": "12px",
+                                "color": "#f3f4f6",
+                            },
+                        ),
+                        item_style=rx.color_mode_cond(
+                            {"color": "#1f2937"}, {"color": "#e5e7eb"}
+                        ),
+                    ),
+                    rx.recharts.bar(
+                        data_key="allocated_amount",
+                        name="Allocated Budget",
+                        fill="#6366f1",
+                        radius=[0, 6, 6, 0],
+                        bar_size=24,
+                    ),
+                    rx.recharts.bar(
+                        data_key="spent_amount",
+                        name="Actual Spent",
+                        fill="#f97316",
+                        radius=[0, 6, 6, 0],
+                        bar_size=24,
+                    ),
+                    data=display_data,
+                    layout="vertical",
+                    margin={"top": 10, "right": 0, "left": -10, "bottom": 0},
                 ),
-                rx.recharts.bar(
-                    data_key="allocated",
-                    name="Allocated Budget",
-                    fill="#6366f1",
-                    radius=[6, 6, 0, 0],
-                    bar_size=24,
-                ),
-                rx.recharts.bar(
-                    data_key="spent",
-                    name="Actual Spent",
-                    fill="#f97316",
-                    radius=[6, 6, 0, 0],
-                    bar_size=24,
-                ),
-                data=display_data,
-                height=320,
                 width="100%",
-                margin={"top": 10, "right": 0, "left": -20, "bottom": 0},
+                height=320,
             ),
-            class_name="w-full h-[320px]",
+            class_name="w-full",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
     )
