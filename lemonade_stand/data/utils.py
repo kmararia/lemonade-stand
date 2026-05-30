@@ -71,24 +71,24 @@ class Transactions:
 class UserData:
     """Dataclass for the user statement data"""
 
-    user_config: UserConfig
-    income: pl.LazyFrame = field(init=False)
-    savings: pl.LazyFrame = field(init=False)
-    expenses: pl.LazyFrame = field(init=False)
-    unknown: pl.LazyFrame = field(init=False)
+    income: pl.LazyFrame
+    savings: pl.LazyFrame
+    expenses: pl.LazyFrame
+    unknown: pl.LazyFrame
 
-    def __post_init__(self):
+    @classmethod
+    def generate_from_scratch(cls, user_config: UserConfig):
         """Post initialization variables set up"""
         LOGGER.info(
             "Loading statements from path: \n\t%s\n",
-            str(self.user_config.data.statement_dir),
+            str(user_config.data.statement_dir),
         )
 
         # Load all user transactions
         statements_list = []
         error_list = []
 
-        for file in Path(self.user_config.data.statement_dir).glob("*.pdf"):
+        for file in Path(user_config.data.statement_dir).glob("*.pdf"):
             try:
                 statements_list.append(Statement(file_path=file, engine="pymullm"))
             except DataLoadingError as e:
@@ -103,7 +103,7 @@ class UserData:
         # Get all transactions from the statements and clean them
         transactions = Transactions(statements_list=statements_list)
         cleaner = TransactionCleaner(
-            user_config=self.user_config, input_df=transactions.data
+            user_config=user_config, input_df=transactions.data
         )
 
         # Break down transactions into individual table types
@@ -131,7 +131,10 @@ class UserData:
 
         LOGGER.info("Written tables to delta lake path:\n\t%s", write_path)
 
-        for table in tables:
-            object.__setattr__(
-                self, table, read_delta(table=table, search_dir=write_path)
-            )
+        # Return the fully formed object
+        return cls(
+            **{
+                table: read_delta(table=table, search_dir=write_path)
+                for table in tables
+            }
+        )

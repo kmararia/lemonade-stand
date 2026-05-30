@@ -14,7 +14,7 @@ from .utils import UserData
 LOGGER = set_up_logger(Path(__file__).stem)
 
 
-def get_data(config: UserConfig) -> UserData | SimpleNamespace:
+def get_data(config: UserConfig) -> UserData:
     """A function to read data from database if exists otherwise process from start"""
 
     if not config.data.always_refresh_data:
@@ -22,7 +22,7 @@ def get_data(config: UserConfig) -> UserData | SimpleNamespace:
 
         try:
             read_dir = AppPaths().data_dir
-            return SimpleNamespace(
+            return UserData(
                 income=read_delta(table="income", search_dir=read_dir),
                 savings=read_delta(table="savings", search_dir=read_dir),
                 expenses=read_delta(table="expenses", search_dir=read_dir),
@@ -34,10 +34,10 @@ def get_data(config: UserConfig) -> UserData | SimpleNamespace:
                 e,
             )
 
-            return UserData(user_config=config)
+            return UserData.generate_from_scratch(user_config=config)
 
     else:
-        return UserData(user_config=config)
+        return UserData.generate_from_scratch(user_config=config)
 
 
 # Expose only the user data
