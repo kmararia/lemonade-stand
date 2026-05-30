@@ -22,7 +22,6 @@ class Budget:
     """"""
 
     name: str
-    type: str
     allocated_amount: float
     period: str
 
@@ -32,7 +31,6 @@ class BudgetHealthStats:
     """"""
 
     name: str
-    type: str
     allocated_amount: float
     period: str
     spent: float
@@ -63,7 +61,7 @@ class Expense:
 class BudgetState(rx.State):
     """Core state for budget and expense data."""
 
-    budgets: list[Budget] = [Budget(**x) for x in DATA_CONFIG.budget_allocations]
+    budgets: list[Budget] = [Budget(**x) for x in DATA_CONFIG.get_budget_allocations]
     expenses: list[Expense] = [Expense(**x) for x in list(DATA_CONFIG.get_row_iterable)]
     warning_threshold: int = 75
     critical_threshold: int = 90
@@ -134,7 +132,6 @@ class BudgetState(rx.State):
             stats.append(
                 BudgetHealthStats(
                     name=b.name,
-                    type=b.type,
                     allocated_amount=total,
                     period=b.period,
                     spent=spent,

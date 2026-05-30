@@ -4,7 +4,6 @@ import json
 import typing
 from collections.abc import Iterable
 from dataclasses import dataclass
-from dataclasses import field
 from pathlib import Path
 
 import polars as pl
@@ -22,38 +21,6 @@ class DataManager:
 
     name: str
     input_data: pl.LazyFrame
-    current_row: dict = field(init=False)
-    current_allocation: dict = field(init=False)
-    budget_allocations: list[dict] = field(init=False)
-
-    def __post_init__(self):
-        """
-        A post initialization method for the UI configurations.
-        """
-
-        self.budget_allocations = self.get_budget_allocations()
-        self.current_allocation = (
-            self.budget_allocations[0] if self.budget_allocations else {}
-        )
-        self.current_row = next(
-            iter(self.get_row_iterable),
-            dict.fromkeys(self.input_data.collect_schema(), ""),
-        )
-
-    @property
-    def available_categories(self) -> list[str]:
-        """
-        Returns a list of available categories from the input dataframe.
-        """
-
-        return (
-            typing.cast(
-                pl.DataFrame,
-                self.input_data.select(pl.col("category").unique().sort()).collect(),
-            )
-            .to_series()
-            .to_list()
-        )
 
     @property
     def get_row_iterable(self) -> Iterable[dict[str, typing.Any]]:
@@ -82,6 +49,7 @@ class DataManager:
             ),
         ).iter_rows(named=True)
 
+    @property
     def get_budget_allocations(self) -> list[dict[str, typing.Any]]:
         """
         Returns the budget allocations either from a config file or by processing the input data.
@@ -105,7 +73,6 @@ class DataManager:
                             .otherwise(pl.col("category").str.slice(0, 19) + "...")
                             .str.replace_all(r"(?i)\s+\b(AND)\b\s+", " & ")
                         ),
-                        type=pl.col("payment_type"),
                         allocated_amount=(
                             pl.col("amount").abs().mean().over("category")
                         ).round(0),
