@@ -23,4 +23,8 @@ config = rx.Config(
             }
         ),
     ],
+    frontend_packages=[
+        "vite@7.3.3",
+        "@tailwindcss/typography",
+    ],
 )
