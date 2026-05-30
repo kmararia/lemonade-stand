@@ -20,14 +20,15 @@
 
 [dependency-groups]
     linter = ["ruff>=0.14.9"]
-    formatters = ["pre-commit>=4.5.0"]
+    typing = ["ty>=0.0.40"]
     dev = [
         { include-group = "linter" },
-        { include-group = "formatters" },
+        { include-group = "typing" },
         "ipykernel>=7.2.0",
         "pyright>=1.1.409",
         "pytest>=9.0.2",
     ]
+
 
 [build-system]
     requires      = ["uv_build>=0.11.12,<0.12"]
@@ -44,6 +45,8 @@
         "\\A(?s:.*# pragma: exclude file.*)\\Z",
     ]
 
+[tool.ty.src]
+    exclude = ["tmp", "_tmp_"]
 
 [tool.ruff]
     # Same as Black.
