@@ -2,6 +2,7 @@
 
 import itertools
 import json
+import typing
 from collections.abc import Generator
 from dataclasses import dataclass
 from dataclasses import field
@@ -64,7 +65,9 @@ class StateCities:
             list(self.code_to_name_map.keys())
         )
 
-    def _sort_and_chunk(self, iter_list: list) -> Generator[str, None, None]:
+    def _sort_and_chunk(
+        self, iter_list: list | itertools.chain[str]
+    ) -> Generator[str, None, None]:
         """Sorts a list by length and returns regex chunks"""
 
         sorted_list = sorted(iter_list, key=len, reverse=True)
@@ -90,7 +93,7 @@ class StateCities:
                 for state in states
                 if state.name.upper() == state_name.upper()
             ),
-            None,
+            "",
         )
 
     def get_city_state_mapping(self, cities_list: list) -> dict:
@@ -106,9 +109,12 @@ class StateCities:
             ]
 
             if len(matches) == 1:
-                city_state_map[city] = get_state_by_code(
+                state_name = get_state_by_code(
                     country_code=self.country, state_code=matches[0].state_code
-                ).name.upper()
+                )
+                city_state_map[city] = (
+                    state_name.name.upper() if state_name is not None else None
+                )
 
         return city_state_map
 
@@ -139,10 +145,15 @@ class TransactionCleaner:
         """Gets a list of column values"""
 
         return (
-            data_df.filter(pl.col(col_name).is_not_null())
-            .select(pl.col(col_name).str.replace_all(" ~", ""))
-            .unique()
-            .collect()
+            typing.cast(
+                pl.DataFrame,
+                (
+                    data_df.filter(pl.col(col_name).is_not_null())
+                    .select(pl.col(col_name).str.replace_all(" ~", ""))
+                    .unique()
+                    .collect()
+                ),
+            )
             .to_series()
             .to_list()
         )
@@ -153,7 +164,7 @@ class TransactionCleaner:
         Adds a cleaned description field to the transaction dataframe.
 
         Returns:
-            A polars dataframe with the cleaned description
+            A polars LazyFrame with the cleaned description
 
         """
 
@@ -193,7 +204,7 @@ class TransactionCleaner:
         Update the amount field if the statement source has a majority of negative amounts.
 
         Returns:
-            A polars dataframe with the amount field updated to have the correct sign
+            A polars LazyFrame with the amount field updated to have the correct sign
         """
 
         return self.output_df.with_columns(
@@ -207,7 +218,7 @@ class TransactionCleaner:
         Finds the merchant of the transaction from the description field.
 
         Returns:
-            A polars dataframe with the merchant linked to the transaction
+            A polars LazyFrame with the merchant linked to the transaction
         """
 
         # Set up to remove unwanted information from the description field to make it easier to identify the merchant
@@ -244,7 +255,7 @@ class TransactionCleaner:
         Finds the location of the transaction by looking for country, state, and city names in the description field.
 
         Returns:
-            A polars expression for finding the location of the transaction
+            A polars LazyFrame with the location of the transaction
         """
 
         location_df = self.output_df.with_columns(
@@ -336,7 +347,7 @@ class TransactionCleaner:
         Finds the category and type of the transaction by using the description field.
 
         Returns:
-            A polars dataframe with the category and type of the transaction
+            A polars LazyFrame with the category and type of the transaction
         """
 
         # Assign predicted buckets (Category and Type) to the transactions
@@ -351,8 +362,12 @@ class TransactionCleaner:
                 {
                     x: str(y[0]).lower()
                     for x, y in (
-                        model_data.train_data.select("category", "payment_type")
-                        .collect()
+                        typing.cast(
+                            pl.DataFrame,
+                            typing.cast(pl.LazyFrame, model_data.train_data)
+                            .select("category", "payment_type")
+                            .collect(),
+                        )
                         .rows_by_key(
                             key="category",
                             unique=True,
@@ -370,7 +385,7 @@ class TransactionCleaner:
         Flags recurring transactions based on historical patterns.
 
         Returns:
-            A polars dataframe with a recurring flag column added
+            A polars LazyFrame with a recurring flag column added
         """
 
         return (
@@ -418,7 +433,7 @@ class TransactionCleaner:
         Flags transactions that are listed in the user exclusion configuration file.
 
         Returns:
-            A polars dataframe with an exclusion flag column added
+            A polars LazyFrame with an exclusion flag column added
         """
 
         config_path = APP_PATHS.config_dir / "exclusions.json"

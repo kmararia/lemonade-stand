@@ -24,9 +24,9 @@ LOGGER = set_up_logger(Path(__file__).stem)
 class Statement:
     """A dataclass for a statement file"""
 
-    file_path: str | Path
+    file_path: Path
     pages: list = field(init=False)
-    transactions: pl.DataFrame = field(init=False)
+    transactions: pl.LazyFrame = field(init=False)
     engine: str = "pdfplumber"
     schema: pl.schema.Schema = field(
         default_factory=lambda: pl.Schema(
@@ -46,7 +46,6 @@ class Statement:
     def __post_init__(self):
         """Post initialization variables"""
 
-        self.file_path = Path(self.file_path)
         try_engines = ["pdfplumber", "pymullm"]
         used_engines = []
 
@@ -105,11 +104,11 @@ class Statement:
 
         return engine_dict[self.engine](read_path)
 
-    def get_transactions(self, pdf_text: str) -> pl.DataFrame:
+    def get_transactions(self, pdf_text: str) -> pl.LazyFrame:
         """Extracts the transaction lines from a string of text
 
         Returns:
-            A list of transaction records
+            A polars LazyFrame containing the transaction records
 
         """
         LOGGER.debug("Getting year of the statement")

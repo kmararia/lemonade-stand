@@ -24,7 +24,7 @@ class Transactions:
     """A dataclass for the available statements"""
 
     statements_list: list[Statement] = field(default_factory=list)
-    data: pl.DataFrame = field(init=False)
+    data: pl.LazyFrame = field(init=False)
 
     def __post_init__(self):
         """Post initialization variables"""
@@ -37,7 +37,7 @@ class Transactions:
         else:
             LOGGER.error("No statements pdfs were found! Setting up empty dataset...")
 
-            self.data = pl.DataFrame(data=[], schema=Statement.schema)
+            self.data = pl.LazyFrame(data=[], schema=Statement.schema)
 
     def __iter__(self):
         """Iterable for the transactions dataclass"""
@@ -72,10 +72,10 @@ class UserData:
     """Dataclass for the user statement data"""
 
     user_config: UserConfig
-    income: pl.DataFrame = field(init=False)
-    savings: pl.DataFrame = field(init=False)
-    expenses: pl.DataFrame = field(init=False)
-    unknown: pl.DataFrame = field(init=False)
+    income: pl.LazyFrame = field(init=False)
+    savings: pl.LazyFrame = field(init=False)
+    expenses: pl.LazyFrame = field(init=False)
+    unknown: pl.LazyFrame = field(init=False)
 
     def __post_init__(self):
         """Post initialization variables set up"""

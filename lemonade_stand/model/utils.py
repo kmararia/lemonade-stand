@@ -51,7 +51,7 @@ class ModelData:
         # Prepare the training fields
         self.train_data = self.func_field_cleaner(input_df=self.train_data)
 
-    def read_csv(self, read_path: Path) -> None:
+    def read_csv(self, read_path: Path) -> pl.LazyFrame:
         """
         Reads a CSV file into a polars LazyFrame.
 

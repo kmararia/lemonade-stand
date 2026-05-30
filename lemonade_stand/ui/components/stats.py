@@ -1,5 +1,7 @@
 """"""
 
+from decimal import Decimal
+
 import reflex as rx
 
 
@@ -7,9 +9,9 @@ def stat_card(
     title: str,
     value: str,
     icon: str,
-    trend: str = None,
+    trend: str | None = None,
     color: str = "indigo",
-    progress: float = None,
+    progress: rx.Var[int | float | Decimal] | None = None,
     trend_up: bool = True,
 ) -> rx.Component:
     """"""
@@ -86,10 +88,10 @@ def stat_card(
 
 
 def stats_grid(
-    total_budget: float,
-    total_spent: float,
-    remaining_budget: float,
-    utilization_pct: float,
+    total_budget: rx.Var[int | float | Decimal],
+    total_spent: rx.Var[int | float | Decimal],
+    remaining_budget: rx.Var[int | float | Decimal],
+    utilization_pct: rx.Var[int | float | Decimal],
 ) -> rx.Component:
     """"""
 

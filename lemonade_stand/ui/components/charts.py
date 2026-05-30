@@ -1,5 +1,7 @@
 """"""
 
+import typing
+
 import reflex as rx
 
 
@@ -25,7 +27,7 @@ def chart_legend() -> rx.Component:
     )
 
 
-def budget_chart(display_data) -> rx.Component:
+def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Component:
     """"""
 
     return rx.el.div(

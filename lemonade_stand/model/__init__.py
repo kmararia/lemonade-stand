@@ -16,8 +16,8 @@ LOGGER = set_up_logger(Path(__file__).stem)
 
 
 def predict_buckets(
-    config: UserConfig, input_data: pl.DataFrame, func_field_cleaner: Callable
-) -> pl.DataFrame:
+    config: UserConfig, input_data: pl.LazyFrame, func_field_cleaner: Callable
+) -> ModelData:
     """ """
 
     model_data = ModelData(

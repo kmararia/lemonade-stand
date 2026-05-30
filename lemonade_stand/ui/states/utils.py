@@ -1,6 +1,7 @@
 """ """
 
 import json
+import typing
 from collections.abc import Iterable
 from dataclasses import dataclass
 from dataclasses import field
@@ -35,7 +36,8 @@ class DataManager:
             self.budget_allocations[0] if self.budget_allocations else {}
         )
         self.current_row = next(
-            self.get_row_iterable, dict.fromkeys(self.input_data.collect_schema(), "")
+            iter(self.get_row_iterable),
+            dict.fromkeys(self.input_data.collect_schema(), ""),
         )
 
     @property
@@ -45,38 +47,42 @@ class DataManager:
         """
 
         return (
-            self.input_data.select(pl.col("category").unique().sort())
-            .collect()
+            typing.cast(
+                pl.DataFrame,
+                self.input_data.select(pl.col("category").unique().sort()).collect(),
+            )
             .to_series()
             .to_list()
         )
 
     @property
-    def get_row_iterable(self) -> Iterable[dict]:
+    def get_row_iterable(self) -> Iterable[dict[str, typing.Any]]:
         """
         Returns an iterable of rows from the input data.
         """
 
-        return (
-            self.input_data.select(
-                "date",
-                "description",
-                "amount",
-                "category",
-                "payment_type",
-                "exclude_flag",
-                "recurring_flag",
-                "source_file",
-                pl.col("source_file").is_not_null().alias("has_source_file"),
-                pl.concat_list("state", "city").list.drop_nulls().alias("location"),
-            )
-            .sort("date", "amount", descending=[True, True])
-            .limit(6)
-            .collect()
-            .iter_rows(named=True)
-        )
+        return typing.cast(
+            pl.DataFrame,
+            (
+                self.input_data.select(
+                    "date",
+                    "description",
+                    "amount",
+                    "category",
+                    "payment_type",
+                    "exclude_flag",
+                    "recurring_flag",
+                    "source_file",
+                    pl.col("source_file").is_not_null().alias("has_source_file"),
+                    pl.concat_list("state", "city").list.drop_nulls().alias("location"),
+                )
+                .sort("date", "amount", descending=[True, True])
+                .limit(6)
+                .collect()
+            ),
+        ).iter_rows(named=True)
 
-    def get_budget_allocations(self) -> list[dict]:
+    def get_budget_allocations(self) -> list[dict[str, typing.Any]]:
         """
         Returns the budget allocations either from a config file or by processing the input data.
         """
@@ -89,7 +95,8 @@ class DataManager:
                 return json.load(file)["budget_allocations"]
 
         else:
-            return (
+            return typing.cast(
+                pl.DataFrame,
                 self.input_data.select(
                     name=pl.col("category"),
                     type=pl.col("payment_type"),
@@ -100,6 +107,5 @@ class DataManager:
                 )
                 .unique()
                 .sort("allocated_amount", descending=True)
-                .collect()
-                .to_dicts()
-            )
+                .collect(),
+            ).to_dicts()

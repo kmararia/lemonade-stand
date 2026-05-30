@@ -3,9 +3,9 @@ Utilities to help download files and unzip utilities
 """
 
 import shutil
+import urllib.parse
 import zipfile
 from pathlib import Path
-from urllib.parse import urlparse
 
 import certifi
 import urllib3
@@ -18,7 +18,7 @@ LOGGER = set_up_logger(Path(__file__).stem)
 DIRECTORIES = AppPaths()
 
 
-def unzip_file(zip_path: Path, extract_to: Path = None) -> None:
+def unzip_file(zip_path: Path, extract_to: Path | None = None) -> Path:
     """
     Unzips a file to a specified location.
 
@@ -58,7 +58,7 @@ def download_data(download_url: str, file_name: str | None = None) -> Path:
     """
 
     # Set up paths
-    download_url = urlparse(download_url)
+    download_url: urllib.parse.ParseResult = urllib.parse.urlparse(download_url)
     file_name = Path(download_url.path).name if file_name is None else file_name
     download_file = DIRECTORIES.root_dir / "downloads" / file_name
 

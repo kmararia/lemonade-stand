@@ -1,5 +1,6 @@
 """ """
 
+import typing
 from collections.abc import Callable
 
 import numpy as np
@@ -15,13 +16,16 @@ def predict_cosine_similarity(
 ) -> pl.LazyFrame:
     """Utilizes cosine similarity between train and test vectors to predict the category of the output data."""
 
-    train_dataframe = data_model.train_data.collect()
+    train_dataframe = typing.cast(
+        pl.DataFrame, typing.cast(pl.LazyFrame, data_model.train_data).collect()
+    )
 
     train_vector, test_vector = func_vectorize(
         train_series=train_dataframe.select(pl.col(data_model.text_field)).to_series(),
-        test_series=data_model.inference_data.select(pl.col(data_model.text_field))
-        .collect()
-        .to_series(),
+        test_series=typing.cast(
+            pl.DataFrame,
+            (data_model.inference_data.select(pl.col(data_model.text_field))).collect(),
+        ).to_series(),
     )
 
     similarity = cosine_similarity(test_vector, train_vector)

@@ -81,7 +81,7 @@ def activity_feed() -> rx.Component:
     )
 
 
-def budget_health_widget(health_stats: list[BudgetStats]) -> rx.Component:
+def budget_health_widget(health_stats: rx.Var[list[BudgetStats]]) -> rx.Component:
     """"""
 
     def budget_health_row(budget: BudgetStats) -> rx.Component:
@@ -89,37 +89,39 @@ def budget_health_widget(health_stats: list[BudgetStats]) -> rx.Component:
         return rx.el.div(
             rx.el.div(
                 rx.el.span(
-                    budget["name"],
+                    budget.name,
                     class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 w-32 truncate",
                 ),
                 rx.el.div(
                     rx.el.div(
-                        class_name=f"h-2 rounded-full {budget['progress_color']}",
-                        style={"width": f"{budget['utilization']}%"},
+                        class_name=f"h-2 rounded-full {budget.progress_color}",
+                        style={"width": f"{budget.utilization}%"},
                     ),
                     class_name="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mx-3",
                 ),
                 rx.el.div(
                     rx.el.span(
-                        f"{budget['utilization']}%",
+                        f"{budget.utilization}%",
                         class_name="text-xs font-bold text-gray-700 dark:text-gray-300 w-10 text-right mr-3",
                     ),
                     rx.el.span(
                         rx.cond(
-                            budget["utilization"] > 90,
+                            budget.utilization > 90,
                             "Critical",
-                            rx.cond(budget["utilization"] > 75, "Warning", "Healthy"),
+                            rx.cond(budget.utilization > 75, "Warning", "Healthy"),
                         ),
-                        class_name="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-20 text-center "
-                        + rx.cond(
-                            budget["utilization"] > 90,
-                            "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                        class_name=f"""text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-20 text-center
+                        {
                             rx.cond(
-                                budget["utilization"] > 75,
-                                "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-                                "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-                            ),
-                        ),
+                                budget.utilization > 90,
+                                "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                                rx.cond(
+                                    budget.utilization > 75,
+                                    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
+                                    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                                ),
+                            )
+                        }""",
                     ),
                     class_name="flex items-center",
                 ),

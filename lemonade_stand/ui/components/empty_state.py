@@ -7,7 +7,7 @@ def empty_state(
     icon: str,
     title: str,
     description: str,
-    action_label: str = None,
+    action_label: str | None = None,
     on_click: rx.event.EventType = None,
 ) -> rx.Component:
     """"""
