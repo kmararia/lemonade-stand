@@ -5,8 +5,8 @@ import reflex as rx
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.expenses import expenses_table
 from lemonade_stand.ui.components.stats import stats_grid
+from lemonade_stand.ui.states.budget_state import BudgetHealthStats
 from lemonade_stand.ui.states.budget_state import BudgetState
-from lemonade_stand.ui.states.budget_state import BudgetStats
 from lemonade_stand.ui.states.ui_state import ActivityState
 
 
@@ -81,10 +81,10 @@ def activity_feed() -> rx.Component:
     )
 
 
-def budget_health_widget(health_stats: rx.Var[list[BudgetStats]]) -> rx.Component:
+def budget_health_widget(health_stats: rx.Var[list[BudgetHealthStats]]) -> rx.Component:
     """"""
 
-    def budget_health_row(budget: BudgetStats) -> rx.Component:
+    def budget_health_row(budget: BudgetHealthStats) -> rx.Component:
         """"""
         return rx.el.div(
             rx.el.div(

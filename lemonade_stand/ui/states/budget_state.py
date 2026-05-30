@@ -28,32 +28,19 @@ class Budget:
 
 
 @dataclass
-class ExpenseSplit:
+class BudgetHealthStats:
     """"""
 
-    category: str
-    amount: float
-
-
-@dataclass
-class ExpenseComment:
-    """"""
-
-    id: str
-    user: str
-    avatar: str
-    text: str
-    timestamp: str
-
-
-@dataclass
-class ExpenseHistory:
-    """"""
-
-    action: str
-    user: str
-    timestamp: str
-    note: str
+    name: str
+    type: str
+    allocated_amount: float
+    period: str
+    spent: float
+    remaining: float
+    utilization: float
+    health_color: str
+    health_bg: str
+    progress_color: str
 
 
 @dataclass
@@ -69,28 +56,8 @@ class Expense:
     recurring_flag: bool = False
     has_source_file: bool = False
     location: list[str] = field(default_factory=list)
-
-    splits: list[ExpenseSplit] = field(default_factory=list)
-    comments: list[ExpenseComment] = field(default_factory=list)
-    history: list[ExpenseHistory] = field(default_factory=list)
     assigned_approver_id: str = ""
     source_file: str = ""
-
-
-@dataclass
-class BudgetStats:
-    """"""
-
-    name: str
-    type: str
-    allocated_amount: float
-    period: str
-    spent: float
-    remaining: float
-    utilization: float
-    health_color: str
-    health_bg: str
-    progress_color: str
 
 
 class BudgetState(rx.State):
@@ -144,7 +111,7 @@ class BudgetState(rx.State):
         return data
 
     @rx.var
-    def budget_health_stats(self) -> list[BudgetStats]:
+    def budget_health_stats(self) -> list[BudgetHealthStats]:
         """"""
 
         stats = []
@@ -165,7 +132,7 @@ class BudgetState(rx.State):
             )
 
             stats.append(
-                BudgetStats(
+                BudgetHealthStats(
                     name=b.name,
                     type=b.type,
                     allocated_amount=total,
