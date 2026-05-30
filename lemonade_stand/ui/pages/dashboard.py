@@ -3,6 +3,7 @@
 import reflex as rx
 
 from lemonade_stand.ui.components.charts import budget_chart
+from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.expenses import expenses_table
 from lemonade_stand.ui.components.stats import stats_grid
 from lemonade_stand.ui.states.budget_state import BudgetHealthStats
@@ -155,9 +156,13 @@ def dashboard_content() -> rx.Component:
     """ """
     return rx.el.div(
         rx.el.div(
-            rx.el.h2(
-                "Overview",
-                class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
+            rx.el.div(
+                rx.el.h2(
+                    "Overview",
+                    class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
+                ),
+                date_picker(),
+                class_name="flex justify-between items-center w-full",
             ),
             rx.el.p(
                 "Track your spending, income, and budget in real-time.",
