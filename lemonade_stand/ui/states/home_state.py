@@ -150,6 +150,7 @@ class HomeState(rx.State):
                     ),
                     allocated_amount=(
                         pl.col("amount").abs().mean().over("category")
+                        * pl.col("date").dt.strftime("%Y-%m").n_unique()
                     ).round(0),
                 )
                 .agg(
