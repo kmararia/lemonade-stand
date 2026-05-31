@@ -47,7 +47,7 @@ def header() -> rx.Component:
                         ),
                         rx.el.div(
                             rx.el.p(
-                                "Alex Finance",
+                                "Kelvin M.",
                                 class_name="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none group-hover:text-indigo-600 dark:group-hover:text-cyan-400 transition-colors",
                             ),
                             rx.el.p(

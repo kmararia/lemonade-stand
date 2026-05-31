@@ -71,7 +71,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                             {"fontSize": 12, "fill": "#6b7280", "fontWeight": 500},
                         ),
                     ),
-                    rx.recharts.tooltip(
+                    rx.recharts.graphing_tooltip(
                         cursor=rx.color_mode_cond(
                             {"fill": "#f8fafc"}, {"fill": "#374151"}
                         ),
@@ -104,23 +104,25 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                         name="Allocated Budget",
                         fill="#6366f1",
                         radius=[0, 6, 6, 0],
-                        bar_size=24,
+                        bar_size=10,
                     ),
                     rx.recharts.bar(
                         data_key="spent_amount",
                         name="Actual Spent",
                         fill="#f97316",
                         radius=[0, 6, 6, 0],
-                        bar_size=24,
+                        bar_size=10,
                     ),
                     data=display_data,
+                    bar_gap=0,
                     layout="vertical",
-                    margin={"top": 10, "right": 0, "left": -10, "bottom": 0},
+                    bar_category_gap="30%",
+                    margin={"top": 10, "right": 0, "left": -15, "bottom": -10},
                 ),
                 width="100%",
-                height=320,
+                height=340,
             ),
-            class_name="w-full h-[320px]",
+            class_name="w-full h-[340px]",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
     )
