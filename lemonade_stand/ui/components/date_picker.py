@@ -2,7 +2,7 @@
 
 import reflex as rx
 
-from lemonade_stand.ui.states.ui_state import DateState
+from lemonade_stand.ui.states.budget_state import BudgetState
 
 
 def date_picker() -> rx.Component:
@@ -13,7 +13,7 @@ def date_picker() -> rx.Component:
     return rx.popover.root(
         rx.popover.trigger(
             rx.button(
-                DateState.button_display_text,
+                BudgetState.date_selection_text,
                 rx.icon("calendar", size=16, class_name="ml-2"),
                 variant="soft",
                 radius="large",
@@ -25,9 +25,9 @@ def date_picker() -> rx.Component:
             rx.flex(
                 # Year Dropdown
                 rx.select(
-                    DateState.available_years,
-                    value=DateState.selected_year,
-                    on_change=DateState.set_year,
+                    BudgetState.available_years,
+                    value=BudgetState.selected_year,
+                    on_change=BudgetState.set_year,
                     placeholder="All Years",
                     color_scheme="mint",
                     variant="ghost",
@@ -35,9 +35,9 @@ def date_picker() -> rx.Component:
                 ),
                 # Month Dropdown
                 rx.select(
-                    DateState.available_months,
-                    value=DateState.selected_month,
-                    on_change=DateState.set_month,
+                    BudgetState.available_months,
+                    value=BudgetState.selected_month,
+                    on_change=BudgetState.set_month,
                     placeholder="All Months",
                     color_scheme="mint",
                     variant="ghost",
@@ -45,7 +45,7 @@ def date_picker() -> rx.Component:
                 ),
                 direction="row-reverse",
                 justify="between",
-                spacing="4",
+                spacing="6",
             ),
             align="end",
             side="bottom",

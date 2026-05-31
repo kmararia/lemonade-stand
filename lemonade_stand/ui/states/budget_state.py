@@ -52,13 +52,68 @@ class BudgetState(rx.State):
     warning_threshold: int = 75
     critical_threshold: int = 90
 
+    selected_year: str = ""
+    selected_month: str = ""
+    available_months: list[str] = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+    ]
+
+    @rx.var
+    def available_years(self) -> list[str]:
+        """Dynamically generate available years based on the user's expense data."""
+
+        return (
+            typing.cast(
+                pl.DataFrame,
+                (
+                    self.user_data.expenses.select(
+                        year=pl.col("date").dt.strftime("%Y"),
+                    )
+                    .unique()
+                    .sort("year")
+                    .collect()
+                ),
+            )
+            .to_series()
+            .to_list()
+        )
+
+    @rx.var
+    def filtered_expense_data(self) -> pl.LazyFrame:
+        """Filter expenses based on the selected date range from DateState."""
+
+        if self.selected_month != "" and self.selected_year != "":
+            return self.user_data.expenses.filter(
+                (pl.col("date").dt.strftime("%Y") == self.selected_year)
+                & (pl.col("date").dt.strftime("%B") == self.selected_month)
+            )
+
+        elif self.selected_year != "":
+            return self.user_data.expenses.filter(
+                pl.col("date").dt.strftime("%Y") == self.selected_year
+            )
+
+        else:
+            return self.user_data.expenses
+
     @rx.var
     def expenses(self) -> list[Expense]:
         """"""
         row_iterable = typing.cast(
             pl.DataFrame,
             (
-                self.user_data.expenses.select(
+                self.filtered_expense_data.select(
                     "date",
                     "description",
                     "amount",
@@ -81,10 +136,11 @@ class BudgetState(rx.State):
     @rx.var
     def home_page_data(self) -> pl.DataFrame:
         """"""
+
         return typing.cast(
             pl.DataFrame,
             (
-                self.user_data.expenses.group_by(
+                self.filtered_expense_data.group_by(
                     payment_type=pl.col("payment_type"),
                     category=(
                         pl.when(pl.col("category").str.len_chars() <= 20)
@@ -187,6 +243,27 @@ class BudgetState(rx.State):
                 ),
             ).to_dicts()
         ]
+
+    @rx.var
+    def date_selection_text(self) -> str:
+        """Dynamically updates the text on the button surface."""
+
+        if self.selected_month != "":
+            return f"{self.selected_month} {self.selected_year}"
+        elif self.selected_year != "":
+            return self.selected_year
+        else:
+            return "All Time"
+
+    @rx.event
+    def set_year(self, year: str):
+        """"""
+        self.selected_year = year
+
+    @rx.event
+    def set_month(self, month: str):
+        """"""
+        self.selected_month = month
 
     @rx.event
     def open_add_budget_modal(self):
