@@ -33,3 +33,6 @@ config.json
 *.db
 assets/external/
 *.py[cod]
+
+# Ignore VS Code workspace settings
+.vscode/
