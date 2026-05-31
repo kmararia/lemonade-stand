@@ -11,6 +11,7 @@
         "llama-index>=0.14.21",
         "pdfplumber>=0.11.9",
         "polars[rt64, deltalake, pyarrow]>=1.40.1",
+        "pymupdf-layout>=1.27.2.3",
         "pymupdf4llm==0.2.8",
         "python-dateutil>=2.9.0.post0",
         "reflex==0.9.3",
