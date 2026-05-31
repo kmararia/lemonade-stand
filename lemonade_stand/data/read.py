@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 import pdfplumber
 import polars as pl
+import pymupdf.layout
 import pymupdf4llm
 from dateutil.parser import parse
 
@@ -25,9 +26,8 @@ class Statement:
     """A dataclass for a statement file"""
 
     file_path: Path
-    pages: list = field(init=False)
     transactions: pl.LazyFrame = field(init=False)
-    engine: str = "pdfplumber"
+    engine: str = "pymullm-layout"
     schema: pl.schema.Schema = field(
         default_factory=lambda: pl.Schema(
             {
@@ -46,7 +46,7 @@ class Statement:
     def __post_init__(self):
         """Post initialization variables"""
 
-        try_engines = ["pdfplumber", "pymullm"]
+        try_engines = ["pdfplumber", "pymullm-llama", "pymullm-layout"]
         used_engines = []
 
         LOGGER.info("Setting up data structure for file %s", self.file_path.name)
@@ -54,9 +54,8 @@ class Statement:
         while True:
             try:
                 used_engines.append(self.engine)
-                self.pages = self.read_file(read_path=self.file_path)
                 self.transactions = self.get_transactions(
-                    pdf_text="\n".join(self.pages),
+                    pdf_text=self.read_file(read_path=self.file_path),
                 )
                 break
 
@@ -75,7 +74,7 @@ class Statement:
                         f"Unable to process file '{self.file_path.name}'. Skipping processing..."
                     ) from None
 
-    def read_file(self, read_path: Path) -> list[str]:
+    def read_file(self, read_path: Path) -> str:
         """Extracts page text using specified engine"""
 
         def _read_pdfplumber(pdf_path: Path):
@@ -85,21 +84,30 @@ class Statement:
 
             pdf = pdfplumber.open(pdf_path)
 
-            return [page.extract_text() for page in pdf.pages]
+            return "\n".join([page.extract_text() for page in pdf.pages])
 
-        def _read_pymullm(pdf_path: Path):
+        def _read_pymullm_llama(pdf_path: Path):
             """Extracts page text using pymullm"""
 
-            LOGGER.debug("Reading file using pymupdf4llm")
+            LOGGER.debug("Reading file using pymupdf4llm - LlamaMarkdownReader")
 
             read_obj = pymupdf4llm.LlamaMarkdownReader()
             pdf_data = read_obj.load_data(pdf_path)
 
-            return [page.to_dict()["text"] for page in pdf_data]
+            return "\n".join([page.to_dict()["text"] for page in pdf_data])
+
+        def _read_pymullm_layout(pdf_path: Path):
+            """Extracts page text using pymullm"""
+
+            LOGGER.debug("Reading file using pymupdf4llm - Layout")
+
+            pdf_doc = pymupdf.open(pdf_path)
+            return pymupdf4llm.to_text(pdf_doc, use_ocr=False)
 
         engine_dict: dict[str, Callable] = {
             "pdfplumber": _read_pdfplumber,
-            "pymullm": _read_pymullm,
+            "pymullm-llama": _read_pymullm_llama,
+            "pymullm-layout": _read_pymullm_layout,
         }
 
         return engine_dict[self.engine](read_path)
@@ -169,9 +177,10 @@ class Statement:
                 date_pattern,
             )
 
+            amount_pattern = r"[-+$]?\d*[,]?\d+\.\d{2}"
             transactions = re.finditer(
                 re.compile(
-                    rf"({date_pattern})\s+(?:{date_pattern}\s+)?(.*?)\s+(-?\d*,?\d+\.\d{{2}})",
+                    rf"({date_pattern})\s+(?:{date_pattern}\s+)?([\s\S]+?)\s+({amount_pattern})[\b|\s+]({amount_pattern})?",
                     re.IGNORECASE | re.VERBOSE,
                 ),
                 pdf_text,
@@ -191,7 +200,7 @@ class Statement:
             (
                 parse(row[0], default=file_year).date(),
                 None,
-                PyDecimal(row[2].replace(",", "")),
+                PyDecimal(re.sub(r"[,$]", "", row[2])),
                 "Credit/Debit Card",
                 row[1],
                 None,

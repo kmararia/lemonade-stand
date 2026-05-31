@@ -90,7 +90,7 @@ class UserData:
 
         for file in Path(user_config.data.statement_dir).glob("*.pdf"):
             try:
-                statements_list.append(Statement(file_path=file, engine="pymullm"))
+                statements_list.append(Statement(file_path=file))
             except DataLoadingError as e:
                 error_list.append((file, str(e)))
 
