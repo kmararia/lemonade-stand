@@ -13,7 +13,7 @@ BASE_CONFIG = {
     "data": {
         "always-refresh-data": True,
         "statement-dir": (
-            Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "statements"
+            Path(lemonade_stand.__file__).parents[1] / "tests" / "data" / "inputs"
         ),
     },
     "model": {
@@ -22,6 +22,7 @@ BASE_CONFIG = {
             Path(lemonade_stand.__file__).parents[1]
             / "tests"
             / "model"
+            / "inputs"
             / "training.csv"
         ),
     },
