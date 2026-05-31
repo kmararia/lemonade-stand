@@ -89,23 +89,37 @@ class HomeState(rx.State):
             .to_list()
         )
 
-    @rx.var
-    def filtered_expense_data(self) -> pl.LazyFrame:
-        """Filter expenses based on the selected date range from DateState."""
+    def filtered_data(self, data_df: pl.LazyFrame) -> pl.LazyFrame:
+        """Filter data based on the selected date range from DateState."""
 
         if self.selected_month != "" and self.selected_year != "":
-            return self.user_data.expenses.filter(
+            return data_df.filter(
                 (pl.col("date").dt.strftime("%Y") == self.selected_year)
                 & (pl.col("date").dt.strftime("%B") == self.selected_month)
             )
 
         elif self.selected_year != "":
-            return self.user_data.expenses.filter(
+            return data_df.filter(
                 pl.col("date").dt.strftime("%Y") == self.selected_year
             )
 
         else:
-            return self.user_data.expenses
+            return data_df
+
+    @rx.var
+    def filtered_income_data(self) -> pl.LazyFrame:
+        """Filter income based on the selected date range from DateState."""
+        return self.filtered_data(self.user_data.income)
+
+    @rx.var
+    def filtered_savings_data(self) -> pl.LazyFrame:
+        """Filter savings based on the selected date range from DateState."""
+        return self.filtered_data(self.user_data.savings)
+
+    @rx.var
+    def filtered_expense_data(self) -> pl.LazyFrame:
+        """Filter expenses based on the selected date range from DateState."""
+        return self.filtered_data(self.user_data.expenses)
 
     @rx.var
     def expenses(self) -> list[Expense]:
@@ -194,26 +208,37 @@ class HomeState(rx.State):
         )
 
     @rx.var
-    def total_budget(self) -> float:
+    def total_earnings(self) -> float:
         """"""
-        return self.home_page_data.select(pl.col("allocated_amount").sum()).item(0, 0)
+        return typing.cast(
+            pl.DataFrame,
+            self.filtered_income_data.select(pl.col("amount").sum()).collect(),
+        ).item(0, 0)
 
     @rx.var
-    def total_spent(self) -> float:
+    def total_savings(self) -> float:
+        """"""
+        return typing.cast(
+            pl.DataFrame,
+            self.filtered_savings_data.select(pl.col("amount").sum()).collect(),
+        ).item(0, 0)
+
+    @rx.var
+    def total_expenses(self) -> float:
         """"""
         return self.home_page_data.select(pl.col("spent_amount").sum()).item(0, 0)
 
     @rx.var
-    def remaining_budget(self) -> float:
+    def remaining_earnings(self) -> float:
         """"""
-        return self.total_budget - self.total_spent
+        return self.total_earnings - self.total_expenses
 
     @rx.var
     def utilization_percentage(self) -> float:
         """"""
-        if self.total_budget == 0:
+        if self.total_earnings == 0:
             return 0.0
-        return round(self.total_spent / self.total_budget * 100, 1)
+        return round(self.total_expenses / self.total_earnings * 100, 1)
 
     @rx.var
     def budget_vs_actual_spend(self) -> list[dict[str, typing.Any]]:

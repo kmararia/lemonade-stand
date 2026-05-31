@@ -176,9 +176,9 @@ def home_content() -> rx.Component:
         ),
         rx.el.div(
             stats_grid(
-                total_budget=HomeState.total_budget,
-                total_spent=HomeState.total_spent,
-                remaining_budget=HomeState.remaining_budget,
+                total_earnings=HomeState.total_earnings,
+                total_expenses=HomeState.total_expenses,
+                remaining_earnings=HomeState.remaining_earnings,
                 utilization_pct=HomeState.utilization_percentage,
             ),
             class_name="mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",

@@ -88,17 +88,17 @@ def stat_card(
 
 
 def stats_grid(
-    total_budget: rx.Var[int | float | Decimal],
-    total_spent: rx.Var[int | float | Decimal],
-    remaining_budget: rx.Var[int | float | Decimal],
+    total_earnings: rx.Var[int | float | Decimal],
+    total_expenses: rx.Var[int | float | Decimal],
+    remaining_earnings: rx.Var[int | float | Decimal],
     utilization_pct: rx.Var[int | float | Decimal],
 ) -> rx.Component:
     """"""
 
     return rx.el.div(
         stat_card(
-            "Total Budget",
-            f"${total_budget:,.0f}",
+            "Total Earnings",
+            f"${total_earnings:,.0f}",
             "wallet",
             trend="+12% from last Q",
             color="blue",
@@ -106,15 +106,15 @@ def stats_grid(
         ),
         stat_card(
             "Total Spent",
-            f"${total_spent:,.0f}",
+            f"${total_expenses:,.0f}",
             "credit-card",
             trend="+5% vs target",
             color="indigo",
             trend_up=False,
         ),
         stat_card(
-            "Remaining Budget",
-            f"${remaining_budget:,.0f}",
+            "Remaining Earnings",
+            f"${remaining_earnings:,.0f}",
             "piggy-bank",
             color="indigo",
             progress=utilization_pct,
