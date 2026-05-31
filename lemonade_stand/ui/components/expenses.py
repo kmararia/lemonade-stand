@@ -4,7 +4,7 @@ import typing
 
 import reflex as rx
 
-from lemonade_stand.ui.states.budget_state import Expense
+from lemonade_stand.ui.states.home_state import Expense
 
 
 def status_badge(status: bool) -> rx.Component:

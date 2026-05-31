@@ -45,7 +45,7 @@ class Expense:
     source_file: str = ""
 
 
-class BudgetState(rx.State):
+class HomeState(rx.State):
     """Core state for budget and expense data."""
 
     user_data: UserData = get_data(config=USER_CONFIG)

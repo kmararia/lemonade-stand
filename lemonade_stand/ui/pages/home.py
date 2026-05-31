@@ -6,8 +6,8 @@ from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.expenses import expenses_table
 from lemonade_stand.ui.components.stats import stats_grid
-from lemonade_stand.ui.states.budget_state import BudgetHealthStats
-from lemonade_stand.ui.states.budget_state import BudgetState
+from lemonade_stand.ui.states.home_state import BudgetHealthStats
+from lemonade_stand.ui.states.home_state import HomeState
 from lemonade_stand.ui.states.ui_state import ActivityState
 
 
@@ -152,7 +152,7 @@ def budget_health_widget(health_stats: rx.Var[list[BudgetHealthStats]]) -> rx.Co
     )
 
 
-def dashboard_content() -> rx.Component:
+def home_content() -> rx.Component:
     """ """
     return rx.el.div(
         rx.el.div(
@@ -171,21 +171,21 @@ def dashboard_content() -> rx.Component:
             class_name="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
         ),
         quick_actions_panel(
-            open_add_expense_modal=BudgetState.open_add_expense_modal,
-            open_add_budget_modal=BudgetState.open_add_budget_modal,
+            open_add_expense_modal=HomeState.open_add_expense_modal,
+            open_add_budget_modal=HomeState.open_add_budget_modal,
         ),
         rx.el.div(
             stats_grid(
-                total_budget=BudgetState.total_budget,
-                total_spent=BudgetState.total_spent,
-                remaining_budget=BudgetState.remaining_budget,
-                utilization_pct=BudgetState.utilization_percentage,
+                total_budget=HomeState.total_budget,
+                total_spent=HomeState.total_spent,
+                remaining_budget=HomeState.remaining_budget,
+                utilization_pct=HomeState.utilization_percentage,
             ),
             class_name="mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
         ),
         rx.el.div(
             rx.el.div(
-                budget_chart(display_data=BudgetState.budget_vs_actual_spend),
+                budget_chart(display_data=HomeState.budget_vs_actual_spend),
                 class_name="lg:col-span-2",
             ),
             rx.el.div(activity_feed(), class_name="lg:col-span-1"),
@@ -193,7 +193,7 @@ def dashboard_content() -> rx.Component:
         ),
         rx.el.div(
             rx.el.div(
-                budget_health_widget(health_stats=BudgetState.budget_health_stats),
+                budget_health_widget(health_stats=HomeState.budget_health_stats),
                 class_name="lg:col-span-2",
             ),
             # rx.el.div(goals_widget(), class_name="lg:col-span-1"),
@@ -201,7 +201,7 @@ def dashboard_content() -> rx.Component:
         ),
         rx.el.div(
             rx.el.div(
-                expenses_table(expense_data=BudgetState.expenses),
+                expenses_table(expense_data=HomeState.expenses),
                 class_name="lg:col-span-3",
             ),
             class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",

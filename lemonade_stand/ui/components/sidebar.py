@@ -60,7 +60,7 @@ def sidebar() -> rx.Component:
             ),
             rx.el.nav(
                 rx.el.div(
-                    sidebar_item("Dashboard", "layout-dashboard", href="/"),
+                    sidebar_item("Home", "layout-dashboard", href="/"),
                     sidebar_item("Income", "line_chart", href="/income"),
                     sidebar_item("Savings", "piggy-bank", href="/savings"),
                     sidebar_item("Expenses", "receipt", href="/expenses"),

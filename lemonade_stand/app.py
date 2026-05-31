@@ -4,7 +4,7 @@ import reflex as rx
 
 from lemonade_stand.ui.components.header import header
 from lemonade_stand.ui.components.sidebar import sidebar
-from lemonade_stand.ui.pages.dashboard import dashboard_content
+from lemonade_stand.ui.pages.home import home_content
 
 
 def index() -> rx.Component:
@@ -31,7 +31,7 @@ def index() -> rx.Component:
         rx.el.div(
             header(),
             rx.el.main(
-                dashboard_content(),
+                home_content(),
                 class_name="flex-1 p-6 md:p-8 overflow-y-auto scroll-smooth",
             ),
             class_name="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50/30 dark:bg-transparent backdrop-blur-sm",
