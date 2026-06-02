@@ -6,6 +6,7 @@ from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.sidebar import sidebar
 from lemonade_stand.ui.components.tables import data_table
 from lemonade_stand.ui.states.expense_state import ExpenseState
+from lemonade_stand.ui.states.expense_state import TopExpense
 
 
 def summary_stat(
@@ -56,6 +57,59 @@ def summary_stat(
     )
 
 
+def top_spenders_widget() -> rx.Component:
+    """"""
+
+    def top_spender_row(category: TopExpense) -> rx.Component:
+        return rx.el.div(
+            rx.el.div(
+                rx.match(
+                    category.index,
+                    (1, rx.el.span("🥇", class_name="text-lg w-8 text-center")),
+                    (2, rx.el.span("🥈", class_name="text-lg w-8 text-center")),
+                    (3, rx.el.span("🥉", class_name="text-lg w-8 text-center")),
+                    rx.el.span(
+                        f"#{category.index}",
+                        class_name="text-xs font-bold text-gray-400 w-8 text-center",
+                    ),
+                ),
+                rx.image(
+                    src=f"https://api.dicebear.com/10.x/shapes/svg?seed={category.index}",
+                    class_name="w-10 h-10 rounded-full bg-gray-50 border-2 border-white shadow-sm mr-3 ml-1",
+                ),
+                rx.el.p(
+                    category.name,
+                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100",
+                ),
+                class_name="flex items-center flex-1",
+            ),
+            rx.el.div(
+                rx.el.p(
+                    f"${category.amount:,.0f}",
+                    class_name="text-sm font-bold text-gray-900 dark:text-gray-100",
+                ),
+                rx.el.p(
+                    "Total Spend",
+                    class_name="text-[10px] text-gray-400 font-medium text-right",
+                ),
+                class_name="text-right",
+            ),
+            class_name="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0",
+        )
+
+    return rx.el.div(
+        rx.el.h3(
+            "Top Spending Category",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
+        ),
+        rx.el.div(
+            rx.foreach(ExpenseState.top_spending_category_list, top_spender_row),
+            class_name="flex flex-col",
+        ),
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-50 dark:border-gray-700/50 shadow-sm h-full",
+    )
+
+
 def expense_page() -> rx.Component:
     """Expense tracking page."""
 
@@ -65,19 +119,12 @@ def expense_page() -> rx.Component:
             rx.el.div(
                 rx.el.div(
                     rx.el.div(
-                        rx.el.div(
-                            rx.el.h2(
-                                "Overview",
-                                class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
-                            ),
-                            date_picker(),
-                            class_name="flex justify-between items-center w-full",
+                        rx.el.h2(
+                            "Expense Overview",
+                            class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
                         ),
-                        rx.el.p(
-                            "Track your spending, income, and budget in real-time.",
-                            class_name="text-gray-600 dark:text-gray-400 mb-6",
-                        ),
-                        class_name="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
+                        date_picker(),
+                        class_name="flex justify-between items-center w-full mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
                     ),
                     rx.el.div(
                         summary_stat(
@@ -109,6 +156,10 @@ def expense_page() -> rx.Component:
                             icon_color="orange",
                         ),
                         class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700",
+                    ),
+                    rx.el.div(
+                        rx.el.div(top_spenders_widget(), class_name="lg:col-span-1"),
+                        class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-7 duration-700",
                     ),
                     rx.el.div(
                         rx.el.div(

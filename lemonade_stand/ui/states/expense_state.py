@@ -28,6 +28,15 @@ class Expense:
     source_file: str = ""
 
 
+@dataclass
+class TopExpense:
+    """"""
+
+    index: int
+    name: str
+    amount: float
+
+
 class ExpenseState(DataState):
     """Core state for budget and expense data."""
 
@@ -63,6 +72,22 @@ class ExpenseState(DataState):
         ).iter_rows(named=True)
 
         return [Expense(**row) for row in row_iterator]
+
+    @rx.var
+    def top_spending_category_list(self) -> list[TopExpense]:
+        """"""
+        row_iterator = typing.cast(
+            pl.DataFrame,
+            (
+                self._shared_data.expenses.group_by(name=pl.col("category"))
+                .agg(pl.col("amount").sum())
+                .sort("amount", descending=True)
+                .with_row_index("index", offset=1)
+                .collect()
+            ),
+        ).to_dicts()
+
+        return [TopExpense(**row) for row in row_iterator][:5]
 
     @rx.var
     def active_budgets(self) -> int:
@@ -103,21 +128,9 @@ class ExpenseState(DataState):
     @rx.var
     def top_spending_category(self) -> str:
         """"""
-        top_category = typing.cast(
-            pl.DataFrame,
-            (
-                self._shared_data.expenses.group_by("category")
-                .agg(pl.col("amount").sum())
-                .sort("amount", descending=True)
-                .limit(1)
-                .collect()
-            ),
-        )
-
-        if top_category.height == 0:
+        if len(self.top_spending_category_list) == 0:
             return "N/A"
-        else:
-            return top_category.item(0, "category")
+        return self.top_spending_category_list[0].name
 
     @rx.event
     def set_year(self, year: str):
