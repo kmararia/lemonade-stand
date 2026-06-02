@@ -11,8 +11,12 @@ class UIState(rx.State):
     @rx.event
     def toggle_sidebar(self):
         """"""
-
         self.is_sidebar_collapsed = not self.is_sidebar_collapsed
+
+    @rx.event
+    def collapse_sidebar(self):
+        """"""
+        self.is_sidebar_collapsed = True
 
 
 class ActivityState(rx.State):
