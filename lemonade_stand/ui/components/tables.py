@@ -4,7 +4,8 @@ import typing
 
 import reflex as rx
 
-from lemonade_stand.ui.states.home_state import Expense
+from lemonade_stand.ui.states.expense_state import Expense
+from lemonade_stand.ui.states.expense_state import ExpenseState
 
 
 def status_badge(status: bool) -> rx.Component:
@@ -35,17 +36,17 @@ def status_badge(status: bool) -> rx.Component:
     )
 
 
-def expense_row(expense: Expense) -> rx.Component:
+def table_row(table: Expense) -> rx.Component:
     """"""
     return rx.el.tr(
         rx.el.td(
             rx.el.div(
                 rx.el.span(
-                    expense.date,
+                    table.date,
                     class_name="text-sm font-medium text-gray-900 dark:text-gray-100",
                 ),
                 rx.cond(
-                    expense.recurring_flag,
+                    table.recurring_flag,
                     rx.el.div(
                         rx.icon(
                             "repeat",
@@ -56,11 +57,11 @@ def expense_row(expense: Expense) -> rx.Component:
                     ),
                 ),
                 rx.cond(
-                    expense.has_source_file,
+                    table.has_source_file,
                     rx.el.div(
                         rx.icon("paperclip", size=12, class_name="text-gray-400"),
                         class_name="ml-2",
-                        title=expense.source_file,
+                        title=table.source_file,
                     ),
                 ),
                 class_name="flex items-center",
@@ -71,7 +72,7 @@ def expense_row(expense: Expense) -> rx.Component:
             rx.el.div(
                 rx.icon("tag", size=14, class_name="mr-2 text-gray-400"),
                 rx.el.span(
-                    expense.category,
+                    table.category,
                     class_name="text-sm text-gray-700 dark:text-gray-300",
                 ),
                 class_name="flex items-center",
@@ -80,14 +81,14 @@ def expense_row(expense: Expense) -> rx.Component:
         ),
         rx.el.td(
             rx.el.span(
-                f"${expense.amount:,.2f}",
+                f"${table.amount:,.2f}",
                 class_name="text-sm font-semibold text-gray-900 dark:text-gray-100",
             ),
             class_name="px-6 py-4 whitespace-nowrap",
         ),
         rx.el.td(
             rx.el.span(
-                expense.payment_type,
+                table.payment_type,
                 class_name="text-sm text-gray-500 dark:text-gray-400",
             ),
             class_name="px-6 py-4 whitespace-nowrap",
@@ -95,14 +96,14 @@ def expense_row(expense: Expense) -> rx.Component:
         rx.el.td(
             rx.el.div(
                 rx.el.span(
-                    expense.description,
+                    table.description,
                     class_name="text-sm text-gray-500 dark:text-gray-400 max-w-[200px] truncate block",
                 ),
                 rx.cond(
-                    expense.location.length() > 0,  # type: ignore
+                    table.location.length() > 0,  # type: ignore
                     rx.el.div(
                         rx.foreach(
-                            expense.location,
+                            table.location,
                             lambda tag: rx.el.span(
                                 tag,
                                 class_name="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
@@ -116,14 +117,14 @@ def expense_row(expense: Expense) -> rx.Component:
             class_name="px-6 py-4",
         ),
         rx.el.td(
-            status_badge(expense.exclude_flag),
+            status_badge(table.exclude_flag),
             class_name="px-6 py-4 whitespace-nowrap",
         ),
         class_name="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors even:bg-gray-50/50 dark:even:bg-gray-800/30",
     )
 
 
-def expenses_table(expense_data: rx.Var[list[Expense]]) -> rx.Component:
+def data_table() -> rx.Component:
     """"""
     return rx.el.div(
         rx.el.div(
@@ -139,7 +140,7 @@ def expenses_table(expense_data: rx.Var[list[Expense]]) -> rx.Component:
             class_name="flex items-center justify-between mb-6",
         ),
         rx.cond(
-            expense_data.length() > 0,  # type: ignore
+            ExpenseState.expense_rows.length() > 0,  # type: ignore
             rx.el.div(
                 rx.el.table(
                     rx.el.thead(
@@ -172,7 +173,7 @@ def expenses_table(expense_data: rx.Var[list[Expense]]) -> rx.Component:
                         )
                     ),
                     rx.el.tbody(
-                        rx.foreach(expense_data, lambda e, _: expense_row(e)),
+                        rx.foreach(ExpenseState.expense_rows, table_row),
                         class_name="bg-white/50 dark:bg-transparent divide-y divide-gray-100 dark:divide-gray-700/50",
                     ),
                     class_name="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50",

@@ -4,7 +4,6 @@ import reflex as rx
 
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
-from lemonade_stand.ui.components.expenses import expenses_table
 from lemonade_stand.ui.components.stats import stats_grid
 from lemonade_stand.ui.states.home_state import BudgetHealthStats
 from lemonade_stand.ui.states.home_state import HomeState
@@ -14,6 +13,7 @@ from lemonade_stand.ui.states.ui_state import ActivityState
 def quick_actions_panel(
     open_add_expense_modal: rx.event.EventType,
     open_add_budget_modal: rx.event.EventType,
+    open_add_budget_allocations: rx.event.EventType,
 ) -> rx.Component:
     """"""
 
@@ -48,10 +48,13 @@ def quick_actions_panel(
                 "blue",
             ),
             action_button("New Budget", "wallet", open_add_budget_modal, "emerald"),
-            # action_button(
-            #     "Export Report", "file-down", SettingsState.export_data, "purple"
-            # ),
-            action_button("View Team", "users", rx.redirect("/team"), "orange"),
+            action_button(
+                "Budget Allocations",
+                "clipboard_pen_line",
+                open_add_budget_allocations,
+                "purple",
+            ),
+            action_button("User Info", "users", rx.redirect("/user_info"), "orange"),
             class_name="grid grid-cols-2 sm:grid-cols-4 gap-4",
         ),
         class_name="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
@@ -82,7 +85,7 @@ def activity_feed() -> rx.Component:
     )
 
 
-def budget_health_widget(health_stats: rx.Var[list[BudgetHealthStats]]) -> rx.Component:
+def budget_health_widget() -> rx.Component:
     """"""
 
     def budget_health_row(budget: BudgetHealthStats) -> rx.Component:
@@ -145,7 +148,7 @@ def budget_health_widget(health_stats: rx.Var[list[BudgetHealthStats]]) -> rx.Co
             class_name="flex items-center justify-between mb-4",
         ),
         rx.el.div(
-            rx.foreach(health_stats, budget_health_row),
+            rx.foreach(HomeState.budget_health_stats, budget_health_row),
             class_name="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar pr-2",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
@@ -173,6 +176,7 @@ def home_content() -> rx.Component:
         quick_actions_panel(
             open_add_expense_modal=HomeState.open_add_expense_modal,
             open_add_budget_modal=HomeState.open_add_budget_modal,
+            open_add_budget_allocations=HomeState.open_add_budget_allocations,
         ),
         rx.el.div(
             stats_grid(
@@ -193,18 +197,11 @@ def home_content() -> rx.Component:
         ),
         rx.el.div(
             rx.el.div(
-                budget_health_widget(health_stats=HomeState.budget_health_stats),
+                budget_health_widget(),
                 class_name="lg:col-span-2",
             ),
             # rx.el.div(goals_widget(), class_name="lg:col-span-1"),
             class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
-        ),
-        rx.el.div(
-            rx.el.div(
-                expenses_table(expense_data=HomeState.expenses),
-                class_name="lg:col-span-3",
-            ),
-            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",
         ),
         class_name="max-w-7xl mx-auto relative z-10",
     )

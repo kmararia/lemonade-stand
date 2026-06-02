@@ -4,6 +4,7 @@ import reflex as rx
 
 from lemonade_stand.ui.components.header import header
 from lemonade_stand.ui.components.sidebar import sidebar
+from lemonade_stand.ui.pages.expense import expense_page
 from lemonade_stand.ui.pages.home import home_content
 
 
@@ -47,4 +48,5 @@ app = rx.App(
     ],
 )
 
-app.add_page(index, route="/")
+app.add_page(index, route="/")  # , on_load=DataState.load_shared_data)
+app.add_page(expense_page, route="/expenses")
