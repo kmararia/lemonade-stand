@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import fields
 from pathlib import Path
 from typing import overload
 
@@ -37,7 +38,15 @@ class Transactions:
         else:
             LOGGER.error("No statements pdfs were found! Setting up empty dataset...")
 
-            self.data = pl.LazyFrame(data=[], schema=Statement.schema)
+            statement_schema = next(x for x in fields(Statement) if x.name == "schema")
+            self.data = pl.LazyFrame(
+                data=[],
+                schema=(
+                    statement_schema.default_factory()
+                    if callable(statement_schema.default_factory)
+                    else {}
+                ),
+            )
 
     def __iter__(self):
         """Iterable for the transactions dataclass"""
