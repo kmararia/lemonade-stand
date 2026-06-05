@@ -4,6 +4,8 @@ import typing
 
 import reflex as rx
 
+from lemonade_stand.ui.states.expense_state import TopExpense
+
 
 def legend_item(name: str, color: str) -> rx.Component:
     """"""
@@ -125,4 +127,91 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
             class_name="w-full h-[340px]",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
+    )
+
+
+def trend_chart(
+    title: str,
+    max_lines: int,
+    monthly_trends: rx.Var[list[dict]],
+    trend_lines: rx.Var[list[TopExpense]],
+) -> rx.Component:
+    """"""
+
+    return rx.el.div(
+        rx.el.h3(
+            title, class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6"
+        ),
+        rx.el.div(
+            rx.recharts.bar_chart(
+                rx.recharts.cartesian_grid(
+                    stroke_dasharray="3 3",
+                    vertical=False,
+                    class_name="stroke-gray-200 dark:stroke-gray-700/50",
+                ),
+                rx.recharts.x_axis(
+                    data_key="date",
+                    tick={"fontSize": 12, "fill": "#6b7280"},
+                    dy=10,
+                ),
+                rx.recharts.y_axis(
+                    axis_line=False,
+                    tick_line=False,
+                    tick={"fontSize": 12, "fill": "#6b7280"},
+                ),
+                rx.recharts.graphing_tooltip(
+                    cursor=rx.color_mode_cond({"fill": "#f8fafc"}, {"fill": "#374151"}),
+                    content_style=rx.color_mode_cond(
+                        {
+                            "backgroundColor": "rgba(255, 255, 255, 0.9)",
+                            "borderRadius": "12px",
+                            "border": "1px solid rgba(255, 255, 255, 0.5)",
+                            "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                            "backdropFilter": "blur(10px)",
+                            "padding": "12px",
+                            "color": "#1f2937",
+                        },
+                        {
+                            "backgroundColor": "rgba(31, 41, 55, 0.9)",
+                            "borderRadius": "12px",
+                            "border": "1px solid rgba(55, 65, 81, 0.5)",
+                            "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                            "backdropFilter": "blur(10px)",
+                            "padding": "12px",
+                            "color": "#f3f4f6",
+                        },
+                    ),
+                    item_style=rx.color_mode_cond(
+                        {"color": "#1f2937"}, {"color": "#e5e7eb"}
+                    ),
+                    indicator="circle",
+                ),
+                *[
+                    rx.recharts.bar(
+                        data_key=rx.cond(
+                            trend_lines.length() > x,  # type: ignore
+                            trend_lines[x].name,  # type: ignore
+                            f"Empty_{x}",
+                        ),
+                        type_=rx.cond(
+                            trend_lines.length() > x,  # type: ignore
+                            trend_lines[x].type,  # type: ignore
+                            "monotone",
+                        ),
+                        fill=rx.cond(
+                            trend_lines.length() > x,  # type: ignore
+                            trend_lines[x].stroke,  # type: ignore
+                            "#000000",
+                        ),
+                        radius=[4, 4, 0, 0],
+                    )
+                    for x in range(max_lines)
+                ],
+                data=monthly_trends,
+                width="100%",
+                height=300,
+            ),
+            class_name="w-full h-[340px]",
+        ),
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
     )

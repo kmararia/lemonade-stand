@@ -2,9 +2,11 @@
 
 import reflex as rx
 
+from lemonade_stand.ui.components.charts import trend_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.sidebar import sidebar
 from lemonade_stand.ui.components.tables import data_table
+from lemonade_stand.ui.states.expense_state import STROKE_COLORS
 from lemonade_stand.ui.states.expense_state import ExpenseState
 from lemonade_stand.ui.states.expense_state import TopExpense
 
@@ -27,7 +29,7 @@ def summary_stat(
                 ),
                 rx.el.h3(
                     value,
-                    class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
+                    class_name="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
                 ),
                 class_name="flex flex-col",
             ),
@@ -137,7 +139,7 @@ def expense_page() -> rx.Component:
                         summary_stat(
                             "Remaining Budget",
                             f"${ExpenseState.remaining_budget:,.2f}",
-                            f"{100 - ExpenseState.utilization_percentage}% of total",
+                            f"{100 - ExpenseState.utilization_percentage:.0f}% of total",
                             icon="wallet",
                             icon_color="emerald",
                         ),
@@ -158,6 +160,15 @@ def expense_page() -> rx.Component:
                         class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700",
                     ),
                     rx.el.div(
+                        rx.el.div(
+                            trend_chart(
+                                title="Spending Trends",
+                                max_lines=len(STROKE_COLORS),
+                                monthly_trends=ExpenseState.spending_trends_data,
+                                trend_lines=ExpenseState.top_spending_category_list,
+                            ),
+                            class_name="lg:col-span-2",
+                        ),
                         rx.el.div(top_spenders_widget(), class_name="lg:col-span-1"),
                         class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-7 duration-700",
                     ),

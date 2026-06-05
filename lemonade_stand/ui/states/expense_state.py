@@ -9,6 +9,8 @@ import reflex as rx
 
 from lemonade_stand.ui.states.data_state import DataState
 
+STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
+
 
 @dataclass
 class Expense:
@@ -34,7 +36,10 @@ class TopExpense:
 
     index: int
     name: str
+    clean_name: str
     amount: float
+    stroke: str
+    type: str
 
 
 class ExpenseState(DataState):
@@ -74,6 +79,41 @@ class ExpenseState(DataState):
         return [Expense(**row) for row in row_iterator]
 
     @rx.var
+    def spending_trends_data(self) -> list[dict]:
+        """"""
+
+        category_names = [x.name for x in self.top_spending_category_list]
+
+        return typing.cast(
+            pl.DataFrame,
+            (
+                self._shared_data.expenses.filter(
+                    pl.col("category").is_in(category_names)
+                    & (
+                        pl.col("date")
+                        .dt.month_start()
+                        .rank(method="dense", descending=True)
+                        <= 6
+                    )
+                )
+                .group_by(
+                    name=pl.col("category"),
+                    date=pl.col("date").dt.strftime("%b %Y"),
+                )
+                .agg(pl.col("amount").sum())
+                .sort(["date", "name"], descending=[False, True])
+                .pivot(
+                    on="name",
+                    on_columns=category_names,
+                    index="date",
+                    values="amount",
+                    maintain_order=True,
+                )
+                .collect()
+            ),
+        ).to_dicts()
+
+    @rx.var
     def top_spending_category_list(self) -> list[TopExpense]:
         """"""
         row_iterator = typing.cast(
@@ -82,12 +122,21 @@ class ExpenseState(DataState):
                 self._shared_data.expenses.group_by(name=pl.col("category"))
                 .agg(pl.col("amount").sum())
                 .sort("amount", descending=True)
+                .limit(len(STROKE_COLORS))
                 .with_row_index("index", offset=1)
                 .collect()
             ),
         ).to_dicts()
 
-        return [TopExpense(**row) for row in row_iterator][:5]
+        return [
+            TopExpense(
+                **row,
+                clean_name=row["name"].replace(" ", "_"),
+                stroke=STROKE_COLORS[i],
+                type="monotone",
+            )
+            for i, row in enumerate(row_iterator)
+        ]
 
     @rx.var
     def active_budgets(self) -> int:
