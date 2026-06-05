@@ -126,6 +126,8 @@ def table_row(table: Expense) -> rx.Component:
 
 def data_table() -> rx.Component:
     """"""
+    th_class = "sticky top-0 z-10 px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+
     return rx.el.div(
         rx.el.div(
             rx.el.h3(
@@ -140,35 +142,17 @@ def data_table() -> rx.Component:
             class_name="flex items-center justify-between mb-6",
         ),
         rx.cond(
-            ExpenseState.expense_rows.length() > 0,  # type: ignore
+            ExpenseState.expense_rows.length() > 0,
             rx.el.div(
                 rx.el.table(
                     rx.el.thead(
                         rx.el.tr(
-                            rx.el.th(
-                                "Date",
-                                class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                            ),
-                            rx.el.th(
-                                "Category",
-                                class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                            ),
-                            rx.el.th(
-                                "Amount",
-                                class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                            ),
-                            rx.el.th(
-                                "Payment Type",
-                                class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                            ),
-                            rx.el.th(
-                                "Description",
-                                class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                            ),
-                            rx.el.th(
-                                "Status",
-                                class_name="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider",
-                            ),
+                            rx.el.th("Date", class_name=th_class),
+                            rx.el.th("Category", class_name=th_class),
+                            rx.el.th("Amount", class_name=th_class),
+                            rx.el.th("Payment Type", class_name=th_class),
+                            rx.el.th("Description", class_name=th_class),
+                            rx.el.th("Status", class_name=th_class),
                             class_name="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50",
                         )
                     ),
@@ -178,7 +162,7 @@ def data_table() -> rx.Component:
                     ),
                     class_name="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50",
                 ),
-                class_name="overflow-x-auto rounded-xl border border-gray-100/50 dark:border-gray-700/50",
+                class_name="overflow-x-auto overflow-y-auto max-h-[550px] rounded-xl border border-gray-100/50 dark:border-gray-700/50 custom-scrollbar",
             ),
             rx.el.div(
                 rx.el.div(
