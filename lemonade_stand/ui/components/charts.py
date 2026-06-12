@@ -7,6 +7,67 @@ import reflex as rx
 from lemonade_stand.ui.states.expense_state import TopExpense
 
 
+def custom_tooltip() -> rx.Component:
+    """A highly styled, reusable tooltip for all charts."""
+    return rx.recharts.graphing_tooltip(
+        separator="  —  ",
+        animation_duration=250,
+        animation_easing="ease-out",
+        cursor=rx.color_mode_cond(
+            {"fill": "#f8fafc", "opacity": 0.5}, {"fill": "#1f2937", "opacity": 0.5}
+        ),
+        label_style=rx.color_mode_cond(
+            {
+                "fontWeight": "700",
+                "fontSize": "13px",
+                "letterSpacing": "0.5px",
+                "textTransform": "uppercase",
+                "marginBottom": "8px",
+                "borderBottom": "1px solid rgba(0, 0, 0, 0.05)",
+                "paddingBottom": "6px",
+                "color": "#9ca3af",
+            },
+            {
+                "fontWeight": "700",
+                "fontSize": "13px",
+                "letterSpacing": "0.5px",
+                "textTransform": "uppercase",
+                "marginBottom": "8px",
+                "borderBottom": "1px solid rgba(255, 255, 255, 0.1)",
+                "paddingBottom": "6px",
+                "color": "#6b7280",
+            },
+        ),
+        item_style=rx.color_mode_cond(
+            {"color": "#111827", "fontWeight": "600", "fontSize": "14px"},
+            {"color": "#f9fafb", "fontWeight": "600", "fontSize": "14px"},
+        ),
+        content_style=rx.color_mode_cond(
+            {
+                "backgroundColor": "rgba(255, 255, 255, 0.85)",
+                "borderRadius": "16px",
+                "border": "1px solid rgba(255, 255, 255, 0.8)",
+                "boxShadow": "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)",
+                "backdropFilter": "blur(16px)",
+                "padding": "12px 16px",
+            },
+            {
+                "backgroundColor": "rgba(17, 24, 39, 0.85)",
+                "borderRadius": "16px",
+                "border": "1px solid rgba(255, 255, 255, 0.05)",
+                "boxShadow": "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)",
+                "backdropFilter": "blur(16px)",
+                "padding": "12px 16px",
+            },
+        ),
+        custom_attrs={
+            "formatter": rx.Var(
+                "(value) => Number(value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })"
+            )
+        },
+    )
+
+
 def legend_item(name: str, color: str) -> rx.Component:
     """"""
 
@@ -73,34 +134,6 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                             {"fontSize": 12, "fill": "#6b7280", "fontWeight": 500},
                         ),
                     ),
-                    rx.recharts.graphing_tooltip(
-                        cursor=rx.color_mode_cond(
-                            {"fill": "#f8fafc"}, {"fill": "#374151"}
-                        ),
-                        content_style=rx.color_mode_cond(
-                            {
-                                "backgroundColor": "rgba(255, 255, 255, 0.9)",
-                                "borderRadius": "12px",
-                                "border": "1px solid rgba(255, 255, 255, 0.5)",
-                                "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                                "backdropFilter": "blur(10px)",
-                                "padding": "12px",
-                                "color": "#1f2937",
-                            },
-                            {
-                                "backgroundColor": "rgba(31, 41, 55, 0.9)",
-                                "borderRadius": "12px",
-                                "border": "1px solid rgba(55, 65, 81, 0.5)",
-                                "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                                "backdropFilter": "blur(10px)",
-                                "padding": "12px",
-                                "color": "#f3f4f6",
-                            },
-                        ),
-                        item_style=rx.color_mode_cond(
-                            {"color": "#1f2937"}, {"color": "#e5e7eb"}
-                        ),
-                    ),
                     rx.recharts.bar(
                         data_key="allocated_amount",
                         name="Allocated Budget",
@@ -115,6 +148,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                         radius=[0, 6, 6, 0],
                         bar_size=10,
                     ),
+                    custom_tooltip(),
                     data=display_data,
                     bar_gap=0,
                     layout="vertical",
@@ -159,33 +193,7 @@ def trend_chart(
                     tick_line=False,
                     tick={"fontSize": 12, "fill": "#6b7280"},
                 ),
-                rx.recharts.graphing_tooltip(
-                    cursor=rx.color_mode_cond({"fill": "#f8fafc"}, {"fill": "#374151"}),
-                    content_style=rx.color_mode_cond(
-                        {
-                            "backgroundColor": "rgba(255, 255, 255, 0.9)",
-                            "borderRadius": "12px",
-                            "border": "1px solid rgba(255, 255, 255, 0.5)",
-                            "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                            "backdropFilter": "blur(10px)",
-                            "padding": "12px",
-                            "color": "#1f2937",
-                        },
-                        {
-                            "backgroundColor": "rgba(31, 41, 55, 0.9)",
-                            "borderRadius": "12px",
-                            "border": "1px solid rgba(55, 65, 81, 0.5)",
-                            "boxShadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                            "backdropFilter": "blur(10px)",
-                            "padding": "12px",
-                            "color": "#f3f4f6",
-                        },
-                    ),
-                    item_style=rx.color_mode_cond(
-                        {"color": "#1f2937"}, {"color": "#e5e7eb"}
-                    ),
-                    indicator="circle",
-                ),
+                custom_tooltip(),
                 *[
                     rx.recharts.bar(
                         data_key=rx.cond(
@@ -212,6 +220,96 @@ def trend_chart(
                 height=300,
             ),
             class_name="w-full h-[340px]",
+        ),
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
+    )
+
+
+def pie_chart(
+    title: str,
+    pie_data: rx.Var[list[dict[str, typing.Any]]],
+) -> rx.Component:
+    """"""
+    pie_colors: list[str] = [
+        "#6366f1",
+        "#f97316",
+        "#10b981",
+        "#3b82f6",
+        "#8b5cf6",
+        "#ec4899",
+    ]
+
+    def custom_pie_legend(item: dict, index: int) -> rx.Component:
+        """
+        Reusable component for your custom legend rows
+        """
+        colors: typing.Any = rx.Var.create(pie_colors)
+
+        return rx.el.div(
+            rx.el.div(
+                class_name="w-3 h-3 rounded-full shrink-0",
+                style={"backgroundColor": colors[index % len(pie_colors)]},
+            ),
+            rx.el.span(
+                item["name"],
+                class_name="text-xs font-medium text-gray-600 dark:text-gray-400",
+            ),
+            class_name="flex items-center gap-2 py-1.5",
+        )
+
+    return rx.el.div(
+        rx.el.h3(
+            title, class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4"
+        ),
+        rx.el.div(
+            # Chart Column
+            rx.el.div(
+                rx.recharts.responsive_container(
+                    rx.recharts.pie_chart(
+                        rx.recharts.pie(
+                            *[
+                                rx.recharts.cell(fill=pie_colors[i % len(pie_colors)])
+                                for i in range(len(pie_colors))
+                            ],
+                            rx.recharts.label_list(
+                                data_key="percent_label",
+                                position="outside",
+                                offset=25,
+                                fill=rx.color_mode_cond("#1f2937", "#e5e7eb"),
+                                stroke=rx.color_mode_cond("#1f2937", "#e5e7eb"),
+                                stroke_width=4,
+                                style={"paintOrder": "stroke"},
+                            ),
+                            data=pie_data,
+                            data_key="amount",
+                            name_key="name",
+                            cx="50%",
+                            cy="50%",
+                            inner_radius="0%",
+                            outer_radius="80%",
+                            label_line={
+                                "stroke": rx.color_mode_cond("#9ca3af", "#4b5563"),
+                                "strokeWidth": 1.5,
+                            },
+                            label={"fill": "transparent"},
+                            animation_easing="ease-in-out",
+                        ),
+                        custom_tooltip(),
+                        class_name="[&_text]:!text-[9px] [&_text]:!tracking-wide",
+                    ),
+                    width="100%",
+                    height="100%",
+                ),
+                class_name="col-span-2 h-full",
+            ),
+            # Legend Column
+            rx.el.div(
+                rx.foreach(
+                    pie_data, lambda item, index: custom_pie_legend(item, index)
+                ),
+                class_name="col-span-1 flex flex-col justify-center pl-4 border-l border-gray-50 dark:border-gray-700/30 h-full",
+            ),
+            class_name="grid grid-cols-3 w-full h-[300px] sm:h-[350px] lg:h-[380px] items-center",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
     )

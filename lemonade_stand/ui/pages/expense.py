@@ -2,6 +2,7 @@
 
 import reflex as rx
 
+from lemonade_stand.ui.components.charts import pie_chart
 from lemonade_stand.ui.components.charts import trend_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.sidebar import sidebar
@@ -171,6 +172,17 @@ def expense_page() -> rx.Component:
                         ),
                         rx.el.div(top_spenders_widget(), class_name="lg:col-span-1"),
                         class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-7 duration-700",
+                    ),
+                    rx.el.div(
+                        rx.el.div(
+                            pie_chart(
+                                title="Spending Distribution",
+                                pie_data=ExpenseState.expense_distribution_data,
+                            ),
+                            class_name="lg:col-span-2",
+                        ),
+                        # rx.el.div(distribution_chart(), class_name="lg:col-span-1"),
+                        class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700",
                     ),
                     rx.el.div(
                         rx.el.div(

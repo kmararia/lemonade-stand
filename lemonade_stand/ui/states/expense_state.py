@@ -37,6 +37,7 @@ class TopExpense:
     index: int
     name: str
     clean_name: str
+    percent_label: str
     amount: float
     stroke: str
     type: str
@@ -114,20 +115,35 @@ class ExpenseState(DataState):
         ).to_dicts()
 
     @rx.var
-    def top_spending_category_list(self) -> list[TopExpense]:
+    def expense_distribution_data(self) -> list[dict]:
         """"""
+
         row_iterator = typing.cast(
             pl.DataFrame,
             (
                 self._shared_data.expenses.group_by(name=pl.col("category"))
                 .agg(pl.col("amount").sum())
                 .sort("amount", descending=True)
-                .limit(len(STROKE_COLORS))
                 .with_row_index("index", offset=1)
+                .with_columns(
+                    percent_label=(
+                        (pl.col("amount") / pl.col("amount").sum() * 100)
+                        .round(1)
+                        .cast(pl.Utf8)
+                        + "%"
+                    )
+                )
                 .collect()
             ),
         ).to_dicts()
 
+        return list(row_iterator)
+
+    @rx.var
+    def top_spending_category_list(self) -> list[TopExpense]:
+        """"""
+
+        top_len_categories = self.expense_distribution_data[: len(STROKE_COLORS)]
         return [
             TopExpense(
                 **row,
@@ -135,7 +151,7 @@ class ExpenseState(DataState):
                 stroke=STROKE_COLORS[i],
                 type="monotone",
             )
-            for i, row in enumerate(row_iterator)
+            for i, row in enumerate(top_len_categories)
         ]
 
     @rx.var
