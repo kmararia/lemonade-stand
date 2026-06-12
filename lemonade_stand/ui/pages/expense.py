@@ -121,80 +121,78 @@ def expense_page() -> rx.Component:
         rx.el.div(
             rx.el.div(
                 rx.el.div(
-                    rx.el.div(
-                        rx.el.h2(
-                            "Expense Overview",
-                            class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
-                        ),
-                        date_picker(),
-                        class_name="flex justify-between items-center w-full mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
+                    rx.el.h2(
+                        "Expense Overview",
+                        class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
                     ),
-                    rx.el.div(
-                        summary_stat(
-                            "Total Spent YTD",
-                            f"${ExpenseState.total_expenses:,.2f}",
-                            "+12% vs last year",
-                            icon="dollar-sign",
-                            icon_color="blue",
-                        ),
-                        summary_stat(
-                            "Remaining Budget",
-                            f"${ExpenseState.remaining_budget:,.2f}",
-                            f"{100 - ExpenseState.utilization_percentage:.0f}% of total",
-                            icon="wallet",
-                            icon_color="emerald",
-                        ),
-                        summary_stat(
-                            "Top Category",
-                            f"{ExpenseState.top_spending_category}",
-                            "Most active sector",
-                            icon="tag",
-                            icon_color="purple",
-                        ),
-                        summary_stat(
-                            "Active Budgets",
-                            f"{ExpenseState.active_budgets}",
-                            "Across all departments",
-                            icon="layers",
-                            icon_color="orange",
-                        ),
-                        class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700",
-                    ),
-                    rx.el.div(
-                        rx.el.div(
-                            trend_chart(
-                                title="Spending Trends",
-                                max_lines=len(STROKE_COLORS),
-                                monthly_trends=ExpenseState.spending_trends_data,
-                                trend_lines=ExpenseState.top_spending_category_list,
-                            ),
-                            class_name="lg:col-span-2",
-                        ),
-                        rx.el.div(top_spenders_widget(), class_name="lg:col-span-1"),
-                        class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-7 duration-700",
-                    ),
-                    rx.el.div(
-                        rx.el.div(
-                            pie_chart(
-                                title="Spending Distribution",
-                                pie_data=ExpenseState.expense_distribution_data,
-                            ),
-                            class_name="lg:col-span-2",
-                        ),
-                        # rx.el.div(distribution_chart(), class_name="lg:col-span-1"),
-                        class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700",
-                    ),
-                    rx.el.div(
-                        rx.el.div(
-                            data_table(),
-                            class_name="lg:col-span-3",
-                        ),
-                        class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",
-                    ),
-                    class_name="max-w-7xl mx-auto relative z-10",
+                    date_picker(),
+                    class_name="flex justify-between items-center w-full mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
                 ),
-                class_name="flex-1 p-6 md:p-8 overflow-y-auto scroll-smooth",
+                rx.el.div(
+                    summary_stat(
+                        "Total Spent YTD",
+                        f"${ExpenseState.total_expenses:,.2f}",
+                        "+12% vs last year",
+                        icon="dollar-sign",
+                        icon_color="blue",
+                    ),
+                    summary_stat(
+                        "Remaining Budget",
+                        f"${ExpenseState.remaining_budget:,.2f}",
+                        f"{100 - ExpenseState.utilization_percentage:.0f}% of total",
+                        icon="wallet",
+                        icon_color="emerald",
+                    ),
+                    summary_stat(
+                        "Top Category",
+                        f"{ExpenseState.top_spending_category}",
+                        "Most active sector",
+                        icon="tag",
+                        icon_color="purple",
+                    ),
+                    summary_stat(
+                        "Active Budgets",
+                        f"{ExpenseState.active_budgets}",
+                        "Across all departments",
+                        icon="layers",
+                        icon_color="orange",
+                    ),
+                    class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700",
+                ),
+                rx.el.div(
+                    rx.el.div(
+                        trend_chart(
+                            title="Spending Trends",
+                            max_lines=len(STROKE_COLORS),
+                            monthly_trends=ExpenseState.spending_trends_data,
+                            trend_lines=ExpenseState.top_spending_category_list,
+                        ),
+                        class_name="lg:col-span-2",
+                    ),
+                    rx.el.div(top_spenders_widget(), class_name="lg:col-span-1"),
+                    class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-7 duration-700",
+                ),
+                rx.el.div(
+                    rx.el.div(
+                        pie_chart(
+                            title="Spending Distribution",
+                            pie_data=ExpenseState.expense_distribution_data,
+                        ),
+                        class_name="lg:col-span-2",
+                    ),
+                    # rx.el.div(distribution_chart(), class_name="lg:col-span-1"),
+                    class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700",
+                ),
+                rx.el.div(
+                    rx.el.div(
+                        data_table(),
+                        class_name="lg:col-span-3",
+                    ),
+                    class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",
+                ),
+                class_name="w-full mx-auto relative z-10",
             ),
+            class_name="flex-1 h-full p-6 md:p-8 overflow-y-auto scroll-smooth",
         ),
-        class_name="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-300 font-['Inter'] selection:bg-indigo-100 dark:selection:bg-cyan-900 selection:text-indigo-900 dark:selection:text-cyan-100",
+        class_name="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-300 font-['Inter'] selection:bg-indigo-100 dark:selection:bg-cyan-900 selection:text-indigo-900 dark:selection:text-cyan-100",
     )
