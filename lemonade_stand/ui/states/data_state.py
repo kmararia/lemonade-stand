@@ -76,6 +76,7 @@ class DataState(rx.State):
         """Dynamically generate available months based on the user's expense data."""
 
         return [
+            "All Months",  # Represents "All Months" option
             "January",
             "February",
             "March",
@@ -94,7 +95,7 @@ class DataState(rx.State):
     def available_years(self) -> list[str]:
         """Dynamically generate available years based on the user's expense data."""
 
-        return (
+        return ["All Years"] + (
             typing.cast(
                 pl.DataFrame,
                 (
@@ -131,11 +132,11 @@ class DataState(rx.State):
     @rx.event
     def set_year(self, year: str):
         """"""
-        self.selected_year = year
+        self.selected_year = year if year != "All Years" else ""
         self.filter_data_dates()
 
     @rx.event
     def set_month(self, month: str):
         """"""
-        self.selected_month = month
+        self.selected_month = month if month != "All Months" else ""
         self.filter_data_dates()
