@@ -1,5 +1,7 @@
 """"""
 
+from datetime import datetime
+
 import reflex as rx
 
 from lemonade_stand.ui.components.charts import budget_chart
@@ -106,7 +108,7 @@ def budget_health_widget() -> rx.Component:
                 rx.el.div(
                     rx.el.span(
                         f"{budget.utilization}%",
-                        class_name="text-xs font-bold text-gray-700 dark:text-gray-300 w-10 text-right mr-3",
+                        class_name="text-xs font-bold text-gray-700 dark:text-gray-300 w-12 text-right mr-3",
                     ),
                     rx.el.span(
                         rx.cond(
@@ -162,14 +164,14 @@ def home_content() -> rx.Component:
             rx.el.div(
                 rx.el.h2(
                     "Overview",
-                    class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
+                    class_name="font-['Poppins'] text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
                 ),
                 date_picker(),
                 class_name="flex justify-between items-center w-full",
             ),
             rx.el.p(
-                "Track your spending, income, and budget in real-time.",
-                class_name="text-gray-600 dark:text-gray-400 mb-6",
+                f"Today is {datetime.now().strftime('%d %B, %Y')}",
+                class_name="font-['Poppins'] text-gray-600 dark:text-gray-400 mb-6",
             ),
             class_name="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
         ),

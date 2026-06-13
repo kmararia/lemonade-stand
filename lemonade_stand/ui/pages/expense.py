@@ -130,7 +130,7 @@ def expense_page() -> rx.Component:
                 ),
                 rx.el.div(
                     summary_stat(
-                        "Total Spent YTD",
+                        "Total Spent this Period",
                         f"${ExpenseState.total_expenses:,.2f}",
                         "+12% vs last year",
                         icon="dollar-sign",

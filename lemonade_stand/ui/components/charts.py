@@ -139,14 +139,14 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                         name="Allocated Budget",
                         fill="#6366f1",
                         radius=[0, 6, 6, 0],
-                        bar_size=10,
+                        bar_size=9,
                     ),
                     rx.recharts.bar(
                         data_key="spent_amount",
                         name="Actual Spent",
                         fill="#f97316",
                         radius=[0, 6, 6, 0],
-                        bar_size=10,
+                        bar_size=9,
                     ),
                     custom_tooltip(),
                     data=display_data,
@@ -158,7 +158,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                 width="100%",
                 height=340,
             ),
-            class_name="w-full h-[340px]",
+            class_name="font-['Inter'] w-full h-[340px]",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
     )
@@ -221,7 +221,7 @@ def trend_chart(
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl pt-6 px-5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
     )
 
 
