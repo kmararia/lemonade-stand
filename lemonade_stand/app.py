@@ -38,15 +38,18 @@ def index() -> rx.Component:
             ),
             class_name="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50/30 dark:bg-transparent backdrop-blur-sm",
         ),
-        class_name="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-300 font-['Inter'] selection:bg-indigo-100 dark:selection:bg-cyan-900 selection:text-indigo-900 dark:selection:text-cyan-100",
+        class_name="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-300 selection:bg-indigo-100 dark:selection:bg-cyan-900 selection:text-indigo-900 dark:selection:text-cyan-100",
     )
 
 
 # Build and deploy the app
 app = rx.App(
     stylesheets=[
-        "https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&text=0123456789.%2C%24%25%2B-&display=swap",
+        "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap",
+        "https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap",
         "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+        "/fonts.css",
     ],
 )
 
