@@ -196,13 +196,3 @@ class ExpenseState(DataState):
         if len(self.top_spending_category_list) == 0:
             return "N/A"
         return self.top_spending_category_list[0].name
-
-    @rx.event
-    def set_year(self, year: str):
-        """"""
-        self.selected_year = year
-
-    @rx.event
-    def set_month(self, month: str):
-        """"""
-        self.selected_month = month
