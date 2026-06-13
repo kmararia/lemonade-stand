@@ -158,22 +158,37 @@ def budget_health_widget() -> rx.Component:
 
 
 def home_content() -> rx.Component:
-    """ """
+    """
+    Home content page
+    """
+
+    def str_date_now(time_now: datetime | None = None) -> str:
+        """ """
+        time_now = datetime.now() if time_now is None else time_now
+
+        if 11 <= time_now.day <= 13:
+            str_day = f"{time_now.day}th"
+        str_day = f"{time_now.day}" + {1: "st", 2: "nd", 3: "rd"}.get(
+            time_now.day % 10, "th"
+        )
+
+        return time_now.strftime(f"%B {str_day}, %Y")
+
     return rx.el.div(
         rx.el.div(
             rx.el.div(
                 rx.el.h2(
                     "Overview",
-                    class_name="font-['Poppins'] text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
+                    class_name="font-['Raleway'] text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2",
                 ),
                 date_picker(),
                 class_name="flex justify-between items-center w-full",
             ),
             rx.el.p(
-                f"Today is {datetime.now().strftime('%d %B, %Y')}",
-                class_name="font-['Poppins'] text-gray-600 dark:text-gray-400 mb-6",
+                f"Today is {str_date_now()}",
+                class_name="text-gray-600 dark:text-gray-400 mb-6",
             ),
-            class_name="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
+            class_name="mb-9 animate-in fade-in slide-in-from-bottom-4 duration-700",
         ),
         quick_actions_panel(
             open_add_expense_modal=HomeState.open_add_expense_modal,
