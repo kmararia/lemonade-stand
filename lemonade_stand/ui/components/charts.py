@@ -62,7 +62,14 @@ def custom_tooltip() -> rx.Component:
         ),
         custom_attrs={
             "formatter": rx.Var(
-                "(value) => Number(value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })"
+                """
+                (value) => Number(value).toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                })
+            """
             )
         },
     )

@@ -25,7 +25,11 @@ def sidebar_item(text: str, icon_name: str, href: str = "#") -> rx.Component:
 
     return rx.el.a(
         rx.el.div(
-            rx.icon(icon_name, size=20, class_name="shrink-0"),
+            rx.icon(
+                icon_name,
+                size=20,
+                class_name=f"shrink-0 {rx.cond(is_current_page, 'fill-green-700 dark:fill-cyan-400', '')}",
+            ),
             rx.cond(
                 ~UIState.is_sidebar_collapsed,
                 rx.el.span(
@@ -66,7 +70,7 @@ def sidebar() -> rx.Component:
                     sidebar_item("Overview", "layout_grid", href="/"),
                     sidebar_item("Income", "line_chart", href="/income"),
                     sidebar_item("Savings", "piggy-bank", href="/savings"),
-                    sidebar_item("Expenses", "receipt", href="/expenses"),
+                    sidebar_item("Expenses", "wallet", href="/expenses"),
                     sidebar_item("Goals", "badge_check", href="/goals"),
                     class_name="space-y-1 py-6 px-2",
                 ),

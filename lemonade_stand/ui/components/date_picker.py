@@ -13,13 +13,14 @@ def date_picker() -> rx.Component:
     return rx.popover.root(
         rx.popover.trigger(
             rx.button(
+                rx.icon("calendar_days", size=16, class_name="ml-2"),
                 DataState.date_selection_text,
-                rx.icon("calendar", size=16, class_name="ml-2"),
                 variant="soft",
                 radius="large",
                 color_scheme="mint",
                 class_name="cursor-pointer",
-            )
+            ),
+            class_name="pr-5 pl-0 flex justify-left",
         ),
         rx.popover.content(
             rx.flex(

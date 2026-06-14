@@ -93,7 +93,7 @@ def top_spenders_widget() -> rx.Component:
                     class_name="text-sm font-bold text-gray-900 dark:text-gray-100",
                 ),
                 rx.el.p(
-                    "Total Spend",
+                    "Total Spent",
                     class_name="text-[10px] text-gray-400 font-medium text-right",
                 ),
                 class_name="text-right",
@@ -162,7 +162,7 @@ def expense_page() -> rx.Component:
                                 icon="layers",
                                 icon_color="orange",
                             ),
-                            class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700",
+                            class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 pt-4 animate-in fade-in slide-in-from-bottom-6 duration-700",
                         ),
                         rx.el.div(
                             rx.el.div(
