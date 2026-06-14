@@ -86,37 +86,6 @@ class HomeState(DataState):
         ).to_dicts()
 
     @rx.var
-    def total_earnings(self) -> float:
-        """"""
-        return (self._shared_data.income.select(pl.col("amount").sum()).collect()).item(
-            0, 0
-        )
-
-    @rx.var
-    def total_savings(self) -> float:
-        """"""
-        return (
-            self._shared_data.savings.select(pl.col("amount").sum()).collect()
-        ).item(0, 0)
-
-    @rx.var
-    def total_expenses(self) -> float:
-        """"""
-        return sum(item["spent_amount"] for item in self.home_page_data)
-
-    @rx.var
-    def remaining_earnings(self) -> float:
-        """"""
-        return self.total_earnings - self.total_expenses
-
-    @rx.var
-    def utilization_percentage(self) -> float:
-        """"""
-        if self.total_earnings == 0:
-            return 0.0
-        return round(self.total_expenses / self.total_earnings * 100, 1)
-
-    @rx.var
     def budget_vs_actual_spend(self) -> list[dict[str, typing.Any]]:
         """"""
 
