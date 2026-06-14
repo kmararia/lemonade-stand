@@ -10,6 +10,17 @@ from lemonade_stand.ui.states.data_state import DataState
 
 
 @dataclass
+class TransactionActivity:
+    """"""
+
+    date: str
+    description: str
+    amount: float
+    payment_type: str
+    health_color: str
+
+
+@dataclass
 class BudgetHealthStats:
     """"""
 
@@ -28,6 +39,37 @@ class HomeState(DataState):
 
     warning_threshold: int = 75
     critical_threshold: int = 90
+
+    @rx.var(cache=True)
+    def recent_activity(self) -> list[TransactionActivity]:
+        """"""
+
+        return [
+            TransactionActivity(**row)
+            for row in (
+                self._shared_data.expenses.limit(31)
+                .select(
+                    date=pl.col("date").dt.strftime("%m/%d/%Y"),
+                    description=pl.col("description"),
+                    amount=pl.col("amount").round(2),
+                    payment_type=pl.when(
+                        pl.col("payment").str.contains("(?i)card"),
+                    )
+                    .then(pl.lit("credit_card"))
+                    .otherwise(pl.lit("badge_cent")),
+                    health_color=pl.col("payment_type").replace_strict(
+                        {
+                            "income": "green",
+                            "savings": "blue",
+                            "expenses": "yellow",
+                            "unknown": "gray",
+                        },
+                        default="gray",
+                    ),
+                )
+                .collect()
+            ).to_dicts()
+        ]
 
     @rx.var(cache=True)
     def home_page_data(self) -> list[dict[str, typing.Any]]:
