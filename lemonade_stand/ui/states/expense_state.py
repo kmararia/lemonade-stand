@@ -1,6 +1,5 @@
 """"""
 
-import typing
 from dataclasses import dataclass
 from dataclasses import field
 
@@ -50,31 +49,28 @@ class ExpenseState(DataState):
     def expense_rows(self) -> list[Expense]:
         """Filter data based on the selected date range from DateState."""
 
-        row_iterator = typing.cast(
-            pl.DataFrame,
-            (
-                self._shared_data.expenses.join(
-                    pl.LazyFrame(self.allocation_rows),
-                    on="category",
-                    how="left",
-                    coalesce=True,
-                )
-                .select(
-                    "date",
-                    "description",
-                    "allocated_amount",
-                    "amount",
-                    "category",
-                    "payment_type",
-                    "exclude_flag",
-                    "recurring_flag",
-                    "source_file",
-                    has_source_file=pl.col("source_file").is_not_null(),
-                    location=pl.concat_list("state", "city").list.drop_nulls(),
-                )
-                .sort("date", "amount", descending=[True, True])
-                .collect()
-            ),
+        row_iterator = (
+            self._shared_data.expenses.join(
+                pl.LazyFrame(self.allocation_rows),
+                on="category",
+                how="left",
+                coalesce=True,
+            )
+            .select(
+                "date",
+                "description",
+                "allocated_amount",
+                "amount",
+                "category",
+                "payment_type",
+                "exclude_flag",
+                "recurring_flag",
+                "source_file",
+                has_source_file=pl.col("source_file").is_not_null(),
+                location=pl.concat_list("state", "city").list.drop_nulls(),
+            )
+            .sort("date", "amount", descending=[True, True])
+            .collect()
         ).iter_rows(named=True)
 
         return [Expense(**row) for row in row_iterator]
@@ -85,56 +81,50 @@ class ExpenseState(DataState):
 
         category_names = [x.name for x in self.top_spending_category_list]
 
-        return typing.cast(
-            pl.DataFrame,
-            (
-                self._shared_data.expenses.filter(
-                    pl.col("category").is_in(category_names)
-                    & (
-                        pl.col("date")
-                        .dt.month_start()
-                        .rank(method="dense", descending=True)
-                        <= 6
-                    )
+        return (
+            self._shared_data.expenses.filter(
+                pl.col("category").is_in(category_names)
+                & (
+                    pl.col("date")
+                    .dt.month_start()
+                    .rank(method="dense", descending=True)
+                    <= 6
                 )
-                .group_by(
-                    name=pl.col("category"),
-                    date=pl.col("date").dt.strftime("%b %Y"),
-                )
-                .agg(pl.col("amount").sum())
-                .sort(["date", "name"], descending=[False, True])
-                .pivot(
-                    on="name",
-                    on_columns=category_names,
-                    index="date",
-                    values="amount",
-                    maintain_order=True,
-                )
-                .collect()
-            ),
+            )
+            .group_by(
+                name=pl.col("category"),
+                date=pl.col("date").dt.strftime("%b %Y"),
+            )
+            .agg(pl.col("amount").sum())
+            .sort(["date", "name"], descending=[False, True])
+            .pivot(
+                on="name",
+                on_columns=category_names,
+                index="date",
+                values="amount",
+                maintain_order=True,
+            )
+            .collect()
         ).to_dicts()
 
     @rx.var
     def expense_distribution_data(self) -> list[dict]:
         """"""
 
-        row_iterator = typing.cast(
-            pl.DataFrame,
-            (
-                self._shared_data.expenses.group_by(name=pl.col("category"))
-                .agg(pl.col("amount").sum())
-                .sort("amount", descending=True)
-                .with_row_index("index", offset=1)
-                .with_columns(
-                    percent_label=(
-                        (pl.col("amount") / pl.col("amount").sum() * 100)
-                        .round(1)
-                        .cast(pl.Utf8)
-                        + "%"
-                    )
+        row_iterator = (
+            self._shared_data.expenses.group_by(name=pl.col("category"))
+            .agg(pl.col("amount").sum())
+            .sort("amount", descending=True)
+            .with_row_index("index", offset=1)
+            .with_columns(
+                percent_label=(
+                    (pl.col("amount") / pl.col("amount").sum() * 100)
+                    .round(1)
+                    .cast(pl.Utf8)
+                    + "%"
                 )
-                .collect()
-            ),
+            )
+            .collect()
         ).to_dicts()
 
         return list(row_iterator)
@@ -173,9 +163,8 @@ class ExpenseState(DataState):
     @rx.var
     def total_expenses(self) -> float:
         """"""
-        return typing.cast(
-            pl.DataFrame,
-            self._shared_data.expenses.select(pl.col("amount").sum()).collect(),
+        return (
+            self._shared_data.expenses.select(pl.col("amount").sum()).collect()
         ).item(0, 0)
 
     @rx.var

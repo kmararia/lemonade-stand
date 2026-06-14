@@ -33,79 +33,70 @@ class HomeState(DataState):
     def home_page_data(self) -> list[dict[str, typing.Any]]:
         """"""
 
-        return typing.cast(
-            pl.DataFrame,
-            (
-                self._shared_data.expenses.join(
-                    pl.LazyFrame(self.allocation_rows),
-                    on="category",
-                    how="left",
-                    coalesce=True,
+        return (
+            self._shared_data.expenses.join(
+                pl.LazyFrame(self.allocation_rows),
+                on="category",
+                how="left",
+                coalesce=True,
+            )
+            .group_by(
+                allocated_amount=pl.col("allocated_amount"),
+                payment_type=pl.col("payment_type"),
+                category=(
+                    pl.when(pl.col("category").str.len_chars() <= 20)
+                    .then(pl.col("category"))
+                    .otherwise(pl.col("category").str.slice(0, 19) + "...")
+                    .str.replace_all(r"(?i)\s+\b(AND)\b\s+", " & ")
+                ),
+            )
+            .agg(
+                spent_amount=(
+                    pl.when(pl.col("exclude_flag"))
+                    .then(pl.col("amount"))
+                    .otherwise(0)
+                    .sum()
                 )
-                .group_by(
-                    allocated_amount=pl.col("allocated_amount"),
-                    payment_type=pl.col("payment_type"),
-                    category=(
-                        pl.when(pl.col("category").str.len_chars() <= 20)
-                        .then(pl.col("category"))
-                        .otherwise(pl.col("category").str.slice(0, 19) + "...")
-                        .str.replace_all(r"(?i)\s+\b(AND)\b\s+", " & ")
-                    ),
-                )
-                .agg(
-                    spent_amount=(
-                        pl.when(pl.col("exclude_flag"))
-                        .then(pl.col("amount"))
-                        .otherwise(0)
-                        .sum()
+            )
+            .with_columns(
+                remaining_amount=(pl.col("allocated_amount") - pl.col("spent_amount")),
+                utilization=(
+                    pl.when(pl.col("allocated_amount") > 0)
+                    .then(
+                        (
+                            pl.col("spent_amount") / pl.col("allocated_amount") * 100
+                        ).round(1)
+                    )
+                    .otherwise(0.0)
+                ),
+            )
+            .with_columns(
+                color=(
+                    pl.when(pl.col("utilization") > self.critical_threshold)
+                    .then(pl.lit("red"))
+                    .otherwise(
+                        pl.when(pl.col("utilization") > self.warning_threshold)
+                        .then(pl.lit("orange"))
+                        .otherwise(pl.lit("emerald"))
                     )
                 )
-                .with_columns(
-                    remaining_amount=(
-                        pl.col("allocated_amount") - pl.col("spent_amount")
-                    ),
-                    utilization=(
-                        pl.when(pl.col("allocated_amount") > 0)
-                        .then(
-                            (
-                                pl.col("spent_amount")
-                                / pl.col("allocated_amount")
-                                * 100
-                            ).round(1)
-                        )
-                        .otherwise(0.0)
-                    ),
-                )
-                .with_columns(
-                    color=(
-                        pl.when(pl.col("utilization") > self.critical_threshold)
-                        .then(pl.lit("red"))
-                        .otherwise(
-                            pl.when(pl.col("utilization") > self.warning_threshold)
-                            .then(pl.lit("orange"))
-                            .otherwise(pl.lit("emerald"))
-                        )
-                    )
-                )
-                .sort("allocated_amount", descending=False)
-                .collect()
-            ),
+            )
+            .sort("allocated_amount", descending=False)
+            .collect()
         ).to_dicts()
 
     @rx.var
     def total_earnings(self) -> float:
         """"""
-        return typing.cast(
-            pl.DataFrame,
-            self._shared_data.income.select(pl.col("amount").sum()).collect(),
-        ).item(0, 0)
+        return (self._shared_data.income.select(pl.col("amount").sum()).collect()).item(
+            0, 0
+        )
 
     @rx.var
     def total_savings(self) -> float:
         """"""
-        return typing.cast(
-            pl.DataFrame,
-            self._shared_data.savings.select(pl.col("amount").sum()).collect(),
+        return (
+            self._shared_data.savings.select(pl.col("amount").sum()).collect()
         ).item(0, 0)
 
     @rx.var

@@ -54,22 +54,17 @@ class DataState(rx.State):
     def allocation_rows(self) -> list[dict[str, typing.Any]]:
         """Filter data based on the selected date range from DateState."""
 
-        return list(
-            typing.cast(
-                pl.DataFrame,
-                (
-                    self._shared_data.expenses.select(
-                        "category",
-                        allocated_amount=(
-                            pl.col("amount").abs().mean().over("category")
-                            * pl.col("date").dt.strftime("%Y-%m").n_unique()
-                        ).round(0),
-                    )
-                    .unique()
-                    .collect()
-                ),
-            ).to_dicts()
-        )
+        return (
+            self._shared_data.expenses.select(
+                "category",
+                allocated_amount=(
+                    pl.col("amount").abs().mean().over("category")
+                    * pl.col("date").dt.strftime("%Y-%m").n_unique()
+                ).round(0),
+            )
+            .unique()
+            .collect()
+        ).to_dicts()
 
     @rx.var
     def available_months(self) -> list[str]:
@@ -96,23 +91,20 @@ class DataState(rx.State):
         """Dynamically generate available years based on the user's expense data."""
 
         return ["All Years"] + (
-            typing.cast(
-                pl.DataFrame,
-                (
-                    pl.concat(
-                        [
-                            self._shared_data.income,
-                            self._shared_data.savings,
-                            self._shared_data.expenses,
-                        ]
-                    )
-                    .select(
-                        year=pl.col("date").dt.strftime("%Y"),
-                    )
-                    .unique()
-                    .sort("year")
-                    .collect()
-                ),
+            (
+                pl.concat(
+                    [
+                        self._shared_data.income,
+                        self._shared_data.savings,
+                        self._shared_data.expenses,
+                    ]
+                )
+                .select(
+                    year=pl.col("date").dt.strftime("%Y"),
+                )
+                .unique()
+                .sort("year")
+                .collect()
             )
             .to_series()
             .to_list()

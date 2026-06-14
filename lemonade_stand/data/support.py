@@ -145,15 +145,10 @@ class TransactionCleaner:
         """Gets a list of column values"""
 
         return (
-            typing.cast(
-                pl.DataFrame,
-                (
-                    data_df.filter(pl.col(col_name).is_not_null())
-                    .select(pl.col(col_name).str.replace_all(" ~", ""))
-                    .unique()
-                    .collect()
-                ),
-            )
+            data_df.filter(pl.col(col_name).is_not_null())
+            .select(pl.col(col_name).str.replace_all(" ~", ""))
+            .unique()
+            .collect()
             .to_series()
             .to_list()
         )
@@ -362,12 +357,9 @@ class TransactionCleaner:
                 {
                     x: str(y[0]).lower()
                     for x, y in (
-                        typing.cast(
-                            pl.DataFrame,
-                            typing.cast(pl.LazyFrame, model_data.train_data)
-                            .select("category", "payment_type")
-                            .collect(),
-                        )
+                        typing.cast(pl.LazyFrame, model_data.train_data)
+                        .select("category", "payment_type")
+                        .collect()
                         .rows_by_key(
                             key="category",
                             unique=True,
