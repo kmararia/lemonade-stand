@@ -34,10 +34,10 @@ def index() -> rx.Component:
 # Build and deploy the app
 app = rx.App(
     stylesheets=[
-        "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&text=0123456789.%2C%24%25%2B-&display=swap",
+        "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&text=0123456789.%2C%24%25%2B-&display=swap",
         "https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap",
         "https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap",
-        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+        "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
         "/fonts.css",
     ],
 )

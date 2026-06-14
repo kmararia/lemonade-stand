@@ -59,7 +59,7 @@ def quick_actions_panel(
             action_button("User Info", "users", rx.redirect("/user_info"), "orange"),
             class_name="grid grid-cols-2 sm:grid-cols-4 gap-4",
         ),
-        class_name="mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700",
+        class_name="mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
     )
 
 
@@ -116,8 +116,9 @@ def budget_health_widget() -> rx.Component:
                             "Critical",
                             rx.cond(budget.utilization > 75, "Warning", "Healthy"),
                         ),
-                        class_name=f"""text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-20 text-center
-                        {
+                        class_name=f"""
+                            text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-20 text-center
+                            {
                             rx.cond(
                                 budget.utilization > 90,
                                 "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
@@ -127,13 +128,14 @@ def budget_health_widget() -> rx.Component:
                                     "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
                                 ),
                             )
-                        }""",
+                        }
+                        """,
                     ),
                     class_name="flex items-center",
                 ),
                 class_name="flex items-center",
             ),
-            class_name="py-3 border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors px-2 rounded-lg",
+            class_name="py-3 px-2 border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors rounded-lg",
         )
 
     return rx.el.div(
@@ -153,7 +155,7 @@ def budget_health_widget() -> rx.Component:
             rx.foreach(HomeState.budget_health_stats, budget_health_row),
             class_name="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar pr-2",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -179,16 +181,16 @@ def home_content() -> rx.Component:
             rx.el.div(
                 rx.el.h2(
                     "Overview",
-                    class_name="font-['Raleway'] text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2",
+                    class_name="font-['Inter'] font-extrabold text-2xl text-gray-900 dark:text-gray-100 mb-2",
                 ),
                 date_picker(),
                 class_name="flex justify-between items-center w-full",
             ),
             rx.el.p(
                 f"Today is {str_date_now()}",
-                class_name="text-gray-600 dark:text-gray-400 mb-6",
+                class_name="text-sm text-gray-600 dark:text-gray-400 mb-6",
             ),
-            class_name="mb-9 animate-in fade-in slide-in-from-bottom-4 duration-700",
+            class_name="mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700",
         ),
         quick_actions_panel(
             open_add_expense_modal=HomeState.open_add_expense_modal,
@@ -202,7 +204,7 @@ def home_content() -> rx.Component:
                 remaining_earnings=HomeState.remaining_earnings,
                 utilization_pct=HomeState.utilization_percentage,
             ),
-            class_name="mb-8 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
+            class_name="mb-5 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
         ),
         rx.el.div(
             rx.el.div(
@@ -210,7 +212,7 @@ def home_content() -> rx.Component:
                 class_name="lg:col-span-2",
             ),
             rx.el.div(activity_feed(), class_name="lg:col-span-1"),
-            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
+            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         rx.el.div(
             rx.el.div(
@@ -218,7 +220,7 @@ def home_content() -> rx.Component:
                 class_name="lg:col-span-2",
             ),
             # rx.el.div(goals_widget(), class_name="lg:col-span-1"),
-            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
+            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         class_name="max-w-7xl mx-auto relative z-10",
     )

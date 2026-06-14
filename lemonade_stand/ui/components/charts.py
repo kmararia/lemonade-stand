@@ -153,14 +153,14 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                     bar_gap=0,
                     layout="vertical",
                     bar_category_gap="30%",
-                    margin={"top": 10, "right": 0, "left": -15, "bottom": -10},
+                    margin={"top": 10, "right": 0, "left": -8, "bottom": -10},
                 ),
                 width="100%",
                 height=340,
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-7 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
     )
 
 
