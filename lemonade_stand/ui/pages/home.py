@@ -1,14 +1,18 @@
 """"""
 
 from datetime import datetime
+from decimal import Decimal
 
 import reflex as rx
 
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
+from lemonade_stand.ui.components.stats import income_distribution_card
 from lemonade_stand.ui.components.stats import stats_grid
+from lemonade_stand.ui.states.expense_state import ExpenseState
 from lemonade_stand.ui.states.home_state import BudgetHealthStats
 from lemonade_stand.ui.states.home_state import HomeState
+from lemonade_stand.ui.states.income_state import IncomeState
 from lemonade_stand.ui.states.ui_state import ActivityState
 
 
@@ -87,7 +91,7 @@ def activity_feed() -> rx.Component:
     )
 
 
-def budget_health_widget() -> rx.Component:
+def budget_health_widget(total_expenses: rx.Var[int | float | Decimal]) -> rx.Component:
     """"""
 
     def budget_health_row(budget: BudgetHealthStats) -> rx.Component:
@@ -140,9 +144,16 @@ def budget_health_widget() -> rx.Component:
 
     return rx.el.div(
         rx.el.div(
-            rx.el.h3(
-                "Budget Health Overview",
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+            rx.el.div(
+                rx.el.h3(
+                    "Budget Health Overview",
+                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                ),
+                rx.el.span(
+                    f"$ {total_expenses:,.0f}",
+                    class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
+                ),
+                class_name="flex flex-col justify-between gap-5 mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
             ),
             rx.el.a(
                 "Manage",
@@ -164,9 +175,9 @@ def home_content() -> rx.Component:
     Home content page
     """
 
-    def str_date_now(time_now: datetime | None = None) -> str:
-        """ """
-        time_now = datetime.now() if time_now is None else time_now
+    def str_date_now() -> str:
+        """Formats the current date as a string like "September 21st, 2024"""
+        time_now: datetime = datetime.now()
 
         if 11 <= time_now.day <= 13:
             str_day = f"{time_now.day}th"
@@ -199,10 +210,19 @@ def home_content() -> rx.Component:
         ),
         rx.el.div(
             stats_grid(
-                total_earnings=HomeState.total_earnings,
-                total_expenses=HomeState.total_expenses,
-                remaining_earnings=HomeState.remaining_earnings,
-                utilization_pct=HomeState.utilization_percentage,
+                total_earnings=IncomeState.total_earnings,
+                total_expenses=ExpenseState.total_expenses,
+                remaining_earnings=(
+                    IncomeState.total_earnings - ExpenseState.total_expenses
+                ),
+                utilization_pct=rx.cond(
+                    IncomeState.total_earnings == 0,
+                    0.0,
+                    round(
+                        ExpenseState.total_expenses / IncomeState.total_earnings * 100,
+                        1,
+                    ),
+                ),
             ),
             class_name="mb-5 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100",
         ),
@@ -211,15 +231,21 @@ def home_content() -> rx.Component:
                 budget_chart(display_data=HomeState.budget_vs_actual_spend),
                 class_name="lg:col-span-2",
             ),
-            rx.el.div(activity_feed(), class_name="lg:col-span-1"),
+            rx.el.div(
+                income_distribution_card(
+                    earnings_categories=IncomeState.income_category_list,
+                    total_earnings=IncomeState.total_earnings,
+                ),
+                class_name="lg:col-span-1",
+            ),
             class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         rx.el.div(
             rx.el.div(
-                budget_health_widget(),
+                budget_health_widget(total_expenses=ExpenseState.total_expenses),
                 class_name="lg:col-span-2",
             ),
-            # rx.el.div(goals_widget(), class_name="lg:col-span-1"),
+            rx.el.div(activity_feed(), class_name="lg:col-span-1"),
             class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         class_name="max-w-7xl mx-auto relative z-10",
