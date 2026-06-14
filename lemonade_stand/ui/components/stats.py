@@ -5,6 +5,86 @@ from decimal import Decimal
 import reflex as rx
 
 
+def income_distribution_card(
+    earnings_categories: rx.Var[list[dict]],
+    total_earnings: rx.Var[int | float | Decimal],
+) -> rx.Component:
+    """"""
+
+    return rx.el.div(
+        # Header Section
+        rx.el.div(
+            rx.el.div(
+                rx.icon(
+                    "wallet",
+                    size=24,
+                    class_name="text-blue-600 dark:text-blue-400/60 transition-colors",
+                ),
+                rx.el.h3(
+                    "Total Income",
+                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                ),
+                class_name="flex justify-left gap-4",
+            ),
+            rx.el.button(
+                "All accounts",
+                rx.icon("chevron-down", size=14, class_name="ml-1"),
+                class_name="flex items-center text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:text-indigo-800 transition-colors",
+            ),
+            class_name="flex justify-between items-center mb-8",
+        ),
+        # Chart Section
+        rx.el.div(
+            # The Recharts Doughnut
+            rx.recharts.responsive_container(
+                rx.recharts.pie_chart(
+                    rx.recharts.pie(
+                        data=earnings_categories,
+                        data_key="amount",
+                        name_key="name",
+                        cx="50%",
+                        cy="50%",
+                        inner_radius="90%",
+                        outer_radius="100%",
+                        padding_angle=6,
+                        corner_radius=8,
+                        stroke="none",
+                    ),
+                ),
+                width="100%",
+                height=220,
+            ),
+            rx.el.div(
+                rx.el.span(
+                    f"$ {total_earnings:,.0f}",
+                    class_name="pb-10 text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
+                ),
+                class_name="absolute inset-0 flex items-center justify-center pointer-events-none",
+            ),
+            class_name="relative h-[300px] pt-6 w-full",
+        ),
+        # Custom Legend Section
+        rx.el.div(
+            rx.foreach(
+                earnings_categories,
+                lambda item: rx.el.div(
+                    rx.el.div(
+                        class_name="w-2.5 h-2.5 rounded-full mr-2",
+                        style={"backgroundColor": item["fill"]},
+                    ),
+                    rx.el.span(
+                        item["name"],
+                        class_name="text-xs font-medium text-gray-500 dark:text-gray-400",
+                    ),
+                    class_name="flex items-center",
+                ),
+            ),
+            class_name="flex justify-center gap-6",
+        ),
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+    )
+
+
 def stat_card(
     title: str,
     value: str,
