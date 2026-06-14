@@ -11,34 +11,23 @@ from lemonade_stand.ui.states.ui_state import UIState
 
 def index() -> rx.Component:
     """"""
-
-    def background_pattern() -> rx.Component:
-        """ """
-        return rx.el.div(
-            rx.el.div(
-                class_name="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-indigo-100/40 via-purple-100/30 to-transparent -z-10"
-            ),
-            rx.el.div(
-                class_name="absolute top-[-50px] right-[-50px] w-96 h-96 bg-purple-200/30 rounded-full blur-3xl -z-10 mix-blend-multiply filter opacity-70 animate-blob"
-            ),
-            rx.el.div(
-                class_name="absolute top-[-50px] left-[-50px] w-96 h-96 bg-indigo-200/30 rounded-full blur-3xl -z-10 mix-blend-multiply filter opacity-70 animate-blob animation-delay-2000"
-            ),
-            class_name="fixed inset-0 overflow-hidden pointer-events-none dark:hidden",
-        )
-
     return rx.el.div(
-        background_pattern(),
-        sidebar(),
+        # Inner floating APP
         rx.el.div(
             header(),
-            rx.el.main(
-                home_content(),
-                class_name="flex-1 p-6 md:p-8 overflow-y-auto scroll-smooth",
+            rx.el.div(
+                sidebar(),
+                rx.el.main(
+                    home_content(),
+                    # The main content area blends into the background
+                    class_name="flex-1 p-6 md:p-8 overflow-y-auto scroll-smooth",
+                ),
+                class_name="flex-1 flex overflow-hidden",
             ),
-            class_name="flex-1 flex flex-col h-screen overflow-hidden bg-gray-50/30 dark:bg-transparent backdrop-blur-sm",
+            class_name="flex flex-col w-full h-full bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-300 rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800",
         ),
-        class_name="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-300 selection:bg-indigo-100 dark:selection:bg-cyan-900 selection:text-indigo-900 dark:selection:text-cyan-100",
+        # Grayed out bakground
+        class_name="flex h-screen w-screen bg-gray-300/60 dark:bg-gray-900 p-4 md:p-6 lg:p-8",
     )
 
 

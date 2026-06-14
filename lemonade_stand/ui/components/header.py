@@ -2,72 +2,54 @@
 
 import reflex as rx
 
-from lemonade_stand.ui.states.ui_state import UIState
-
 
 def header() -> rx.Component:
     """"""
-
     return rx.el.header(
         rx.el.div(
+            # Left Side: App Branding
             rx.el.div(
-                rx.el.button(
-                    rx.icon(
-                        rx.cond(
-                            UIState.is_sidebar_collapsed,
-                            "panel-left-open",
-                            "panel-left-close",
-                        ),
-                        size=20,
-                        class_name="text-gray-600 dark:text-gray-400",
-                    ),
-                    on_click=UIState.toggle_sidebar,
-                    class_name="p-2 rounded-xl hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all focus:ring-2 focus:ring-indigo-100 outline-none active:scale-95",
-                    title="Toggle Sidebar",
+                rx.icon("citrus", size=28, class_name="text-indigo-500 shrink-0"),
+                rx.el.h1(
+                    "Lemonade Stand",
+                    class_name="text-xl font-bold text-gray-900 dark:text-gray-100 ml-3 tracking-tight",
                 ),
-                rx.el.div(
-                    rx.icon("search", size=18, class_name="text-gray-400"),
-                    rx.el.input(
-                        placeholder="Search anything...",
-                        class_name="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-gray-400 text-gray-700 dark:text-gray-200 outline-none",
-                    ),
-                    class_name="hidden md:flex items-center gap-3 bg-gray-50/80 dark:bg-gray-900/50 px-4 py-2 rounded-xl w-64 border border-transparent focus-within:border-indigo-200 dark:focus-within:border-cyan-700/50 focus-within:bg-white dark:focus-within:bg-gray-900/80 focus-within:shadow-sm transition-all duration-300 ml-4",
+                rx.color_mode.button(
+                    class_name="ml-6 text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-cyan-400"
                 ),
                 class_name="flex items-center",
             ),
+            # Right Side: Search, Settings, & Profile
             rx.el.div(
                 rx.el.div(
-                    rx.color_mode.button(
-                        class_name="mr-4 text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-cyan-400"
+                    # Search Bar
+                    rx.icon("search", size=18, class_name="text-gray-400"),
+                    rx.el.input(
+                        placeholder="Search...",
+                        class_name="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-gray-400 text-gray-700 outline-none",
                     ),
-                    rx.el.button(
-                        rx.image(
-                            src="https://api.dicebear.com/9.x/notionists/svg?seed=Felix",
-                            class_name="w-9 h-9 rounded-full bg-indigo-50 dark:bg-cyan-900/30 border-2 border-white dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow",
-                        ),
-                        rx.el.div(
-                            rx.el.p(
-                                "Kelvin M.",
-                                class_name="text-sm font-semibold text-gray-700 dark:text-gray-200 leading-none group-hover:text-indigo-600 dark:group-hover:text-cyan-400 transition-colors",
-                            ),
-                            rx.el.p(
-                                "Admin",
-                                class_name="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-none",
-                            ),
-                            class_name="hidden sm:block text-right",
-                        ),
-                        rx.icon(
-                            "chevron-down",
-                            size=16,
-                            class_name="text-gray-400 group-hover:text-indigo-500 dark:group-hover:text-cyan-400 transition-colors",
-                        ),
-                        class_name="flex items-center gap-3 pl-4 border-l border-gray-200/60 dark:border-gray-700/60 ml-2 group cursor-pointer",
-                    ),
-                    class_name="flex items-center gap-2",
+                    class_name="hidden md:flex items-center gap-3 bg-white dark:bg-gray-900 px-4 py-2.5 rounded-full w-64 shadow-sm border border-gray-100 dark:border-gray-800 transition-all mr-6",
                 ),
-                class_name="flex items-center gap-2",
+                # Settings Link
+                rx.el.a(
+                    "Settings",
+                    href="/settings",
+                    class_name="text-sm font-medium text-gray-500 hover:text-gray-900 dark:hover:text-gray-200 mr-6 transition-colors",
+                ),
+                # User Profile
+                rx.el.div(
+                    rx.el.button(
+                        rx.icon("user", size=18, class_name="text-gray-500 mr-2"),
+                        rx.el.span(
+                            "Kelvin M.",
+                            class_name="text-sm font-medium text-gray-700 dark:text-gray-200",
+                        ),
+                        class_name="flex items-center group cursor-pointer",
+                    ),
+                ),
+                class_name="flex items-center",
             ),
-            class_name="flex items-center justify-between h-20 px-6 bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl border-b border-white/50 dark:border-gray-700/50 shadow-sm",
+            class_name="flex items-center justify-between h-20 px-8 w-full bg-gray-100 dark:bg-gray-950 border-b-2 border-white dark:border-gray-800 transition-colors",
         ),
-        class_name="sticky top-0 z-20 w-full",
+        class_name="w-full shrink-0 z-20",
     )
