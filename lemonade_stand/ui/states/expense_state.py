@@ -7,6 +7,7 @@ import polars as pl
 import reflex as rx
 
 from lemonade_stand.ui.states.data_state import DataState
+from lemonade_stand.ui.states.home_state import TransactionActivity
 
 STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
 
@@ -74,6 +75,35 @@ class ExpenseState(DataState):
         ).iter_rows(named=True)
 
         return [Expense(**row) for row in row_iterator]
+
+    @rx.var(cache=True)
+    def unseen_transactions(self) -> list[TransactionActivity]:
+        """"""
+
+        return [
+            TransactionActivity(**row)
+            for row in (
+                self._shared_data.expenses.sort("date", descending=True)
+                .select(
+                    date=pl.col("date").dt.strftime("%m/%d/%Y"),
+                    description=pl.col("description"),
+                    amount=pl.col("amount").round(2),
+                    payment_type=(
+                        pl.when(
+                            pl.col("payment").str.contains("(?i)card"),
+                        )
+                        .then(pl.lit("credit_card"))
+                        .otherwise(pl.lit("badge_cent"))
+                    ),
+                    health_color=(
+                        pl.when(pl.col("amount") > 0)
+                        .then(pl.lit("yellow"))
+                        .otherwise(pl.lit("green"))
+                    ),
+                )
+                .collect()
+            ).to_dicts()
+        ]
 
     @rx.var
     def spending_trends_data(self) -> list[dict]:
