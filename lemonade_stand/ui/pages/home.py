@@ -60,7 +60,7 @@ def quick_actions_panel(
                 "purple",
             ),
             action_button("User Info", "users", rx.redirect("/user_info"), "orange"),
-            class_name="grid grid-cols-2 sm:grid-cols-4 gap-4",
+            class_name="grid grid-cols-2 sm:grid-cols-4 gap-5",
         ),
         class_name="mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
     )
@@ -134,7 +134,7 @@ def home_content() -> rx.Component:
                 ),
                 class_name="lg:col-span-1",
             ),
-            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
+            class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         rx.el.div(
             rx.el.div(
@@ -142,13 +142,13 @@ def home_content() -> rx.Component:
                     health_stats=HomeState.budget_health_stats,
                     total_expenses=ExpenseState.total_expenses,
                 ),
-                class_name="lg:col-span-2",
+                class_name="lg:col-span-4",
             ),
             rx.el.div(
                 activity_feed(transaction_list=HomeState.recent_activity),
-                class_name="lg:col-span-1 w-full",
+                class_name="lg:col-span-3 w-full",
             ),
-            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
+            class_name="grid grid-cols-1 lg:grid-cols-7 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         class_name="max-w-7xl mx-auto relative z-10",
     )

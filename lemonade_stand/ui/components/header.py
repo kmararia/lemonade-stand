@@ -53,5 +53,5 @@ def header() -> rx.Component:
             ),
             class_name="flex items-center justify-between h-20 px-8 w-full bg-gray-100 dark:bg-gray-950 border-b-2 border-white dark:border-gray-800 transition-colors",
         ),
-        class_name="w-full shrink-0 z-20 my-4",
+        class_name="w-full shrink-0 z-20 my-3",
     )

@@ -162,7 +162,7 @@ def expense_page() -> rx.Component:
                                 icon="layers",
                                 icon_color="orange",
                             ),
-                            class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 pt-4 animate-in fade-in slide-in-from-bottom-6 duration-700",
+                            class_name="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5 pt-4 animate-in fade-in slide-in-from-bottom-6 duration-700",
                         ),
                         rx.el.div(
                             rx.el.div(
@@ -177,7 +177,7 @@ def expense_page() -> rx.Component:
                             rx.el.div(
                                 top_spenders_widget(), class_name="lg:col-span-1"
                             ),
-                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-7 duration-700",
+                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-7 duration-700",
                         ),
                         rx.el.div(
                             rx.el.div(
@@ -188,14 +188,14 @@ def expense_page() -> rx.Component:
                                 class_name="lg:col-span-2",
                             ),
                             # rx.el.div(distribution_chart(), class_name="lg:col-span-1"),
-                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-8 duration-700",
+                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700",
                         ),
                         rx.el.div(
                             rx.el.div(
                                 data_table(),
                                 class_name="lg:col-span-3",
                             ),
-                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",
+                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",
                         ),
                         class_name="w-full mx-auto relative z-10",
                     ),
@@ -206,5 +206,5 @@ def expense_page() -> rx.Component:
             class_name="flex flex-col w-full h-full bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-300 rounded-[2.5rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800",
         ),
         # Grayed out bakground
-        class_name="flex h-screen w-screen bg-gray-300/60 dark:bg-gray-900 p-4 md:p-6 lg:p-8",
+        class_name="flex h-screen w-screen bg-gray-300/60 dark:bg-gray-900 p-4 md:p-6 lg:p-6",
     )
