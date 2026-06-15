@@ -47,16 +47,25 @@ class HomeState(DataState):
         return [
             TransactionActivity(**row)
             for row in (
-                self._shared_data.expenses.limit(31)
+                pl.concat(
+                    [
+                        self._shared_data.income,
+                        self._shared_data.savings,
+                        self._shared_data.expenses,
+                    ]
+                )
+                .sort("date", descending=True)
                 .select(
                     date=pl.col("date").dt.strftime("%m/%d/%Y"),
                     description=pl.col("description"),
                     amount=pl.col("amount").round(2),
-                    payment_type=pl.when(
-                        pl.col("payment").str.contains("(?i)card"),
-                    )
-                    .then(pl.lit("credit_card"))
-                    .otherwise(pl.lit("badge_cent")),
+                    payment_type=(
+                        pl.when(
+                            pl.col("payment").str.contains("(?i)card"),
+                        )
+                        .then(pl.lit("credit_card"))
+                        .otherwise(pl.lit("badge_cent"))
+                    ),
                     health_color=pl.col("payment_type").replace_strict(
                         {
                             "income": "green",
