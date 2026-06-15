@@ -1,19 +1,18 @@
 """"""
 
 from datetime import datetime
-from decimal import Decimal
 
 import reflex as rx
 
+from lemonade_stand.ui.components.cards import activity_feed
+from lemonade_stand.ui.components.cards import budget_health_widget
 from lemonade_stand.ui.components.cards import income_distribution_card
 from lemonade_stand.ui.components.cards import stats_grid
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.states.expense_state import ExpenseState
-from lemonade_stand.ui.states.home_state import BudgetHealthStats
 from lemonade_stand.ui.states.home_state import HomeState
 from lemonade_stand.ui.states.income_state import IncomeState
-from lemonade_stand.ui.states.ui_state import ActivityState
 
 
 def quick_actions_panel(
@@ -64,109 +63,6 @@ def quick_actions_panel(
             class_name="grid grid-cols-2 sm:grid-cols-4 gap-4",
         ),
         class_name="mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
-    )
-
-
-def activity_feed() -> rx.Component:
-    """"""
-    return rx.el.div(
-        rx.el.div(
-            rx.el.h3(
-                "Recent Activity",
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
-            ),
-            rx.el.select(
-                rx.el.option("All", value="All"),
-                rx.el.option("Expenses", value="Expense"),
-                rx.el.option("Budgets", value="Budget"),
-                rx.el.option("System", value="System"),
-                rx.el.option("Warnings", value="Warning"),
-                value=ActivityState.activity_filter,
-                on_change=ActivityState.set_activity_filter,
-                class_name="text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-none rounded-lg focus:ring-1 focus:ring-indigo-500 py-1 pl-2 pr-8 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors",
-            ),
-            class_name="flex items-center justify-between mb-6",
-        ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
-    )
-
-
-def budget_health_widget(total_expenses: rx.Var[int | float | Decimal]) -> rx.Component:
-    """"""
-
-    def budget_health_row(budget: BudgetHealthStats) -> rx.Component:
-        """"""
-        return rx.el.div(
-            rx.el.div(
-                rx.el.span(
-                    budget.category,
-                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 w-32 truncate",
-                ),
-                rx.el.div(
-                    rx.el.div(
-                        class_name=f"h-2 rounded-full {budget.progress_color}",
-                        style={"width": f"{budget.utilization}%"},
-                    ),
-                    class_name="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mx-3",
-                ),
-                rx.el.div(
-                    rx.el.span(
-                        f"{budget.utilization}%",
-                        class_name="text-xs font-bold text-gray-700 dark:text-gray-300 w-12 text-right mr-3",
-                    ),
-                    rx.el.span(
-                        rx.cond(
-                            budget.utilization > 90,
-                            "Critical",
-                            rx.cond(budget.utilization > 75, "Warning", "Healthy"),
-                        ),
-                        class_name=f"""
-                            text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-20 text-center
-                            {
-                            rx.cond(
-                                budget.utilization > 90,
-                                "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-                                rx.cond(
-                                    budget.utilization > 75,
-                                    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-                                    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-                                ),
-                            )
-                        }
-                        """,
-                    ),
-                    class_name="flex items-center",
-                ),
-                class_name="flex items-center",
-            ),
-            class_name="py-3 px-2 border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors rounded-lg",
-        )
-
-    return rx.el.div(
-        rx.el.div(
-            rx.el.div(
-                rx.el.h3(
-                    "Budget Health Overview",
-                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
-                ),
-                rx.el.span(
-                    f"$ {total_expenses:,.0f}",
-                    class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
-                ),
-                class_name="flex flex-col justify-between gap-5 mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
-            ),
-            rx.el.a(
-                "Manage",
-                href="/budgets",
-                class_name="text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:text-indigo-800 transition-colors",
-            ),
-            class_name="flex items-center justify-between mb-4",
-        ),
-        rx.el.div(
-            rx.foreach(HomeState.budget_health_stats, budget_health_row),
-            class_name="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar pr-2",
-        ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-8 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -242,10 +138,16 @@ def home_content() -> rx.Component:
         ),
         rx.el.div(
             rx.el.div(
-                budget_health_widget(total_expenses=ExpenseState.total_expenses),
+                budget_health_widget(
+                    health_stats=HomeState.budget_health_stats,
+                    total_expenses=ExpenseState.total_expenses,
+                ),
                 class_name="lg:col-span-2",
             ),
-            rx.el.div(activity_feed(), class_name="lg:col-span-1"),
+            rx.el.div(
+                activity_feed(transaction_list=HomeState.recent_activity),
+                class_name="lg:col-span-1 w-full",
+            ),
             class_name="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),
         class_name="max-w-7xl mx-auto relative z-10",
