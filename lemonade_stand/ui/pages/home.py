@@ -145,8 +145,10 @@ def home_content() -> rx.Component:
                 class_name="lg:col-span-4",
             ),
             rx.el.div(
-                activity_feed(transaction_list=HomeState.recent_activity),
-                class_name="lg:col-span-3 w-full",
+                activity_feed(
+                    title="Recent Activity", transaction_list=HomeState.recent_activity
+                ),
+                class_name="lg:col-span-3  max-h-[500px] w-full",
             ),
             class_name="grid grid-cols-1 lg:grid-cols-7 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-200",
         ),

@@ -2,6 +2,7 @@
 
 import reflex as rx
 
+from lemonade_stand.ui.components.cards import activity_feed
 from lemonade_stand.ui.components.charts import pie_chart
 from lemonade_stand.ui.components.charts import trend_chart
 from lemonade_stand.ui.components.date_picker import date_picker
@@ -187,7 +188,13 @@ def expense_page() -> rx.Component:
                                 ),
                                 class_name="lg:col-span-2",
                             ),
-                            # rx.el.div(distribution_chart(), class_name="lg:col-span-1"),
+                            rx.el.div(
+                                activity_feed(
+                                    title="New/Unseen Expenses",
+                                    transaction_list=ExpenseState.unseen_transactions,
+                                ),
+                                class_name="lg:col-span-1  max-h-[475px] w-full",
+                            ),
                             class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700",
                         ),
                         rx.el.div(

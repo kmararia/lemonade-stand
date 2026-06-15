@@ -10,6 +10,7 @@ from lemonade_stand.ui.states.ui_state import ActivityState
 
 
 def activity_feed(
+    title: str,
     transaction_list: rx.Var[list[TransactionActivity]],
 ) -> rx.Component:
     """"""
@@ -60,7 +61,7 @@ def activity_feed(
     return rx.el.div(
         rx.el.div(
             rx.el.h3(
-                "Recent Activity",
+                title,
                 class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
             ),
             rx.el.select(
@@ -83,7 +84,7 @@ def activity_feed(
             class_name="flex-1 flex flex-col overflow-y-auto custom-scrollbar pr-2 gap-2",
         ),
         class_name="""
-            p-7 flex flex-col max-h-[500px]
+            p-7 flex flex-col
             bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-white/50 dark:border-gray-700/50
             shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full min-h-0 overflow-hidden
         """,
