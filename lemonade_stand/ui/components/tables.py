@@ -126,7 +126,12 @@ def table_row(table: Expense) -> rx.Component:
 
 def data_table() -> rx.Component:
     """"""
-    th_class = "sticky top-0 z-10 px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+    th_class = """
+        sticky top-0 z-10 px-6 py-4 text-left text-xs font-semibold
+        text-gray-500 dark:text-gray-400 uppercase tracking-wider
+        bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur-md shadow-sm
+        border-b border-gray-200 dark:border-gray-700
+    """
 
     return rx.el.div(
         rx.el.div(
