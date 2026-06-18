@@ -75,30 +75,28 @@ def custom_tooltip() -> rx.Component:
     )
 
 
-def legend_item(name: str, color: str) -> rx.Component:
-    """"""
-
-    return rx.el.div(
-        rx.el.div(
-            class_name="w-3 h-3 rounded-full mr-2", style={"backgroundColor": color}
-        ),
-        rx.el.span(name, class_name="text-sm text-gray-600 dark:text-gray-400"),
-        class_name="flex items-center mr-6",
-    )
-
-
-def chart_legend() -> rx.Component:
-    """"""
-
-    return rx.el.div(
-        legend_item("Allocated Budget", "#6366f1"),
-        legend_item("Actual Spent", "#f97316"),
-        class_name="flex items-center mb-4",
-    )
-
-
 def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Component:
     """"""
+
+    def legend_item(name: str, color: str) -> rx.Component:
+        """"""
+
+        return rx.el.div(
+            rx.el.div(
+                class_name="w-3 h-3 rounded-full mr-2", style={"backgroundColor": color}
+            ),
+            rx.el.span(name, class_name="text-sm text-gray-600 dark:text-gray-400"),
+            class_name="flex items-center mr-6",
+        )
+
+    def chart_legend() -> rx.Component:
+        """"""
+
+        return rx.el.div(
+            legend_item("Allocated Budget", "#6366f1"),
+            legend_item("Actual Spent", "#f97316"),
+            class_name="flex items-center mb-4",
+        )
 
     return rx.el.div(
         rx.el.div(
