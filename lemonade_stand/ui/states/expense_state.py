@@ -46,6 +46,8 @@ class TopExpense:
 class ExpenseState(DataState):
     """Core state for budget and expense data."""
 
+    chart_view_mode: str = "Trend"
+
     @rx.var(cache=True)
     def expense_rows(self) -> list[Expense]:
         """Filter data based on the selected date range from DateState."""
@@ -215,3 +217,8 @@ class ExpenseState(DataState):
         if len(self.top_spending_category_list) == 0:
             return "N/A"
         return self.top_spending_category_list[0].name
+
+    @rx.event
+    def set_chart_view_mode(self, mode: str) -> None:
+        """"""
+        self.chart_view_mode = mode

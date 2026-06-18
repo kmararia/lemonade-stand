@@ -176,12 +176,20 @@ def trend_chart(
     max_lines: int,
     monthly_trends: rx.Var[list[dict]],
     trend_lines: rx.Var[list[TopExpense]],
+    header_action: rx.Component | None = None,
 ) -> rx.Component:
     """"""
 
+    header_action: rx.Component = header_action or rx.fragment()
+
     return rx.el.div(
-        rx.el.h3(
-            title, class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6"
+        rx.el.div(
+            rx.el.h3(
+                title,
+                class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
+            ),
+            header_action,
+            class_name="flex items-center justify-between mb-6",
         ),
         rx.el.div(
             rx.recharts.bar_chart(
@@ -228,15 +236,18 @@ def trend_chart(
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl pt-6 px-5 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl pt-6 px-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
     )
 
 
 def pie_chart(
     title: str,
     pie_data: rx.Var[list[dict[str, typing.Any]]],
+    header_action: rx.Component | None = None,
 ) -> rx.Component:
     """"""
+
+    header_action: rx.Component = header_action or rx.fragment()
     pie_colors: list[str] = [
         "#6366f1",
         "#f97316",
@@ -265,8 +276,13 @@ def pie_chart(
         )
 
     return rx.el.div(
-        rx.el.h3(
-            title, class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4"
+        rx.el.div(
+            rx.el.h3(
+                title,
+                class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
+            ),
+            header_action,
+            class_name="flex items-center justify-between mb-1",
         ),
         rx.el.div(
             # Chart Column
@@ -316,7 +332,7 @@ def pie_chart(
                 ),
                 class_name="col-span-1 flex flex-col justify-center pl-4 border-l border-gray-50 dark:border-gray-700/30 h-full",
             ),
-            class_name="grid grid-cols-3 w-full h-[300px] sm:h-[350px] lg:h-[380px] items-center",
+            class_name="grid grid-cols-3 w-full items-center",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
     )

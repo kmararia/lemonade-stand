@@ -115,6 +115,22 @@ def top_spenders_widget() -> rx.Component:
     )
 
 
+def chart_view_selector() -> rx.Component:
+    """"""
+
+    return rx.el.select(
+        rx.el.option("Spending Trends", value="Trend"),
+        rx.el.option("Spending Distribution", value="Distribution"),
+        value=ExpenseState.chart_view_mode,
+        on_change=ExpenseState.set_chart_view_mode,
+        class_name="""
+            text-xs font-medium text-gray-600 dark:text-gray-400
+            bg-gray-50 dark:bg-gray-800 border-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700
+            focus:ring-1 focus:ring-indigo-500 py-1.5 pl-3 pr-8 cursor-pointer transition-colors
+        """,
+    )
+
+
 def expense_page() -> rx.Component:
     """Expense tracking page."""
 
@@ -167,11 +183,34 @@ def expense_page() -> rx.Component:
                         ),
                         rx.el.div(
                             rx.el.div(
-                                trend_chart(
-                                    title="Spending Trends",
-                                    max_lines=len(STROKE_COLORS),
-                                    monthly_trends=ExpenseState.spending_trends_data,
-                                    trend_lines=ExpenseState.top_spending_category_list,
+                                rx.match(
+                                    ExpenseState.chart_view_mode,
+                                    (
+                                        "Trend",
+                                        trend_chart(
+                                            title="Spending Trends",
+                                            max_lines=len(STROKE_COLORS),
+                                            monthly_trends=ExpenseState.spending_trends_data,
+                                            trend_lines=ExpenseState.top_spending_category_list,
+                                            header_action=chart_view_selector(),  # Passing the dropdown
+                                        ),
+                                    ),
+                                    (
+                                        "Distribution",
+                                        pie_chart(
+                                            title="Spending Distribution",
+                                            pie_data=ExpenseState.expense_distribution_data,
+                                            header_action=chart_view_selector(),  # Passing the dropdown
+                                        ),
+                                    ),
+                                    # Default fallback
+                                    trend_chart(
+                                        title="Spending Trends",
+                                        max_lines=len(STROKE_COLORS),
+                                        monthly_trends=ExpenseState.spending_trends_data,
+                                        trend_lines=ExpenseState.top_spending_category_list,
+                                        header_action=chart_view_selector(),
+                                    ),
                                 ),
                                 class_name="lg:col-span-2",
                             ),
