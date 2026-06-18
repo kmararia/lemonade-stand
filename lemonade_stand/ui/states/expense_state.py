@@ -63,10 +63,10 @@ class ExpenseState(DataState):
                 "allocated_amount",
                 "amount",
                 "category",
-                "payment_type",
                 "exclude_flag",
                 "recurring_flag",
                 "source_file",
+                payment_type=pl.col("payment"),
                 has_source_file=pl.col("source_file").is_not_null(),
                 location=pl.concat_list("state", "city").list.drop_nulls(),
             )
