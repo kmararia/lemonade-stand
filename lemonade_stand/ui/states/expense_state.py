@@ -31,6 +31,18 @@ class Expense:
 
 
 @dataclass
+class ExpenseVariance:
+    """"""
+
+    category: str
+    spent_amount: float
+    allocated_amount: float
+    utilization: float
+    remaining_amount: float
+    excess_amount: float
+
+
+@dataclass
 class TopExpense:
     """"""
 
@@ -138,6 +150,60 @@ class ExpenseState(DataState):
             )
             .collect()
         ).to_dicts()
+
+    @rx.var
+    def expense_variance_stats(self) -> list[ExpenseVariance]:
+        """"""
+
+        row_iterator = (
+            self._shared_data.expenses.group_by("category")
+            .agg(spent_amount=pl.col("amount").sum())
+            .join(
+                pl.LazyFrame(self.allocation_rows),
+                on="category",
+                how="left",
+                coalesce=True,
+            )
+            .select(
+                "category",
+                "spent_amount",
+                "allocated_amount",
+                remaining_amount=(pl.col("allocated_amount") - pl.col("spent_amount")),
+                excess_amount=(pl.col("spent_amount") - pl.col("allocated_amount")),
+                utilization=(pl.col("spent_amount") / pl.col("allocated_amount") * 100),
+            )
+            .sort("spent_amount", descending=True)
+            .collect()
+        ).to_dicts()
+
+        return [
+            ExpenseVariance(
+                category=x["category"],
+                spent_amount=x["spent_amount"],
+                allocated_amount=x["allocated_amount"],
+                remaining_amount=max(0, x["remaining_amount"]),
+                excess_amount=max(0, x["excess_amount"]),
+                utilization=x["utilization"],
+            )
+            for x in row_iterator
+        ]
+
+    @rx.var
+    def expense_variance_totals(self) -> dict[str, str]:
+        """"""
+
+        totals_dict = {
+            "spent_amount": sum(x.spent_amount for x in self.expense_variance_stats),
+            "allocated_amount": sum(
+                x.allocated_amount for x in self.expense_variance_stats
+            ),
+            "remaining_amount": sum(
+                x.remaining_amount for x in self.expense_variance_stats
+            ),
+            "excess_amount": sum(x.excess_amount for x in self.expense_variance_stats),
+        }
+
+        return {f"{k}": f"{v:,.2f}" for k, v in totals_dict.items()}
 
     @rx.var
     def expense_distribution_data(self) -> list[dict]:

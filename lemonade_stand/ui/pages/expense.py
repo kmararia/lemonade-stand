@@ -8,6 +8,7 @@ from lemonade_stand.ui.components.charts import trend_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.header import header
 from lemonade_stand.ui.components.sidebar import sidebar
+from lemonade_stand.ui.components.tables import budget_variance_table
 from lemonade_stand.ui.components.tables import data_table
 from lemonade_stand.ui.states.expense_state import STROKE_COLORS
 from lemonade_stand.ui.states.expense_state import ExpenseState
@@ -104,7 +105,7 @@ def top_spenders_widget() -> rx.Component:
 
     return rx.el.div(
         rx.el.h3(
-            "Top Spending Category",
+            "Top Spending Categories",
             class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
         ),
         rx.el.div(
@@ -183,6 +184,20 @@ def expense_page() -> rx.Component:
                         ),
                         rx.el.div(
                             rx.el.div(
+                                budget_variance_table(
+                                    title="Expense",
+                                    table_data=ExpenseState.expense_variance_stats,
+                                    totals_dict=ExpenseState.expense_variance_totals,
+                                ),
+                                class_name="lg:col-span-2",
+                            ),
+                            rx.el.div(
+                                top_spenders_widget(), class_name="lg:col-span-1"
+                            ),
+                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-7 duration-700",
+                        ),
+                        rx.el.div(
+                            rx.el.div(
                                 rx.match(
                                     ExpenseState.chart_view_mode,
                                     (
@@ -212,27 +227,14 @@ def expense_page() -> rx.Component:
                                         header_action=chart_view_selector(),
                                     ),
                                 ),
-                                class_name="lg:col-span-2",
-                            ),
-                            rx.el.div(
-                                top_spenders_widget(), class_name="lg:col-span-1"
-                            ),
-                            class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-7 duration-700",
-                        ),
-                        rx.el.div(
-                            rx.el.div(
-                                pie_chart(
-                                    title="Spending Distribution",
-                                    pie_data=ExpenseState.expense_distribution_data,
-                                ),
-                                class_name="lg:col-span-2",
+                                class_name="lg:col-span-2 max-h-[443px]",
                             ),
                             rx.el.div(
                                 activity_feed(
                                     title="New/Unseen Expenses",
                                     transaction_list=ExpenseState.unseen_transactions,
                                 ),
-                                class_name="lg:col-span-1  max-h-[475px] w-full",
+                                class_name="lg:col-span-1 max-h-[443px] w-full",
                             ),
                             class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700",
                         ),

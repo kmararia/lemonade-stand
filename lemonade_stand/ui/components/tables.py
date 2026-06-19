@@ -6,6 +6,7 @@ import reflex as rx
 
 from lemonade_stand.ui.states.expense_state import Expense
 from lemonade_stand.ui.states.expense_state import ExpenseState
+from lemonade_stand.ui.states.expense_state import ExpenseVariance
 
 
 def table_row(table: Expense) -> rx.Component:
@@ -186,4 +187,87 @@ def data_table() -> rx.Component:
             ),
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+    )
+
+
+def budget_variance_table(
+    title: str, table_data: rx.Var[list[ExpenseVariance]], totals_dict: rx.Var[dict]
+) -> rx.Component:
+    """A detailed budget variance table"""
+
+    th_comp_class = "px-3 pb-2 font-bold text-gray-800 dark:text-gray-200"
+    td_comp_class = "px-3 py-1.5 text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/50"
+    tb_comp_class = "italic px-3 py-2"
+
+    def render_row(item: ExpenseVariance) -> rx.Component:
+        """"""
+
+        return rx.el.tr(
+            rx.el.td(
+                item.category,
+                class_name="""
+                    font-bold text-left pl-3 pr-2 py-1.5
+                    bg-[#f3dfc1] dark:bg-orange-900/30 text-gray-900 dark:text-gray-100
+                    border-b-[3px] border-r-[3px] border-white dark:border-gray-800
+                """,
+            ),
+            rx.el.td(f"{item.spent_amount:,.2f}", class_name=td_comp_class),
+            rx.el.td(f"{item.allocated_amount:,.2f}", class_name=td_comp_class),
+            rx.el.td(f"{item.utilization:,.0f}%", class_name=td_comp_class),
+            rx.el.td(f"{item.remaining_amount:,.2f}", class_name=td_comp_class),
+            rx.el.td(f"{item.excess_amount:,.2f}", class_name=td_comp_class),
+            class_name="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors",
+        )
+
+    return rx.el.div(
+        # Header
+        rx.el.h2(
+            title,
+            class_name="text-[21px] font-bold text-[#c75d2c] dark:text-orange-500 mb-4 tracking-tight",
+        ),
+        # Table Container
+        rx.el.div(
+            rx.el.table(
+                # Table Head
+                rx.el.thead(
+                    rx.el.tr(
+                        rx.el.th("", class_name="pb-2"),  # Empty corner
+                        rx.el.th("Spent", class_name=th_comp_class),
+                        rx.el.th("Planned", class_name=th_comp_class),
+                        rx.el.th("%Util", class_name=th_comp_class),
+                        rx.el.th("Remaining", class_name=th_comp_class),
+                        rx.el.th("Excess", class_name=th_comp_class),
+                        class_name="border-b-2 border-gray-300 dark:border-gray-600",
+                    )
+                ),
+                # Table Body
+                rx.el.tbody(
+                    rx.el.tr(
+                        rx.el.td(
+                            "Total",
+                            class_name=(tb_comp_class + " text-left font-medium"),
+                        ),
+                        rx.el.td(totals_dict["spent_amount"], class_name=tb_comp_class),  # type: ignore
+                        rx.el.td(
+                            totals_dict["allocated_amount"],  # type: ignore
+                            class_name=tb_comp_class,
+                        ),
+                        rx.el.td("", class_name=tb_comp_class),
+                        rx.el.td(
+                            totals_dict["remaining_amount"],  # type: ignore
+                            class_name=tb_comp_class,
+                        ),
+                        rx.el.td(
+                            totals_dict["excess_amount"],  # type: ignore
+                            class_name=tb_comp_class,
+                        ),
+                        class_name="text-slate-500 dark:text-slate-400 border-b border-gray-200 dark:border-gray-700/50",
+                    ),
+                    rx.foreach(table_data, lambda item: render_row(item)),
+                ),
+                class_name="w-full text-sm text-right whitespace-nowrap",
+            ),
+            class_name="max-h-[350px] overflow-x-auto custom-scrollbar",
+        ),
+        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full h-full",
     )
