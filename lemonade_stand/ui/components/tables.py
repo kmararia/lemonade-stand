@@ -213,7 +213,24 @@ def budget_variance_table(
             ),
             rx.el.td(f"{item.spent_amount:,.2f}", class_name=td_comp_class),
             rx.el.td(f"{item.allocated_amount:,.2f}", class_name=td_comp_class),
-            rx.el.td(f"{item.utilization:,.0f}%", class_name=td_comp_class),
+            rx.el.td(
+                f"{item.utilization:,.0f}%",
+                class_name=(
+                    f"""{td_comp_class}
+                    {
+                        rx.cond(
+                            item.utilization <= 50,
+                            "text-green-600 dark:text-green-400",
+                            rx.cond(
+                                item.utilization <= 100,
+                                "text-yellow-600 dark:text-yellow-400",
+                                "text-red-500 dark:text-red-500",
+                            ),
+                        )
+                    }
+                    """
+                ),
+            ),
             rx.el.td(f"{item.remaining_amount:,.2f}", class_name=td_comp_class),
             rx.el.td(f"{item.excess_amount:,.2f}", class_name=td_comp_class),
             class_name="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors",
