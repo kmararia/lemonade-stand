@@ -106,7 +106,7 @@ def top_spenders_widget() -> rx.Component:
     return rx.el.div(
         rx.el.h3(
             "Top Spending Categories",
-            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
         ),
         rx.el.div(
             rx.foreach(ExpenseState.top_spending_category_list, top_spender_row),
@@ -231,8 +231,8 @@ def expense_page() -> rx.Component:
                             ),
                             rx.el.div(
                                 activity_feed(
-                                    title="New/Unseen Expenses",
-                                    transaction_list=ExpenseState.unseen_transactions,
+                                    title="Notable Expenses",
+                                    transaction_list=ExpenseState.notable_transactions,
                                 ),
                                 class_name="lg:col-span-1 max-h-[443px] w-full",
                             ),

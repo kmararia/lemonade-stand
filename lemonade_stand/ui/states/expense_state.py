@@ -91,17 +91,19 @@ class ExpenseState(DataState):
         return [Expense(**row) for row in row_iterator]
 
     @rx.var(cache=True)
-    def unseen_transactions(self) -> list[TransactionActivity]:
+    def notable_transactions(self) -> list[TransactionActivity]:
         """"""
 
         return [
             TransactionActivity(**row)
             for row in (
-                self._shared_data.expenses.sort("date", descending=True)
+                self._shared_data.expenses.sort(
+                    "amount", "date", descending=[True, True]
+                )
                 .select(
                     date=pl.col("date").dt.strftime("%m/%d/%Y"),
                     description=pl.col("description"),
-                    amount=pl.col("amount").round(2),
+                    amount=(pl.col("amount").round(1) * -1),
                     payment_type=(
                         pl.when(
                             pl.col("payment").str.contains("(?i)card"),

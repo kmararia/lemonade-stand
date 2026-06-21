@@ -45,7 +45,7 @@ def activity_feed(
                     f"+${transaction.amount:,.2f}",
                 ),
                 class_name=f"""
-                    text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-20 text-center
+                    text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-22 text-center
                     text-{transaction.health_color}-800 dark:text-{transaction.health_color}-400
                     bg-{transaction.health_color}-100 dark:bg-{transaction.health_color}-900/30
                 """,
@@ -62,7 +62,7 @@ def activity_feed(
         rx.el.div(
             rx.el.h3(
                 title,
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                class_name="px-2 text-lg font-bold text-gray-900 dark:text-gray-100",
             ),
             rx.el.select(
                 rx.el.option("All", value="All"),
@@ -84,7 +84,7 @@ def activity_feed(
             class_name="flex-1 flex flex-col overflow-y-auto custom-scrollbar pr-2 gap-2",
         ),
         class_name="""
-            p-7 flex flex-col
+            py-6 px-4 flex flex-col
             bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-white/50 dark:border-gray-700/50
             shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full min-h-0 overflow-hidden
         """,
