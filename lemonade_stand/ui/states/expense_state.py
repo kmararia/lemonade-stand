@@ -289,7 +289,7 @@ class ExpenseState(DataState):
         return round(self.remaining_budget / self.total_allocations * 100, 1)
 
     @rx.var
-    def remaining_income_percentage(self) -> float:
+    def percentage_of_income_spent(self) -> float:
         """"""
         income_amount = (
             self._shared_data.income.select(pl.col("amount").sum()).collect()

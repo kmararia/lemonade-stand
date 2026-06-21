@@ -171,14 +171,14 @@ def expense_page() -> rx.Component:
                                 "Total Spent this Period",
                                 f"${ExpenseState.total_expenses:,.2f}",
                                 (
-                                    f"{ExpenseState.remaining_income_percentage:.0f}% of income",
+                                    f"{ExpenseState.percentage_of_income_spent:.0f}% of income",
                                     rx.cond(
-                                        ExpenseState.remaining_income_percentage >= 100,
+                                        ExpenseState.percentage_of_income_spent < 100,
                                         "badge_check",
                                         "badge_alert",
                                     ),
                                     rx.cond(
-                                        ExpenseState.remaining_income_percentage >= 100,
+                                        ExpenseState.percentage_of_income_spent < 100,
                                         "emerald",
                                         "red",
                                     ),
