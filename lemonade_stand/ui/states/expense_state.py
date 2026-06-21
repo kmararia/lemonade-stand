@@ -273,11 +273,22 @@ class ExpenseState(DataState):
         return self.total_allocations - self.total_expenses
 
     @rx.var
-    def utilization_percentage(self) -> float:
+    def remaining_budget_percentage(self) -> float:
         """"""
         if self.total_allocations == 0:
             return 0.0
-        return round(self.total_expenses / self.total_allocations * 100, 1)
+        return round(self.remaining_budget / self.total_allocations * 100, 1)
+
+    @rx.var
+    def remaining_income_percentage(self) -> float:
+        """"""
+        income_amount = (
+            self._shared_data.income.select(pl.col("amount").sum()).collect()
+        ).item(0, 0)
+
+        if income_amount == 0:
+            return 0.0
+        return round(self.total_expenses / income_amount * 100, 1)
 
     @rx.var
     def top_spending_category(self) -> str:

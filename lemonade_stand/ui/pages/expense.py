@@ -1,5 +1,7 @@
 """"""
 
+import typing
+
 import reflex as rx
 
 from lemonade_stand.ui.components.cards import activity_feed
@@ -18,11 +20,20 @@ from lemonade_stand.ui.states.expense_state import TopExpense
 def summary_stat(
     label: str,
     value: str,
-    subtext: str = "",
+    subtext: str | tuple[typing.Any, ...] = "",
     icon: str = "activity",
     icon_color: str = "indigo",
 ) -> rx.Component:
     """"""
+
+    if isinstance(subtext, str):
+        subtext_items = (subtext, "trending-up", "emerald")
+    else:
+        subtext_items = (
+            subtext[0],
+            rx.cond(len(subtext) > 1, subtext[1], "trending-up"),
+            rx.cond(len(subtext) > 2, subtext[2], "emerald"),
+        )
 
     return rx.el.div(
         rx.el.div(
@@ -50,9 +61,13 @@ def summary_stat(
         rx.cond(
             subtext != "",
             rx.el.div(
-                rx.icon("trending-up", size=14, class_name="text-emerald-500 mr-1"),
+                rx.icon(
+                    subtext_items[1],
+                    size=14,
+                    class_name=f"text-{subtext_items[2]}-500 mr-1",
+                ),
                 rx.el.span(
-                    subtext,
+                    subtext_items[0],
                     class_name="text-xs font-medium text-gray-500 dark:text-gray-400",
                 ),
                 class_name="flex items-center",
@@ -155,28 +170,52 @@ def expense_page() -> rx.Component:
                             summary_stat(
                                 "Total Spent this Period",
                                 f"${ExpenseState.total_expenses:,.2f}",
-                                "+12% vs last year",
+                                (
+                                    f"{ExpenseState.remaining_income_percentage:.0f}% of income",
+                                    rx.cond(
+                                        ExpenseState.remaining_income_percentage >= 100,
+                                        "badge_check",
+                                        "badge_alert",
+                                    ),
+                                    rx.cond(
+                                        ExpenseState.remaining_income_percentage >= 100,
+                                        "emerald",
+                                        "red",
+                                    ),
+                                ),
                                 icon="dollar-sign",
                                 icon_color="blue",
                             ),
                             summary_stat(
                                 "Remaining Budget",
                                 f"${ExpenseState.remaining_budget:,.2f}",
-                                f"{100 - ExpenseState.utilization_percentage:.0f}% of total",
+                                (
+                                    f"{ExpenseState.remaining_budget_percentage:.0f}% of total",
+                                    rx.cond(
+                                        ExpenseState.remaining_budget_percentage > 0,
+                                        "trending-down",
+                                        "trending-up",
+                                    ),
+                                    rx.cond(
+                                        ExpenseState.remaining_budget_percentage > 0,
+                                        "emerald",
+                                        "red",
+                                    ),
+                                ),
                                 icon="wallet",
                                 icon_color="emerald",
                             ),
                             summary_stat(
                                 "Top Category",
                                 f"{ExpenseState.top_spending_category}",
-                                "Most active sector",
+                                ("Most active expense category", "eye", "green"),
                                 icon="tag",
                                 icon_color="purple",
                             ),
                             summary_stat(
                                 "Active Budgets",
                                 f"{ExpenseState.active_budgets}",
-                                "Across all departments",
+                                ("Across all expenses", "layers", "orange"),
                                 icon="layers",
                                 icon_color="orange",
                             ),
