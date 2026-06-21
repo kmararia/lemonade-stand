@@ -134,6 +134,23 @@ def data_table() -> rx.Component:
         border-b border-gray-200 dark:border-gray-700
     """
 
+    def sortable_header(label: str, sort_key: str, header_class: str) -> rx.Component:
+        """A reusable, clickable header for sorting columns."""
+        return rx.el.th(
+            rx.el.div(
+                rx.el.span(label),
+                rx.icon(
+                    "arrow-up-down",
+                    size=14,
+                    class_name="ml-1.5 text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-cyan-400 transition-colors",
+                ),
+                class_name="flex items-center group cursor-pointer select-none",
+                # Run backend sorting logic when header is clicked
+                on_click=ExpenseState.toggle_table_sort(sort_key),
+            ),
+            class_name=header_class,
+        )
+
     return rx.el.div(
         rx.el.div(
             rx.el.h3(
@@ -153,12 +170,32 @@ def data_table() -> rx.Component:
                 rx.el.table(
                     rx.el.thead(
                         rx.el.tr(
-                            rx.el.th("Date", class_name=th_class),
-                            rx.el.th("Category", class_name=th_class),
-                            rx.el.th("Amount", class_name=th_class),
-                            rx.el.th("Payment Type", class_name=th_class),
-                            rx.el.th("Description", class_name=th_class),
-                            rx.el.th("Status", class_name=th_class),
+                            sortable_header(
+                                label="Date", sort_key="date", header_class=th_class
+                            ),
+                            sortable_header(
+                                label="Category",
+                                sort_key="category",
+                                header_class=th_class,
+                            ),
+                            sortable_header(
+                                label="Amount", sort_key="amount", header_class=th_class
+                            ),
+                            sortable_header(
+                                label="Payment Type",
+                                sort_key="payment_type",
+                                header_class=th_class,
+                            ),
+                            sortable_header(
+                                label="Description",
+                                sort_key="description",
+                                header_class=th_class,
+                            ),
+                            sortable_header(
+                                label="Status",
+                                sort_key="exclude_flag",
+                                header_class=th_class,
+                            ),
                             class_name="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50",
                         )
                     ),

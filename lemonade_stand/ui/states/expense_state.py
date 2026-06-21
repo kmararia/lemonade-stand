@@ -59,6 +59,8 @@ class ExpenseState(DataState):
     """Core state for budget and expense data."""
 
     chart_view_mode: str = "Trend"
+    sort_column: str = "date"
+    sort_reverse: bool = True  # True = Descending, False = Ascending
 
     @rx.var(cache=True)
     def expense_rows(self) -> list[Expense]:
@@ -84,7 +86,14 @@ class ExpenseState(DataState):
                 has_source_file=pl.col("source_file").is_not_null(),
                 location=pl.concat_list("state", "city").list.drop_nulls(),
             )
-            .sort("date", "amount", descending=[True, True])
+            .sort(
+                self.sort_column,
+                "amount",
+                descending=[
+                    self.sort_reverse,
+                    (self.sort_reverse if self.sort_column == "amount" else True),
+                ],
+            )
             .collect()
         ).iter_rows(named=True)
 
@@ -301,3 +310,13 @@ class ExpenseState(DataState):
     def set_chart_view_mode(self, mode: str) -> None:
         """"""
         self.chart_view_mode = mode
+
+    @rx.event
+    def toggle_table_sort(self, sort_key: str) -> None:
+        """Updates the sort memory based on what the user clicks."""
+
+        if self.sort_column == sort_key:
+            self.sort_reverse = not self.sort_reverse
+        else:
+            self.sort_column = sort_key
+            self.sort_reverse = False
