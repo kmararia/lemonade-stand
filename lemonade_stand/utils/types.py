@@ -1,15 +1,11 @@
-"""
-A module for custom types for the application
-"""
+"""A module for custom types for the application"""
 
 from typing import Final
 
 
 # A sentinel value - indicates a missing value in a function call
 class MissingType:
-    """
-    A sentinel value - indicates a missing value in a function call
-    """
+    """A sentinel value - indicates a missing value in a function call"""
 
     def __repr__(self):
         """"""

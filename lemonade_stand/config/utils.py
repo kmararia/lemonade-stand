@@ -1,191 +1,177 @@
-"""
-Holds dataclasses for the application configuration set up
-"""
+"""Holds dataclasses for the application configuration set up"""
 
 import json
-import os
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
 from pathlib import Path
 from types import SimpleNamespace
 
-from lemonade_stand.config import metadata
-from lemonade_stand.config.setup import check_version
-from lemonade_stand.config.setup import get_user_configs
+from .metadata import BASE_CONFIG
 
-from .metadata import USER_CONFIG
+
+@dataclass
+class AppPaths:
+    """A dataclass for the applicaton directories"""
+
+    root_dir: Path = field(init=False)
+    config_dir: Path = field(init=False)
+    data_dir: Path = field(init=False)
+    model_dir: Path = field(init=False)
+    metadata_path: Path = field(init=False)
+
+    def __post_init__(self):
+        """Post initialization variables set up"""
+
+        self.root_dir = self.get_app_root_dir()
+        self.metadata_path = self.root_dir / "metadata.json"
+        self.config_dir = self.root_dir / "configs"
+        self.data_dir = self.root_dir / "shared" / "data"
+        self.model_dir = self.root_dir / "shared" / "model"
+
+    def __str__(self):
+        """String representation of the class"""
+        print_str = [f"{x.name}: \n\t--> {getattr(self, x.name)}" for x in fields(self)]
+
+        return "\n".join(print_str)
+
+    def get_os_home(self) -> Path:
+        """Returns the home directory of the user's operating system"""
+        return Path.home()
+
+    def get_app_root_dir(self) -> Path:
+        """Returns the root working directory for the application"""
+        return self.get_os_home() / ".lemonade-stand"
 
 
 @dataclass
 class UserConfig:
-    """
-    A dataclass for the applicaton configs
-    """
+    """A dataclass for the applicaton configs"""
 
     app_version: str = field(init=False)
-    always_refresh_data: bool = field(init=False)
-    always_skip_login: bool = field(init=False)
-    statement_dir: Path = field(init=False)
-    dev_mode: bool = field(default=False)
+    data: SimpleNamespace = field(init=False)
+    model: SimpleNamespace = field(init=False)
+    ui: SimpleNamespace = field(init=False)
 
     def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
+        """Post initialization variables set up"""
 
-        dirs = AppDir()
+        def clean_dict_key(input_dict):
+            return {k.replace("-", "_"): v for k, v in input_dict.items()}
 
-        # Set up the configurations
-        config_dict = get_user_configs(user_config=dirs.user_config_path)
+        config_dict = self.get_user_configs()
 
         # Update object fields variables
         self.app_version = config_dict["app-version"]
-        self.always_refresh_data = bool(config_dict["always-refresh-data"])
-        self.always_skip_login = self.dev_mode or bool(config_dict["always-skip-login"])
-        self.statement_dir = Path(
-            USER_CONFIG["statement-dir"]
-            if self.dev_mode
-            else config_dict["statement-dir"]
-        )
+        self.data = SimpleNamespace(**clean_dict_key(config_dict["data"]))
+        self.model = SimpleNamespace(**clean_dict_key(config_dict["model"]))
+        self.ui = SimpleNamespace(**clean_dict_key(config_dict["ui"]))
+
+        self.save_config()
 
     def __str__(self):
-        """
-        String representation of the class
-        """
-
-        print_str = [f"\t{x.name}: --> {getattr(self, x.name)}" for x in fields(self)]
+        """String representation of the class"""
+        print_str = [
+            (
+                f"\t{x.name}: --> {getattr(self, x.name)}"
+                if not isinstance(getattr(self, x.name), SimpleNamespace)
+                else f"\t{x.name}: -->\n"
+                + "\n".join(
+                    [f"\t\t{x}: {y}" for x, y in getattr(self, x.name).__dict__.items()]
+                )
+            )
+            for x in fields(self)
+        ]
 
         return "\n".join(print_str)
 
+    def save_config(self):
+        """Saves the user configuration to a json file"""
+
+        config_dict = {
+            x.name.replace("_", "-"): (
+                getattr(self, x.name)
+                if not isinstance(getattr(self, x.name), SimpleNamespace)
+                else {
+                    x.replace("_", "-"): (y if not isinstance(y, Path) else str(y))
+                    for x, y in getattr(self, x.name).__dict__.items()
+                }
+            )
+            for x in fields(self)
+        }
+
+        # Dump user configurations into json file
+        user_config = AppPaths().config_dir / "user_config.json"
+        user_config.parent.mkdir(parents=True, exist_ok=True)
+
+        with user_config.open("w") as file:
+            json.dump(config_dict, file, indent=4)
+
+    def get_user_configs(self):
+        """Sets up application configurations. Uses saved configs or user input configs"""
+
+        user_config = AppPaths().config_dir / "user_config.json"
+
+        # Search for the configuration file in the path
+        if user_config.exists():
+            with user_config.open("r") as file:
+                config_dict = json.load(file)
+
+            # Add configurations if missing
+            for key, val in BASE_CONFIG.items():
+                if key not in config_dict:
+                    config_dict[key] = val
+                if isinstance(val, dict):
+                    for sub_key, sub_val in val.items():
+                        if sub_key not in config_dict[key]:
+                            config_dict[key][sub_key] = sub_val
+                        elif isinstance(sub_val, Path):
+                            config_dict[key][sub_key] = Path(config_dict[key][sub_key])
+                        elif isinstance(sub_val, bool):
+                            config_dict[key][sub_key] = bool(config_dict[key][sub_key])
+        else:
+            config_dict = BASE_CONFIG
+
+        return config_dict
+
     def update_attribute(self, mappings: dict) -> None:
-        """
-        Class method to update the object attributes
+        """Class method to update the object attributes
 
         Arguments:
             mappings: A dictionary of new mappings e.g. {"my_attribute": "new_value"}
+
         Returns:
             None
+
         """
 
         # Update the object variables
         for attr, new_val in mappings.items():
-            object.__setattr__(self, attr, new_val)
+            attr = attr.replace("-", "_")
 
-        # Initialize application directory object
-        dirs = AppDir()
+            for class_attr in fields(self):
+                if attr == class_attr.name:
+                    typed_val = (
+                        new_val
+                        if not isinstance(getattr(self, class_attr.name), Path)
+                        else Path(new_val)
+                    )
+                    object.__setattr__(self, class_attr.name, typed_val)
+                    break
 
-        # Write out new mappings to json file conditionally
-        if not self.dev_mode:
-            config_dict = {
-                x.name.replace("_", "-"): (
-                    str(getattr(self, x.name))
-                    if x.name == "statement_dir"
-                    else getattr(self, x.name)
-                )
-                for x in fields(self)
-                if x.name not in ["dev_mode", "category_mappings"]
-            }
+                elif isinstance(getattr(self, class_attr.name), SimpleNamespace):
+                    class_attr_dict = getattr(self, class_attr.name).__dict__
 
-            # Dump user configurations into file
-            with (dirs.user_config_path).open("w") as file:
-                json.dump(config_dict, file, indent=4)
+                    if attr in class_attr_dict:
+                        typed_val = (
+                            new_val
+                            if not isinstance(class_attr_dict[attr], Path)
+                            else Path(new_val)
+                        )
+                        new_dict = {**class_attr_dict, attr: typed_val}
+                        object.__setattr__(
+                            self, class_attr.name, SimpleNamespace(**new_dict)
+                        )
+                        break
 
-
-@dataclass
-class AppDir:
-    """
-    A dataclass for the applicaton directories
-    """
-
-    current_dir: Path = Path.cwd()
-    root_dir: Path = field(init=False)
-    session_dir: Path = field(init=False)
-    metadata_path: Path = field(init=False)
-    user_config_path: Path = field(init=False)
-    category_config_path: Path = field(init=False)
-    types_config_path: Path = field(init=False)
-    exclusions_config_path: Path = field(init=False)
-    database_dir: Path = field(init=False)
-
-    def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
-
-        self.root_dir = self.get_app_root_dir()
-        self.session_dir = self.get_os_home()
-
-        self.metadata_path = self.root_dir / "shared" / "schema" / "metadata.json"
-        self.user_config_path = self.root_dir / "shared" / "config" / "user_config.json"
-        self.category_config_path = (
-            self.root_dir / "shared" / "config" / "category_config.json"
-        )
-        self.types_config_path = (
-            self.root_dir / "shared" / "config" / "transaction_type_config.json"
-        )
-        self.exclusions_config_path = (
-            self.root_dir / "shared" / "config" / "exclusions_config.json"
-        )
-        self.database_dir = self.root_dir / "shared" / "data"
-
-    def get_app_root_dir(self) -> Path:
-        """
-        Returns the root working directory for the application
-        """
-
-        # Windows
-        if os.name == "nt":
-            apps_dir = Path(os.getenv("APPDATA", Path.home()))
-
-        # macOS
-        elif os.uname().sysname == "Darwin":
-            apps_dir = Path.home() / "Library" / "Application Support"
-
-        # Linux and others
-        else:
-            apps_dir = Path(os.getenv("XDG_CONFIG_HOME", Path.home() / ".config"))
-
-        return apps_dir / "lemonade-stand"
-
-    def get_os_home(self) -> Path:
-        """
-        Returns the home directory of the user's operating system
-        """
-
-        return Path("~/") if os.name == "posix" else Path("C:\\")
-
-
-@dataclass
-class ModelConfig:
-    """
-    A dataclass for the applicaton configs
-    """
-
-    category: str
-    refresh_flag: bool = field(init=False)
-    dot_data: SimpleNamespace = field(init=False)
-
-    def __post_init__(self):
-        """
-        Post initialization variables set up
-        """
-
-        dirs = AppDir()
-
-        if self.category == "model":
-            self.refresh_flag = check_version(
-                config_path=dirs.metadata_path,
-                config_dict=metadata.MODEL_CONFIG,
-            )
-
-        # Save dict as simple-namespace
-        self.dot_data = SimpleNamespace(**metadata.MODEL_CONFIG)
-
-    def __str__(self):
-        """
-        String representation of the class
-        """
-
-        print_str = [f"{x.name} --> ({x.type})" for x in fields(self)]
-        return "\n".join(print_str)
+        self.save_config()

@@ -26,3 +26,13 @@ config.json
 # Ignore temporary directories
 *_tmp_/
 *tmp/
+
+# Reflex generated files
+.states
+.web
+*.db
+assets/external/
+*.py[cod]
+
+# Ignore VS Code workspace settings
+.vscode/
