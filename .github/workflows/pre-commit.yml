@@ -1,5 +1,5 @@
 ---
-name: pre-commit
+name: Run pre-commit
 
 on:
     pull_request:
@@ -9,6 +9,17 @@ jobs:
     pre-commit:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-python@v3
-            - uses: pre-commit/action@v3.0.1
+            - name: Checkout repository
+              uses: actions/checkout@v6
+            - name: Set up Python
+              uses: actions/setup-python@v6
+              with:
+                  python-version: '3.13'
+            - name: Set up uv
+              uses: astral-sh/setup-uv@v7
+            - name: Check uv version
+              run: uv --version
+            - name: Set up python environment
+              run: uv sync --frozen
+            - name: Install pre-commit
+              uses: pre-commit/action@v3.0.1
