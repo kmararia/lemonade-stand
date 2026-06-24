@@ -9,6 +9,8 @@ from lemonade_stand.ui.components.charts import pie_chart
 from lemonade_stand.ui.components.charts import trend_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.header import header
+from lemonade_stand.ui.components.modals import generic_edit_modal
+from lemonade_stand.ui.components.modals import modal_input_field
 from lemonade_stand.ui.components.sidebar import sidebar
 from lemonade_stand.ui.components.tables import budget_variance_table
 from lemonade_stand.ui.components.tables import data_table
@@ -147,6 +149,61 @@ def chart_view_selector() -> rx.Component:
     )
 
 
+def expense_edit_modal() -> rx.Component:
+    """"""
+
+    return generic_edit_modal(
+        *[
+            modal_input_field(
+                label="Date",
+                value=ExpenseState.edit_values["date"],
+                on_change=ExpenseState.set_edit_value,
+                field_name="date",
+            ),
+            modal_input_field(
+                label="Category",
+                value=ExpenseState.edit_values["category"],
+                on_change=ExpenseState.set_edit_value,
+                field_name="category",
+                config={"select_options": ExpenseState.distinct_values["category"]},
+            ),
+            modal_input_field(
+                label="Amount",
+                value=ExpenseState.edit_values["amount"],
+                on_change=ExpenseState.set_edit_value,
+                field_name="amount",
+                config={"input_type": "number"},
+            ),
+            modal_input_field(
+                label="Payment Type",
+                value=ExpenseState.edit_values["payment_type"],
+                on_change=ExpenseState.set_edit_value,
+                field_name="payment_type",
+                config={"select_options": ExpenseState.distinct_values["payment"]},
+            ),
+            modal_input_field(
+                label="Description",
+                value=ExpenseState.edit_values["description"],
+                on_change=ExpenseState.set_edit_value,
+                field_name="description",
+                config={"is_textarea": True, "col_span_2": True},
+            ),
+            modal_input_field(
+                label="Exclude Status",
+                value=ExpenseState.edit_values["exclude_flag"],
+                on_change=ExpenseState.set_edit_value,
+                field_name="exclude_flag",
+                config={"select_options": ExpenseState.distinct_values["exclude_flag"]},
+            ),
+        ],
+        title="Edit Expense",
+        description="Make changes to this transaction. Click save when you're done.",
+        on_save=ExpenseState.apply_data_edits,
+        is_open=ExpenseState.is_edit_modal_open,
+        on_open_change=ExpenseState.set_is_edit_modal_open,
+    )
+
+
 def expense_page() -> rx.Component:
     """Expense tracking page."""
 
@@ -279,7 +336,9 @@ def expense_page() -> rx.Component:
                         ),
                         rx.el.div(
                             rx.el.div(
-                                data_table(),
+                                data_table(
+                                    edit_modal_func=expense_edit_modal,
+                                ),
                                 class_name="lg:col-span-3",
                             ),
                             class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-9 duration-700 delay-250",
