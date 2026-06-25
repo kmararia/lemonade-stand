@@ -1,15 +1,16 @@
 """"""
 
 from datetime import datetime
+from decimal import Decimal
 
 import reflex as rx
 
 from lemonade_stand.ui.components.cards import activity_feed
 from lemonade_stand.ui.components.cards import budget_health_widget
 from lemonade_stand.ui.components.cards import income_distribution_card
-from lemonade_stand.ui.components.cards import stats_grid
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
+from lemonade_stand.ui.components.small_cards import stats_card
 from lemonade_stand.ui.states.expense_state import ExpenseState
 from lemonade_stand.ui.states.home_state import HomeState
 from lemonade_stand.ui.states.income_state import IncomeState
@@ -63,6 +64,49 @@ def quick_actions_panel(
             class_name="grid grid-cols-2 sm:grid-cols-4 gap-5",
         ),
         class_name="mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
+    )
+
+
+def stats_grid(
+    total_earnings: rx.Var[int | float | Decimal],
+    total_expenses: rx.Var[int | float | Decimal],
+    remaining_earnings: rx.Var[int | float | Decimal],
+    utilization_pct: rx.Var[int | float | Decimal],
+) -> rx.Component:
+    """"""
+
+    return rx.el.div(
+        stats_card(
+            "Total Earnings",
+            f"${total_earnings:,.0f}",
+            "wallet",
+            trend="+12% from last Q",
+            color="blue",
+            trend_up=True,
+        ),
+        stats_card(
+            "Total Spent",
+            f"${total_expenses:,.0f}",
+            "credit-card",
+            trend="+5% vs target",
+            color="indigo",
+            trend_up=False,
+        ),
+        stats_card(
+            "Remaining Earnings",
+            f"${remaining_earnings:,.0f}",
+            "piggy-bank",
+            color="indigo",
+            progress=utilization_pct,
+        ),
+        stats_card(
+            "Utilization",
+            f"{utilization_pct}%",
+            "pie-chart",
+            color="purple",
+            progress=utilization_pct,
+        ),
+        class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5",
     )
 
 

@@ -7,6 +7,7 @@ import polars as pl
 import reflex as rx
 
 from lemonade_stand.ui.states.data_state import DataState
+from lemonade_stand.ui.states.data_state import TopCategory
 from lemonade_stand.ui.states.home_state import TransactionActivity
 
 STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
@@ -41,19 +42,6 @@ class ExpenseVariance:
     utilization: float
     remaining_amount: float
     excess_amount: float
-
-
-@dataclass
-class TopExpense:
-    """"""
-
-    index: int
-    name: str
-    clean_name: str
-    percent_label: str
-    amount: float
-    stroke: str
-    type: str
 
 
 class ExpenseState(DataState):
@@ -241,12 +229,12 @@ class ExpenseState(DataState):
         return list(row_iterator)
 
     @rx.var
-    def top_spending_category_list(self) -> list[TopExpense]:
+    def top_spending_category_list(self) -> list[TopCategory]:
         """"""
 
         top_len_categories = self.expense_distribution_data[: len(STROKE_COLORS)]
         return [
-            TopExpense(
+            TopCategory(
                 **row,
                 clean_name=row["name"].replace(" ", "_"),
                 stroke=STROKE_COLORS[i],

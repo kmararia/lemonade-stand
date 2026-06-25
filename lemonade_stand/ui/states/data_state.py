@@ -1,6 +1,7 @@
 """ """
 
 import typing
+from dataclasses import dataclass
 
 import polars as pl
 import reflex as rx
@@ -15,6 +16,19 @@ USER_CONFIG = UserConfig()
 
 # Preload the data at the module level to ensure it's available when the UI loads.
 _PRELOADED_DATA: UserData = get_data(config=USER_CONFIG)
+
+
+@dataclass
+class TopCategory:
+    """"""
+
+    index: int
+    name: str
+    clean_name: str
+    percent_label: str
+    amount: float
+    stroke: str
+    type: str
 
 
 class DataState(rx.State):
