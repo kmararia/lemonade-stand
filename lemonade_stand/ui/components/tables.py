@@ -126,7 +126,7 @@ def table_row(table: Expense) -> rx.Component:
                 rx.icon("pencil", size=16),
                 on_click=lambda: ExpenseState.open_edit_modal(
                     {
-                        "index": table.date,
+                        "index": table.index,
                         "date": table.date,
                         "category": table.category,
                         "amount": table.amount,

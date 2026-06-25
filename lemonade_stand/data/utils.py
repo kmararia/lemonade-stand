@@ -129,7 +129,9 @@ class UserData:
                 )
             )
             table_dict[table] = {
-                "dataframe": cleaner.output_df.filter(filter_condition)
+                "dataframe": (
+                    cleaner.output_df.filter(filter_condition).with_row_index("index")
+                ),
             }
 
         # Write out to delta lake

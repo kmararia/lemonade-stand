@@ -16,6 +16,7 @@ STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
 class Expense:
     """"""
 
+    index: str
     date: str
     description: str
     amount: float
@@ -74,6 +75,7 @@ class ExpenseState(DataState):
                 coalesce=True,
             )
             .select(
+                "index",
                 "date",
                 "description",
                 "allocated_amount",
