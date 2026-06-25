@@ -175,7 +175,7 @@ def budget_health_widget(
     )
 
 
-def income_distribution_card(
+def income_distribution_widget(
     earnings_categories: rx.Var[list[dict]],
     total_earnings: rx.Var[int | float | Decimal],
 ) -> rx.Component:
