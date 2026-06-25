@@ -5,12 +5,12 @@ from decimal import Decimal
 
 import reflex as rx
 
-from lemonade_stand.ui.components.cards import activity_feed
-from lemonade_stand.ui.components.cards import budget_health_widget
-from lemonade_stand.ui.components.cards import income_distribution_card
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.small_cards import stats_card
+from lemonade_stand.ui.components.widgets import activity_feed
+from lemonade_stand.ui.components.widgets import budget_health_widget
+from lemonade_stand.ui.components.widgets import income_distribution_card
 from lemonade_stand.ui.states.expense_state import ExpenseState
 from lemonade_stand.ui.states.home_state import HomeState
 from lemonade_stand.ui.states.income_state import IncomeState

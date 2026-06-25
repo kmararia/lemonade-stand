@@ -2,8 +2,6 @@
 
 import reflex as rx
 
-from lemonade_stand.ui.components.cards import activity_feed
-from lemonade_stand.ui.components.cards import top_category_widget
 from lemonade_stand.ui.components.charts import pie_chart
 from lemonade_stand.ui.components.charts import trend_chart
 from lemonade_stand.ui.components.date_picker import date_picker
@@ -14,6 +12,8 @@ from lemonade_stand.ui.components.sidebar import sidebar
 from lemonade_stand.ui.components.small_cards import summary_stats_card
 from lemonade_stand.ui.components.tables import budget_variance_table
 from lemonade_stand.ui.components.tables import data_table
+from lemonade_stand.ui.components.widgets import activity_feed
+from lemonade_stand.ui.components.widgets import top_category_widget
 from lemonade_stand.ui.states.expense_state import STROKE_COLORS
 from lemonade_stand.ui.states.expense_state import ExpenseState
 
