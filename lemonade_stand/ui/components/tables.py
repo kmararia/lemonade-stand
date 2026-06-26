@@ -249,7 +249,8 @@ def budget_variance_table(
 ) -> rx.Component:
     """A detailed budget variance table"""
 
-    th_comp_class = "px-3 pb-2 font-bold text-gray-800 dark:text-gray-200"
+    sticky_th = "sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 shadow-[inset_0_-2px_0_0_#d1d5db] dark:shadow-[inset_0_-2px_0_0_#4b5563]"
+    th_comp_class = sticky_th + " px-3 pb-2 font-bold text-gray-800 dark:text-gray-200"
     td_comp_class = "px-3 py-1.5 text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/50"
     tb_comp_class = "italic px-3 py-2"
 
@@ -302,13 +303,12 @@ def budget_variance_table(
                 # Table Head
                 rx.el.thead(
                     rx.el.tr(
-                        rx.el.th("", class_name="pb-2"),  # Empty corner
+                        rx.el.th("", class_name=sticky_th + " pb-2"),  # Empty corner
                         rx.el.th("Actual", class_name=th_comp_class),
                         rx.el.th("Planned", class_name=th_comp_class),
                         rx.el.th("%Util", class_name=th_comp_class),
                         rx.el.th("Remaining", class_name=th_comp_class),
                         rx.el.th("Excess", class_name=th_comp_class),
-                        class_name="border-b-2 border-gray-300 dark:border-gray-600",
                     )
                 ),
                 # Table Body
@@ -338,7 +338,7 @@ def budget_variance_table(
                 ),
                 class_name="w-full text-sm text-right whitespace-nowrap",
             ),
-            class_name="max-h-[350px] overflow-x-auto custom-scrollbar",
+            class_name="max-h-[350px] overflow-auto custom-scrollbar",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full h-full",
     )
