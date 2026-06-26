@@ -7,11 +7,17 @@ from lemonade_stand.ui.components.sidebar import sidebar
 from lemonade_stand.ui.pages.expense import expense_page
 from lemonade_stand.ui.pages.home import home_content
 from lemonade_stand.ui.pages.income import income_page
+from lemonade_stand.ui.states.expense_state import ExpenseState
+from lemonade_stand.ui.states.income_state import IncomeState
 from lemonade_stand.ui.states.ui_state import UIState
 
 
 def index() -> rx.Component:
     """"""
+
+    _ = ExpenseState.expense_rows
+    _ = IncomeState.income_rows
+
     return rx.el.div(
         # Inner floating APP
         rx.el.div(
