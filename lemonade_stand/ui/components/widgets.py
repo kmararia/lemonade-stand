@@ -300,7 +300,7 @@ def top_category_widget(
     return rx.el.div(
         rx.el.h3(
             card_title,
-            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
+            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 pb-2",
         ),
         rx.el.div(
             rx.foreach(top_category_list, top_category_row),
