@@ -2,6 +2,7 @@
 
 import typing
 from dataclasses import dataclass
+from dataclasses import field
 
 import polars as pl
 import reflex as rx
@@ -27,8 +28,39 @@ class TopCategory:
     clean_name: str
     percent_label: str
     amount: float
-    stroke: str
     type: str
+    fill: str = ""
+    stroke: str = ""
+
+
+@dataclass
+class DataVariance:
+    """"""
+
+    category: str
+    spent_amount: float
+    allocated_amount: float
+    utilization: float
+    remaining_amount: float
+    excess_amount: float
+
+
+@dataclass
+class DataRow:
+    """"""
+
+    index: str
+    date: str
+    description: str
+    amount: float
+    category: str
+    payment_type: str
+    exclude_flag: bool = False
+    recurring_flag: bool = False
+    has_source_file: bool = False
+    location: list[str] = field(default_factory=list)
+    assigned_approver_id: str = ""
+    source_file: str = ""
 
 
 class DataState(rx.State):
@@ -72,30 +104,27 @@ class DataState(rx.State):
         """Filter data based on the selected date range from DateState."""
 
         return (
-            self._shared_data.expenses.select(
+            pl.concat(
+                [
+                    self._shared_data.income,
+                    self._shared_data.savings,
+                    self._shared_data.expenses,
+                ]
+            )
+            .select(
+                "payment_type",
                 "category",
-                allocated_amount=(
-                    pl.col("amount").abs().mean().over("category")
-                    * pl.col("date").dt.strftime("%Y-%m").n_unique()
+                allocated_amount=pl.coalesce(
+                    (
+                        pl.col("amount").abs().mean().over("category")
+                        * pl.col("date").dt.strftime("%Y-%m").n_unique()
+                    ),
+                    pl.lit(0),
                 ).round(0),
             )
             .unique()
             .collect()
         ).to_dicts()
-
-    @rx.var
-    def distinct_values(self) -> dict[str, list[str]]:
-        """"""
-        return {
-            x: (
-                self._shared_data.expenses.select(pl.col(x).cast(pl.String).unique())
-                .drop_nulls()
-                .collect()
-                .to_series()
-                .to_list()
-            )
-            for x in ("category", "payment", "exclude_flag")
-        }
 
     @rx.var
     def available_months(self) -> list[str]:

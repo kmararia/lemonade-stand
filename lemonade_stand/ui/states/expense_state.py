@@ -1,47 +1,17 @@
 """"""
 
-from dataclasses import dataclass
-from dataclasses import field
+import typing
 
 import polars as pl
 import reflex as rx
 
+from lemonade_stand.ui.states.data_state import DataRow
 from lemonade_stand.ui.states.data_state import DataState
+from lemonade_stand.ui.states.data_state import DataVariance
 from lemonade_stand.ui.states.data_state import TopCategory
 from lemonade_stand.ui.states.home_state import TransactionActivity
 
 STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
-
-
-@dataclass
-class Expense:
-    """"""
-
-    index: str
-    date: str
-    description: str
-    amount: float
-    allocated_amount: float
-    category: str
-    payment_type: str
-    exclude_flag: bool = False
-    recurring_flag: bool = False
-    has_source_file: bool = False
-    location: list[str] = field(default_factory=list)
-    assigned_approver_id: str = ""
-    source_file: str = ""
-
-
-@dataclass
-class ExpenseVariance:
-    """"""
-
-    category: str
-    spent_amount: float
-    allocated_amount: float
-    utilization: float
-    remaining_amount: float
-    excess_amount: float
 
 
 class ExpenseState(DataState):
@@ -52,21 +22,19 @@ class ExpenseState(DataState):
     sort_reverse: bool = True  # True = Descending, False = Ascending
 
     @rx.var(cache=True)
-    def expense_rows(self) -> list[Expense]:
+    def expense_allocation_rows(self) -> list[dict[str, typing.Any]]:
+        """"""
+        return [x for x in self.allocation_rows if x["payment_type"] == "expenses"]
+
+    @rx.var(cache=True)
+    def expense_rows(self) -> list[DataRow]:
         """Filter data based on the selected date range from DateState."""
 
         row_iterator = (
-            self._shared_data.expenses.join(
-                pl.LazyFrame(self.allocation_rows),
-                on="category",
-                how="left",
-                coalesce=True,
-            )
-            .select(
+            self._shared_data.expenses.select(
                 "index",
                 "date",
                 "description",
-                "allocated_amount",
                 "amount",
                 "category",
                 "exclude_flag",
@@ -87,7 +55,7 @@ class ExpenseState(DataState):
             .collect()
         ).iter_rows(named=True)
 
-        return [Expense(**row) for row in row_iterator]
+        return [DataRow(**row) for row in row_iterator]
 
     @rx.var(cache=True)
     def notable_transactions(self) -> list[TransactionActivity]:
@@ -124,7 +92,7 @@ class ExpenseState(DataState):
     def spending_trends_data(self) -> list[dict]:
         """"""
 
-        category_names = [x.name for x in self.top_spending_category_list]
+        category_names = [x["name"] for x in self.expense_distribution_data]
 
         return (
             self._shared_data.expenses.filter(
@@ -153,14 +121,14 @@ class ExpenseState(DataState):
         ).to_dicts()
 
     @rx.var
-    def expense_variance_stats(self) -> list[ExpenseVariance]:
+    def expense_variance_stats(self) -> list[DataVariance]:
         """"""
 
         row_iterator = (
             self._shared_data.expenses.group_by("category")
             .agg(spent_amount=pl.col("amount").sum())
             .join(
-                pl.LazyFrame(self.allocation_rows),
+                pl.LazyFrame(self.expense_allocation_rows),
                 on="category",
                 how="left",
                 coalesce=True,
@@ -178,12 +146,12 @@ class ExpenseState(DataState):
         ).to_dicts()
 
         return [
-            ExpenseVariance(
+            DataVariance(
                 category=x["category"],
                 spent_amount=x["spent_amount"],
                 allocated_amount=x["allocated_amount"],
-                remaining_amount=max(0, x["remaining_amount"]),
-                excess_amount=max(0, x["excess_amount"]),
+                remaining_amount=max(0, x["remaining_amount"] or 0),
+                excess_amount=max(0, x["excess_amount"] or 0),
                 utilization=x["utilization"],
             )
             for x in row_iterator
@@ -196,7 +164,9 @@ class ExpenseState(DataState):
         totals_dict = {
             "spent_amount": sum(x.spent_amount for x in self.expense_variance_stats),
             "allocated_amount": sum(
-                x.allocated_amount for x in self.expense_variance_stats
+                x.allocated_amount
+                for x in self.expense_variance_stats
+                if x.allocated_amount is not None
             ),
             "remaining_amount": sum(
                 x.remaining_amount for x in self.expense_variance_stats
@@ -244,12 +214,26 @@ class ExpenseState(DataState):
         ]
 
     @rx.var
+    def distinct_values(self) -> dict[str, list[str]]:
+        """"""
+        return {
+            x: (
+                self._shared_data.expenses.select(pl.col(x).cast(pl.String).unique())
+                .drop_nulls()
+                .collect()
+                .to_series()
+                .to_list()
+            )
+            for x in ("category", "payment", "exclude_flag")
+        }
+
+    @rx.var
     def active_budgets(self) -> int:
         """"""
         return len(
             [
                 x["allocated_amount"]
-                for x in self.allocation_rows
+                for x in self.expense_allocation_rows
                 if x["allocated_amount"] > 0
             ]
         )
@@ -257,7 +241,7 @@ class ExpenseState(DataState):
     @rx.var
     def total_allocations(self) -> float:
         """"""
-        return sum(x["allocated_amount"] for x in self.allocation_rows)
+        return sum(x["allocated_amount"] for x in self.expense_allocation_rows)
 
     @rx.var
     def total_expenses(self) -> float:
