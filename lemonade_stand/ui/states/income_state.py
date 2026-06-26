@@ -182,7 +182,7 @@ class IncomeState(DataState):
             self._shared_data.income.group_by(name=pl.col("category"))
             .agg(pl.col("amount").sum())
             .sort("amount", descending=True)
-            .with_row_index("index")
+            .with_row_index("index", offset=1)
             .with_columns(
                 percent_label=(
                     (pl.col("amount") / pl.col("amount").sum() * 100)
