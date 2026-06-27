@@ -18,4 +18,4 @@ jobs:
                   uv python install
                   uv sync --frozen
             - name: Run hooks
-              run: prek run --all-files
+              run: uv run prek run --all-files
