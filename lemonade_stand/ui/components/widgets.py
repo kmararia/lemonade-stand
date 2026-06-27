@@ -175,9 +175,11 @@ def budget_health_widget(
     )
 
 
-def income_distribution_widget(
-    earnings_categories: rx.Var[list[dict]],
+def category_distribution_widget(
+    icon: str,
+    card_title: str,
     total_earnings: rx.Var[int | float | Decimal],
+    earnings_categories: rx.Var[list[dict]],
 ) -> rx.Component:
     """"""
 
@@ -186,12 +188,12 @@ def income_distribution_widget(
         rx.el.div(
             rx.el.div(
                 rx.icon(
-                    "wallet",
+                    icon,
                     size=24,
                     class_name="text-blue-600 dark:text-blue-400/60 transition-colors",
                 ),
                 rx.el.h3(
-                    "Total Income",
+                    card_title,
                     class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
                 ),
                 class_name="flex justify-left gap-4",
