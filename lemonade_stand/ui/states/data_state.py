@@ -1,6 +1,7 @@
 """ """
 
 import typing
+from dataclasses import dataclass
 
 import polars as pl
 import reflex as rx
@@ -17,12 +18,28 @@ USER_CONFIG = UserConfig()
 _PRELOADED_DATA: UserData = get_data(config=USER_CONFIG)
 
 
+@dataclass
+class TopCategory:
+    """"""
+
+    index: int
+    name: str
+    clean_name: str
+    percent_label: str
+    amount: float
+    stroke: str
+    type: str
+
+
 class DataState(rx.State):
     """"""
 
     _shared_data: UserData = _PRELOADED_DATA
     selected_year: str = ""
     selected_month: str = ""
+
+    is_edit_modal_open: bool = False
+    edit_values: dict[str, typing.Any] = {}
 
     def filter_data_dates(self) -> None:
         """Filter data based on the selected date range from DateState."""
@@ -65,6 +82,20 @@ class DataState(rx.State):
             .unique()
             .collect()
         ).to_dicts()
+
+    @rx.var
+    def distinct_values(self) -> dict[str, list[str]]:
+        """"""
+        return {
+            x: (
+                self._shared_data.expenses.select(pl.col(x).cast(pl.String).unique())
+                .drop_nulls()
+                .collect()
+                .to_series()
+                .to_list()
+            )
+            for x in ("category", "payment", "exclude_flag")
+        }
 
     @rx.var
     def available_months(self) -> list[str]:
@@ -132,3 +163,28 @@ class DataState(rx.State):
         """"""
         self.selected_month = month if month != "All Months" else ""
         self.filter_data_dates()
+
+    @rx.event
+    def set_is_edit_modal_open(self, is_open: bool):
+        """Controls the open/close state of the edit modal."""
+        self.is_edit_modal_open = is_open
+
+    @rx.event
+    def set_edit_value(self, field_key: str, new_value: typing.Any):
+        """Updates a specific field in the edit modal form."""
+        self.edit_values[field_key] = new_value
+
+    @rx.event
+    def open_edit_modal(self, row_data: dict):
+        """Pre-fills the modal form with the exact row data and opens it."""
+
+        self.is_edit_modal_open = True
+        self.edit_values = {
+            x: str(y).lower() if isinstance(y, bool) else y for x, y in row_data.items()
+        }
+
+    @rx.event
+    def apply_data_edits(self):
+        """Saves the user changes to the delta table and closes the modal."""
+        # TODO: Add delta table update logic here
+        self.is_edit_modal_open = False

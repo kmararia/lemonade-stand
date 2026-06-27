@@ -7,6 +7,7 @@ import polars as pl
 import reflex as rx
 
 from lemonade_stand.ui.states.data_state import DataState
+from lemonade_stand.ui.states.data_state import TopCategory
 from lemonade_stand.ui.states.home_state import TransactionActivity
 
 STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
@@ -16,6 +17,7 @@ STROKE_COLORS = ["#6366f1", "#f97316", "#14b8a6", "#ec4899", "#8b5cf6"]
 class Expense:
     """"""
 
+    index: str
     date: str
     description: str
     amount: float
@@ -42,23 +44,12 @@ class ExpenseVariance:
     excess_amount: float
 
 
-@dataclass
-class TopExpense:
-    """"""
-
-    index: int
-    name: str
-    clean_name: str
-    percent_label: str
-    amount: float
-    stroke: str
-    type: str
-
-
 class ExpenseState(DataState):
     """Core state for budget and expense data."""
 
     chart_view_mode: str = "Trend"
+    sort_column: str = "date"
+    sort_reverse: bool = True  # True = Descending, False = Ascending
 
     @rx.var(cache=True)
     def expense_rows(self) -> list[Expense]:
@@ -72,6 +63,7 @@ class ExpenseState(DataState):
                 coalesce=True,
             )
             .select(
+                "index",
                 "date",
                 "description",
                 "allocated_amount",
@@ -84,7 +76,14 @@ class ExpenseState(DataState):
                 has_source_file=pl.col("source_file").is_not_null(),
                 location=pl.concat_list("state", "city").list.drop_nulls(),
             )
-            .sort("date", "amount", descending=[True, True])
+            .sort(
+                self.sort_column,
+                "amount",
+                descending=[
+                    self.sort_reverse,
+                    (self.sort_reverse if self.sort_column == "amount" else True),
+                ],
+            )
             .collect()
         ).iter_rows(named=True)
 
@@ -230,12 +229,12 @@ class ExpenseState(DataState):
         return list(row_iterator)
 
     @rx.var
-    def top_spending_category_list(self) -> list[TopExpense]:
+    def top_spending_category_list(self) -> list[TopCategory]:
         """"""
 
         top_len_categories = self.expense_distribution_data[: len(STROKE_COLORS)]
         return [
-            TopExpense(
+            TopCategory(
                 **row,
                 clean_name=row["name"].replace(" ", "_"),
                 stroke=STROKE_COLORS[i],
@@ -273,11 +272,22 @@ class ExpenseState(DataState):
         return self.total_allocations - self.total_expenses
 
     @rx.var
-    def utilization_percentage(self) -> float:
+    def remaining_budget_percentage(self) -> float:
         """"""
         if self.total_allocations == 0:
             return 0.0
-        return round(self.total_expenses / self.total_allocations * 100, 1)
+        return round(self.remaining_budget / self.total_allocations * 100, 1)
+
+    @rx.var
+    def percentage_of_income_spent(self) -> float:
+        """"""
+        income_amount = (
+            self._shared_data.income.select(pl.col("amount").sum()).collect()
+        ).item(0, 0)
+
+        if income_amount == 0:
+            return 0.0
+        return round(self.total_expenses / income_amount * 100, 1)
 
     @rx.var
     def top_spending_category(self) -> str:
@@ -290,3 +300,13 @@ class ExpenseState(DataState):
     def set_chart_view_mode(self, mode: str) -> None:
         """"""
         self.chart_view_mode = mode
+
+    @rx.event
+    def toggle_table_sort(self, sort_key: str) -> None:
+        """Updates the sort memory based on what the user clicks."""
+
+        if self.sort_column == sort_key:
+            self.sort_reverse = not self.sort_reverse
+        else:
+            self.sort_column = sort_key
+            self.sort_reverse = False

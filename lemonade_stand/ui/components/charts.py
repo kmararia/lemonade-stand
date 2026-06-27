@@ -4,7 +4,7 @@ import typing
 
 import reflex as rx
 
-from lemonade_stand.ui.states.expense_state import TopExpense
+from lemonade_stand.ui.states.expense_state import TopCategory
 
 
 def custom_tooltip() -> rx.Component:
@@ -173,7 +173,7 @@ def trend_chart(
     title: str,
     max_lines: int,
     monthly_trends: rx.Var[list[dict]],
-    trend_lines: rx.Var[list[TopExpense]],
+    trend_lines: rx.Var[list[TopCategory]],
     header_action: rx.Component | None = None,
 ) -> rx.Component:
     """"""

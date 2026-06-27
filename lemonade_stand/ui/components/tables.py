@@ -121,18 +121,58 @@ def table_row(table: Expense) -> rx.Component:
             status_badge(table.exclude_flag),
             class_name="px-6 py-4 whitespace-nowrap",
         ),
+        rx.el.td(
+            rx.el.button(
+                rx.icon("pencil", size=16),
+                on_click=lambda: ExpenseState.open_edit_modal(
+                    {
+                        "index": table.index,
+                        "date": table.date,
+                        "category": table.category,
+                        "amount": table.amount,
+                        "payment_type": table.payment_type,
+                        "description": table.description,
+                        "exclude_flag": table.exclude_flag,
+                    }
+                ),
+                class_name="text-gray-400 hover:text-indigo-600 dark:hover:text-cyan-400 hover:bg-indigo-50 dark:hover:bg-cyan-900/30 rounded-lg transition-all",
+            ),
+            class_name="pr-6 py-4 whitespace-nowrap text-right",
+        ),
         class_name="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors even:bg-gray-50/50 dark:even:bg-gray-800/30",
     )
 
 
-def data_table() -> rx.Component:
+def data_table(edit_modal_func: typing.Callable) -> rx.Component:
     """"""
-    th_class = """
-        sticky top-0 z-10 px-6 py-4 text-left text-xs font-semibold
-        text-gray-500 dark:text-gray-400 uppercase tracking-wider
-        bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur-md shadow-sm
-        border-b border-gray-200 dark:border-gray-700
-    """
+
+    def sortable_header(label: str, sort_key: str) -> rx.Component:
+        """A reusable, clickable header for sorting columns."""
+
+        th_class = """
+            sticky top-0 z-10 px-6 py-4 text-left text-xs font-semibold
+            text-gray-500 dark:text-gray-400 uppercase tracking-wider
+            bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur-md shadow-sm
+            border-b border-gray-200 dark:border-gray-700
+        """
+
+        if label == "":
+            return rx.el.th(class_name=th_class)  # Empty header for action buttons
+
+        return rx.el.th(
+            rx.el.div(
+                rx.el.span(label),
+                rx.icon(
+                    "arrow-up-down",
+                    size=14,
+                    class_name="ml-1.5 text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-cyan-400 transition-colors",
+                ),
+                class_name="flex items-center group cursor-pointer select-none",
+                # Run backend sorting logic when header is clicked
+                on_click=ExpenseState.toggle_table_sort(sort_key),
+            ),
+            class_name=th_class,
+        )
 
     return rx.el.div(
         rx.el.div(
@@ -153,12 +193,17 @@ def data_table() -> rx.Component:
                 rx.el.table(
                     rx.el.thead(
                         rx.el.tr(
-                            rx.el.th("Date", class_name=th_class),
-                            rx.el.th("Category", class_name=th_class),
-                            rx.el.th("Amount", class_name=th_class),
-                            rx.el.th("Payment Type", class_name=th_class),
-                            rx.el.th("Description", class_name=th_class),
-                            rx.el.th("Status", class_name=th_class),
+                            sortable_header(label="Date", sort_key="date"),
+                            sortable_header(label="Category", sort_key="category"),
+                            sortable_header(label="Amount", sort_key="amount"),
+                            sortable_header(
+                                label="Payment Type", sort_key="payment_type"
+                            ),
+                            sortable_header(
+                                label="Description", sort_key="description"
+                            ),
+                            sortable_header(label="Status", sort_key="exclude_flag"),
+                            sortable_header(label="", sort_key=""),
                             class_name="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50",
                         )
                     ),
@@ -186,6 +231,7 @@ def data_table() -> rx.Component:
                 class_name="bg-gray-50/30 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700",
             ),
         ),
+        edit_modal_func(),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
     )
 
