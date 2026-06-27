@@ -14,18 +14,18 @@ from lemonade_stand.ui.components.tables import budget_variance_table
 from lemonade_stand.ui.components.tables import data_table
 from lemonade_stand.ui.components.widgets import activity_feed
 from lemonade_stand.ui.components.widgets import top_category_widget
-from lemonade_stand.ui.states.expense_state import STROKE_COLORS
-from lemonade_stand.ui.states.expense_state import ExpenseState
+from lemonade_stand.ui.states.income_state import STROKE_COLORS
+from lemonade_stand.ui.states.income_state import IncomeState
 
 
 def chart_view_selector() -> rx.Component:
     """"""
 
     return rx.el.select(
-        rx.el.option("Spending Trends", value="Trend"),
-        rx.el.option("Spending Distribution", value="Distribution"),
-        value=ExpenseState.chart_view_mode,
-        on_change=ExpenseState.set_chart_view_mode,
+        rx.el.option("Income Trends", value="Trend"),
+        rx.el.option("Income Distribution", value="Distribution"),
+        value=IncomeState.chart_view_mode,
+        on_change=IncomeState.set_chart_view_mode,
         class_name="""
             text-xs font-medium text-gray-600 dark:text-gray-400
             bg-gray-50 dark:bg-gray-800 border-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700
@@ -34,63 +34,63 @@ def chart_view_selector() -> rx.Component:
     )
 
 
-def expense_edit_modal() -> rx.Component:
+def income_edit_modal() -> rx.Component:
     """"""
 
     return generic_edit_modal(
         *[
             modal_input_field(
                 label="Date",
-                value=ExpenseState.edit_values["date"],
-                on_change=ExpenseState.set_edit_value,
+                value=IncomeState.edit_values["date"],
+                on_change=IncomeState.set_edit_value,
                 field_name="date",
             ),
             modal_input_field(
                 label="Category",
-                value=ExpenseState.edit_values["category"],
-                on_change=ExpenseState.set_edit_value,
+                value=IncomeState.edit_values["category"],
+                on_change=IncomeState.set_edit_value,
                 field_name="category",
-                config={"select_options": ExpenseState.distinct_values["category"]},
+                config={"select_options": IncomeState.distinct_values["category"]},
             ),
             modal_input_field(
                 label="Amount",
-                value=ExpenseState.edit_values["amount"],
-                on_change=ExpenseState.set_edit_value,
+                value=IncomeState.edit_values["amount"],
+                on_change=IncomeState.set_edit_value,
                 field_name="amount",
                 config={"input_type": "number"},
             ),
             modal_input_field(
                 label="Payment Type",
-                value=ExpenseState.edit_values["payment_type"],
-                on_change=ExpenseState.set_edit_value,
+                value=IncomeState.edit_values["payment_type"],
+                on_change=IncomeState.set_edit_value,
                 field_name="payment_type",
-                config={"select_options": ExpenseState.distinct_values["payment"]},
+                config={"select_options": IncomeState.distinct_values["payment"]},
             ),
             modal_input_field(
                 label="Description",
-                value=ExpenseState.edit_values["description"],
-                on_change=ExpenseState.set_edit_value,
+                value=IncomeState.edit_values["description"],
+                on_change=IncomeState.set_edit_value,
                 field_name="description",
                 config={"is_textarea": True, "col_span_2": True},
             ),
             modal_input_field(
                 label="Exclude Status",
-                value=ExpenseState.edit_values["exclude_flag"],
-                on_change=ExpenseState.set_edit_value,
+                value=IncomeState.edit_values["exclude_flag"],
+                on_change=IncomeState.set_edit_value,
                 field_name="exclude_flag",
-                config={"select_options": ExpenseState.distinct_values["exclude_flag"]},
+                config={"select_options": IncomeState.distinct_values["exclude_flag"]},
             ),
         ],
-        title="Edit Expense",
+        title="Edit Income",
         description="Make changes to this transaction. Click save when you're done.",
-        on_save=ExpenseState.apply_data_edits,
-        is_open=ExpenseState.is_edit_modal_open,
-        on_open_change=ExpenseState.set_is_edit_modal_open,
+        on_save=IncomeState.apply_data_edits,
+        is_open=IncomeState.is_edit_modal_open,
+        on_open_change=IncomeState.set_is_edit_modal_open,
     )
 
 
-def expense_page() -> rx.Component:
-    """Expense tracking page."""
+def income_page() -> rx.Component:
+    """Income tracking page."""
 
     return rx.el.div(
         # Inner floating APP
@@ -102,7 +102,7 @@ def expense_page() -> rx.Component:
                     rx.el.div(
                         rx.el.div(
                             rx.el.h2(
-                                "Expense Overview",
+                                "Income Overview",
                                 class_name="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2",
                             ),
                             date_picker(),
@@ -110,17 +110,17 @@ def expense_page() -> rx.Component:
                         ),
                         rx.el.div(
                             summary_stats_card(
-                                "Total Spent this Period",
-                                f"${ExpenseState.total_expenses:,.2f}",
+                                "Total Income this Period",
+                                f"${IncomeState.total_earnings:,.2f}",
                                 (
-                                    f"{ExpenseState.percentage_of_income_spent:.0f}% of income",
+                                    f"{IncomeState.percentage_of_target_earned:.0f}% of target",
                                     rx.cond(
-                                        ExpenseState.percentage_of_income_spent < 100,
+                                        IncomeState.percentage_of_target_earned >= 20,
                                         "badge_check",
                                         "badge_alert",
                                     ),
                                     rx.cond(
-                                        ExpenseState.percentage_of_income_spent < 100,
+                                        IncomeState.percentage_of_target_earned >= 20,
                                         "emerald",
                                         "red",
                                     ),
@@ -129,19 +129,19 @@ def expense_page() -> rx.Component:
                                 icon_color="blue",
                             ),
                             summary_stats_card(
-                                "Remaining Budget",
-                                f"${ExpenseState.remaining_budget:,.2f}",
+                                "Remaining Target",
+                                f"${IncomeState.remaining_target:,.2f}",
                                 (
-                                    f"{ExpenseState.remaining_budget_percentage:.0f}% of total",
+                                    f"{IncomeState.remaining_target_percentage:.0f}% of total",
                                     rx.cond(
-                                        ExpenseState.remaining_budget_percentage > 0,
-                                        "trending-down",
+                                        IncomeState.remaining_target_percentage < 50,
                                         "trending-up",
+                                        "trending-down",
                                     ),
                                     rx.cond(
-                                        ExpenseState.remaining_budget_percentage > 0,
+                                        IncomeState.remaining_target_percentage < 50,
                                         "emerald",
-                                        "red",
+                                        "yellow",
                                     ),
                                 ),
                                 icon="wallet",
@@ -149,15 +149,15 @@ def expense_page() -> rx.Component:
                             ),
                             summary_stats_card(
                                 "Top Category",
-                                f"{ExpenseState.top_spending_category}",
-                                ("Most active expense category", "eye", "green"),
+                                f"{IncomeState.top_income_category}",
+                                ("Most active income category", "eye", "green"),
                                 icon="tag",
                                 icon_color="purple",
                             ),
                             summary_stats_card(
                                 "Active Budgets",
-                                f"{ExpenseState.active_budgets}",
-                                ("Across all expenses", "layers", "orange"),
+                                f"{IncomeState.active_budgets}",
+                                ("Across all income sources", "layers", "orange"),
                                 icon="layers",
                                 icon_color="orange",
                             ),
@@ -166,17 +166,17 @@ def expense_page() -> rx.Component:
                         rx.el.div(
                             rx.el.div(
                                 budget_variance_table(
-                                    title="Expense",
-                                    table_data=ExpenseState.expense_variance_stats,
-                                    totals_dict=ExpenseState.expense_variance_totals,
+                                    title="Income",
+                                    table_data=IncomeState.income_variance_stats,
+                                    totals_dict=IncomeState.income_variance_totals,
                                 ),
                                 class_name="lg:col-span-2",
                             ),
                             rx.el.div(
                                 top_category_widget(
-                                    card_title="Top Spending Categories",
-                                    amount_title="Total Spent",
-                                    top_category_list=ExpenseState.top_spending_category_list,
+                                    card_title="Top Earning Categories",
+                                    amount_title="Total Earned",
+                                    top_category_list=IncomeState.top_earning_category_list,
                                 ),
                                 class_name="lg:col-span-1",
                             ),
@@ -185,31 +185,31 @@ def expense_page() -> rx.Component:
                         rx.el.div(
                             rx.el.div(
                                 rx.match(
-                                    ExpenseState.chart_view_mode,
+                                    IncomeState.chart_view_mode,
                                     (
                                         "Trend",
                                         trend_chart(
-                                            title="Spending Trends",
+                                            title="Earnings Trends",
                                             max_lines=len(STROKE_COLORS),
-                                            monthly_trends=ExpenseState.spending_trends_data,
-                                            trend_lines=ExpenseState.top_spending_category_list,
+                                            monthly_trends=IncomeState.income_trends_data,
+                                            trend_lines=IncomeState.top_earning_category_list,
                                             header_action=chart_view_selector(),  # Passing the dropdown
                                         ),
                                     ),
                                     (
                                         "Distribution",
                                         pie_chart(
-                                            title="Spending Distribution",
-                                            pie_data=ExpenseState.expense_distribution_data,
+                                            title="Earnings Distribution",
+                                            pie_data=IncomeState.income_distribution_data,
                                             header_action=chart_view_selector(),  # Passing the dropdown
                                         ),
                                     ),
                                     # Default fallback
                                     trend_chart(
-                                        title="Spending Trends",
+                                        title="Earnings Trends",
                                         max_lines=len(STROKE_COLORS),
-                                        monthly_trends=ExpenseState.spending_trends_data,
-                                        trend_lines=ExpenseState.top_spending_category_list,
+                                        monthly_trends=IncomeState.income_trends_data,
+                                        trend_lines=IncomeState.top_earning_category_list,
                                         header_action=chart_view_selector(),
                                     ),
                                 ),
@@ -217,8 +217,8 @@ def expense_page() -> rx.Component:
                             ),
                             rx.el.div(
                                 activity_feed(
-                                    title="Notable Expenses",
-                                    transaction_list=ExpenseState.notable_transactions,
+                                    title="Notable Earnings",
+                                    transaction_list=IncomeState.notable_transactions,
                                 ),
                                 class_name="lg:col-span-1 max-h-[443px] w-full",
                             ),
@@ -227,12 +227,12 @@ def expense_page() -> rx.Component:
                         rx.el.div(
                             rx.el.div(
                                 data_table(
-                                    title="Recent Expenses",
-                                    view_all_href="/expenses",
-                                    rows=ExpenseState.expense_rows,
-                                    on_sort=ExpenseState.toggle_table_sort,
-                                    on_edit=ExpenseState.open_edit_modal,
-                                    edit_modal_func=expense_edit_modal,
+                                    title="Recent Earnings",
+                                    view_all_href="/income",
+                                    rows=IncomeState.income_rows,
+                                    on_sort=IncomeState.toggle_table_sort,
+                                    on_edit=IncomeState.open_edit_modal,
+                                    edit_modal_func=income_edit_modal,
                                 ),
                                 class_name="lg:col-span-3",
                             ),

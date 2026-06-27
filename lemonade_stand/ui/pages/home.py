@@ -173,7 +173,7 @@ def home_content() -> rx.Component:
             ),
             rx.el.div(
                 income_distribution_widget(
-                    earnings_categories=IncomeState.income_category_list,
+                    earnings_categories=IncomeState.income_distribution_data,
                     total_earnings=IncomeState.total_earnings,
                 ),
                 class_name="lg:col-span-1",

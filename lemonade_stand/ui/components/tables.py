@@ -4,12 +4,11 @@ import typing
 
 import reflex as rx
 
-from lemonade_stand.ui.states.expense_state import Expense
-from lemonade_stand.ui.states.expense_state import ExpenseState
-from lemonade_stand.ui.states.expense_state import ExpenseVariance
+from lemonade_stand.ui.states.data_state import DataRow
+from lemonade_stand.ui.states.data_state import DataVariance
 
 
-def table_row(table: Expense) -> rx.Component:
+def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
     """"""
 
     def status_badge(status: bool) -> rx.Component:
@@ -124,7 +123,7 @@ def table_row(table: Expense) -> rx.Component:
         rx.el.td(
             rx.el.button(
                 rx.icon("pencil", size=16),
-                on_click=lambda: ExpenseState.open_edit_modal(
+                on_click=lambda: on_edit(
                     {
                         "index": table.index,
                         "date": table.date,
@@ -143,7 +142,14 @@ def table_row(table: Expense) -> rx.Component:
     )
 
 
-def data_table(edit_modal_func: typing.Callable) -> rx.Component:
+def data_table(
+    title: str,
+    view_all_href: str,
+    rows: rx.Var,
+    on_sort: typing.Callable,
+    on_edit: typing.Callable,
+    edit_modal_func: typing.Callable,
+) -> rx.Component:
     """"""
 
     def sortable_header(label: str, sort_key: str) -> rx.Component:
@@ -169,7 +175,7 @@ def data_table(edit_modal_func: typing.Callable) -> rx.Component:
                 ),
                 class_name="flex items-center group cursor-pointer select-none",
                 # Run backend sorting logic when header is clicked
-                on_click=ExpenseState.toggle_table_sort(sort_key),
+                on_click=on_sort(sort_key),
             ),
             class_name=th_class,
         )
@@ -177,18 +183,18 @@ def data_table(edit_modal_func: typing.Callable) -> rx.Component:
     return rx.el.div(
         rx.el.div(
             rx.el.h3(
-                "Recent Expenses",
+                title,
                 class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
             ),
             rx.el.a(
                 "View All",
-                href="/expenses",
+                href=view_all_href,
                 class_name="text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:text-indigo-800 transition-colors bg-indigo-50 dark:bg-cyan-900/30 px-3 py-1 rounded-lg",
             ),
             class_name="flex items-center justify-between mb-6",
         ),
         rx.cond(
-            ExpenseState.expense_rows.length() > 0,
+            rows.length() > 0,  # type: ignore
             rx.el.div(
                 rx.el.table(
                     rx.el.thead(
@@ -208,7 +214,9 @@ def data_table(edit_modal_func: typing.Callable) -> rx.Component:
                         )
                     ),
                     rx.el.tbody(
-                        rx.foreach(ExpenseState.expense_rows, table_row),
+                        rx.foreach(
+                            rows, lambda row: table_row(table=row, on_edit=on_edit)
+                        ),
                         class_name="bg-white/50 dark:bg-transparent divide-y divide-gray-100 dark:divide-gray-700/50",
                     ),
                     class_name="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50",
@@ -223,7 +231,7 @@ def data_table(edit_modal_func: typing.Callable) -> rx.Component:
                         class_name="text-gray-300 dark:text-gray-600 mb-3 mx-auto",
                     ),
                     rx.el.p(
-                        "No expenses recorded yet.",
+                        "No transactions recorded yet.",
                         class_name="text-gray-500 dark:text-gray-400 font-medium",
                     ),
                     class_name="text-center py-12",
@@ -237,15 +245,16 @@ def data_table(edit_modal_func: typing.Callable) -> rx.Component:
 
 
 def budget_variance_table(
-    title: str, table_data: rx.Var[list[ExpenseVariance]], totals_dict: rx.Var[dict]
+    title: str, table_data: rx.Var[list[DataVariance]], totals_dict: rx.Var[dict]
 ) -> rx.Component:
     """A detailed budget variance table"""
 
-    th_comp_class = "px-3 pb-2 font-bold text-gray-800 dark:text-gray-200"
+    sticky_th = "sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 shadow-[inset_0_-2px_0_0_#d1d5db] dark:shadow-[inset_0_-2px_0_0_#4b5563]"
+    th_comp_class = sticky_th + " px-3 pb-2 font-bold text-gray-800 dark:text-gray-200"
     td_comp_class = "px-3 py-1.5 text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/50"
     tb_comp_class = "italic px-3 py-2"
 
-    def render_row(item: ExpenseVariance) -> rx.Component:
+    def render_row(item: DataVariance) -> rx.Component:
         """"""
 
         return rx.el.tr(
@@ -294,13 +303,12 @@ def budget_variance_table(
                 # Table Head
                 rx.el.thead(
                     rx.el.tr(
-                        rx.el.th("", class_name="pb-2"),  # Empty corner
-                        rx.el.th("Spent", class_name=th_comp_class),
+                        rx.el.th("", class_name=sticky_th + " pb-2"),  # Empty corner
+                        rx.el.th("Actual", class_name=th_comp_class),
                         rx.el.th("Planned", class_name=th_comp_class),
                         rx.el.th("%Util", class_name=th_comp_class),
                         rx.el.th("Remaining", class_name=th_comp_class),
                         rx.el.th("Excess", class_name=th_comp_class),
-                        class_name="border-b-2 border-gray-300 dark:border-gray-600",
                     )
                 ),
                 # Table Body
@@ -330,7 +338,7 @@ def budget_variance_table(
                 ),
                 class_name="w-full text-sm text-right whitespace-nowrap",
             ),
-            class_name="max-h-[350px] overflow-x-auto custom-scrollbar",
+            class_name="max-h-[350px] overflow-auto custom-scrollbar",
         ),
         class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full h-full",
     )
