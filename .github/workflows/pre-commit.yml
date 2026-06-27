@@ -11,15 +11,11 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@v6
-            - name: Set up Python
-              uses: actions/setup-python@v6
-              with:
-                  python-version: '3.13'
             - name: Set up uv
               uses: astral-sh/setup-uv@v7
-            - name: Check uv version
-              run: uv --version
             - name: Set up python environment
-              run: uv sync --frozen
-            - name: Install pre-commit
-              uses: pre-commit/action@v3.0.1
+              run: |
+                  uv python install
+                  uv sync --frozen
+            - name: Run hooks
+              run: prek run --all-files
