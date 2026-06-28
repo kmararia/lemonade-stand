@@ -1,0 +1,19 @@
+---
+services:
+    webapp-dev:
+        build: .
+        image: lemonade-stand:dev
+        container_name: lemonade-stand-dev
+        ports:
+            - 3000:3000
+            - 8000:8000
+        environment:
+            - UV_PYTHON_INSTALL_DIR=/usr/local
+        volumes:
+      # Sync local logic with the container for hot-reloading
+            - ./lemonade_stand:/lemonade-stand/lemonade_stand
+
+      # Map app's home dir & run statements dir
+            - ./_dev/container/home/.lemonade-stand:/root/.lemonade-stand
+            - ./_dev/user_statements:/root/user_statements
+        command: uv run reflex run
