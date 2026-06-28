@@ -26,6 +26,7 @@ config.json
 # Ignore temporary directories
 *_tmp_/
 *tmp/
+*_dev/
 
 # Reflex generated files
 .states
