@@ -31,6 +31,7 @@ class Statement:
     schema: pl.schema.Schema = field(
         default_factory=lambda: pl.Schema(
             {
+                "index": pl.Int32(),
                 "date": pl.Date(),
                 "category": pl.String(),
                 "amount": pl.Float64(),
@@ -204,6 +205,7 @@ class Statement:
         # Build dataframe from transaction line matches
         data = [
             (
+                None,
                 parse(row[0], default=file_year).date(),
                 None,
                 PyDecimal(re.sub(r"[,$]", "", row[2])),
