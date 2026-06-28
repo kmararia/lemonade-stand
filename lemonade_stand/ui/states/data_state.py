@@ -3,6 +3,7 @@
 import typing
 from dataclasses import dataclass
 from dataclasses import field
+from dataclasses import fields
 
 import polars as pl
 import reflex as rx
@@ -10,13 +11,10 @@ import reflex as rx
 from lemonade_stand.config import UserConfig
 from lemonade_stand.data import UserData
 from lemonade_stand.data import get_data
+from lemonade_stand.data.read import Statement
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(__name__)
-USER_CONFIG = UserConfig()
-
-# Preload the data at the module level to ensure it's available when the UI loads.
-_PRELOADED_DATA: UserData = get_data(config=USER_CONFIG)
 
 
 @dataclass
@@ -63,15 +61,111 @@ class DataRow:
     source_file: str = ""
 
 
+def create_empty_placeholder() -> UserData:
+    """Creates an empty UserData object to serve as a placeholder when no data is available."""
+
+    data_schema = next(
+        typing.cast(typing.Any, x.default_factory)()
+        for x in fields(Statement)
+        if x.name == "schema"
+    )
+
+    empty_df = (
+        pl.Schema(
+            {
+                **dict(data_schema),
+                "allocated_amount": pl.Int64,
+            }
+        )
+        .to_frame()
+        .lazy()
+    )
+
+    return UserData(
+        income=empty_df,
+        savings=empty_df,
+        expenses=empty_df,
+        unknown=empty_df,
+    )
+
+
 class DataState(rx.State):
     """"""
 
-    _shared_data: UserData = _PRELOADED_DATA
+    _master_data: UserData | None = None
+    _filtered_data: UserData | None = None
+    allocations: dict[str, list[dict[str, typing.Any]]] = {
+        "income": [],
+        "savings": [],
+        "expenses": [],
+        "unknown": [],
+    }
     selected_year: str = ""
     selected_month: str = ""
 
     is_edit_modal_open: bool = False
     edit_values: dict[str, typing.Any] = {}
+
+    @property
+    def _shared_data(self) -> UserData:
+        """Lazily loads the user data when accessed for the first time."""
+
+        if self._filtered_data is None:
+            return create_empty_placeholder()
+
+        return self._filtered_data
+
+    @_shared_data.setter
+    def _shared_data(self, value: UserData):
+        self._filtered_data = value
+
+    @rx.event
+    def load_shared_data(self) -> None:
+        """Lazily load user-data when page is loaded."""
+
+        def apply_allocations(name: str, data_df: pl.LazyFrame) -> pl.LazyFrame:
+            """"""
+            if len(self.allocations[name]) == 0:
+                new_allocations = (
+                    data_df.select(
+                        category=pl.col("category"),
+                        allocated_amount=pl.coalesce(
+                            (
+                                pl.col("amount").abs().mean().over("category")
+                                * pl.col("date").dt.strftime("%Y-%m").n_unique()
+                            ),
+                            pl.lit(0),
+                        ).round(0),
+                    )
+                    .unique()
+                    .collect()
+                ).to_dicts()
+
+                if len(new_allocations) == 0:
+                    return data_df.with_columns(
+                        allocated_amount=pl.lit(0).cast(pl.Float64)
+                    )
+                else:
+                    self.allocations[name] = new_allocations
+
+            return data_df.join(
+                pl.LazyFrame(self.allocations[name]),
+                on="category",
+                how="left",
+                coalesce=True,
+            )
+
+        if self._master_data is None:
+            LOGGER.info("User session active: Fetching transaction data from disk...")
+            self._master_data = get_data(config=UserConfig())
+
+            # Sync initial filtered view with our master data copy
+            self._filtered_data = UserData(
+                income=apply_allocations("income", self._master_data.income),
+                savings=apply_allocations("savings", self._master_data.savings),
+                expenses=apply_allocations("expenses", self._master_data.expenses),
+                unknown=apply_allocations("unknown", self._master_data.unknown),
+            )
 
     def filter_data_dates(self) -> None:
         """Filter data based on the selected date range from DateState."""
@@ -92,39 +186,16 @@ class DataState(rx.State):
             else:
                 return data_df
 
+        # Safety fallback for if user triggers a filter before data finishes loading
+        if self._master_data is None:
+            self.load_shared_data()
+
         self._shared_data = UserData(
-            expenses=apply_filters(_PRELOADED_DATA.expenses),
-            income=apply_filters(_PRELOADED_DATA.income),
-            savings=apply_filters(_PRELOADED_DATA.savings),
-            unknown=apply_filters(_PRELOADED_DATA.unknown),
+            expenses=apply_filters(typing.cast(UserData, self._master_data).expenses),
+            income=apply_filters(typing.cast(UserData, self._master_data).income),
+            savings=apply_filters(typing.cast(UserData, self._master_data).savings),
+            unknown=apply_filters(typing.cast(UserData, self._master_data).unknown),
         )
-
-    @rx.var
-    def allocation_rows(self) -> list[dict[str, typing.Any]]:
-        """Filter data based on the selected date range from DateState."""
-
-        return (
-            pl.concat(
-                [
-                    self._shared_data.income,
-                    self._shared_data.savings,
-                    self._shared_data.expenses,
-                ]
-            )
-            .select(
-                "payment_type",
-                "category",
-                allocated_amount=pl.coalesce(
-                    (
-                        pl.col("amount").abs().mean().over("category")
-                        * pl.col("date").dt.strftime("%Y-%m").n_unique()
-                    ),
-                    pl.lit(0),
-                ).round(0),
-            )
-            .unique()
-            .collect()
-        ).to_dicts()
 
     @rx.var
     def available_months(self) -> list[str]:
@@ -183,7 +254,7 @@ class DataState(rx.State):
 
     @rx.event
     def set_year(self, year: str):
-        """"""
+        """Sets the selected year and updates the filtered data."""
         self.selected_year = year if year != "All Years" else ""
         self.filter_data_dates()
 

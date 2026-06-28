@@ -1,7 +1,5 @@
 """"""
 
-import typing
-
 import polars as pl
 import reflex as rx
 
@@ -20,11 +18,6 @@ class ExpenseState(DataState):
     chart_view_mode: str = "Trend"
     sort_column: str = "date"
     sort_reverse: bool = True  # True = Descending, False = Ascending
-
-    @rx.var(cache=True)
-    def expense_allocation_rows(self) -> list[dict[str, typing.Any]]:
-        """"""
-        return [x for x in self.allocation_rows if x["payment_type"] == "expenses"]
 
     @rx.var(cache=True)
     def expense_rows(self) -> list[DataRow]:
@@ -125,14 +118,8 @@ class ExpenseState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.expenses.group_by("category")
+            self._shared_data.expenses.group_by("category", "allocated_amount")
             .agg(spent_amount=pl.col("amount").sum())
-            .join(
-                pl.LazyFrame(self.expense_allocation_rows),
-                on="category",
-                how="left",
-                coalesce=True,
-            )
             .select(
                 "category",
                 "spent_amount",
@@ -230,18 +217,21 @@ class ExpenseState(DataState):
     @rx.var
     def active_budgets(self) -> int:
         """"""
-        return len(
-            [
-                x["allocated_amount"]
-                for x in self.expense_allocation_rows
-                if x["allocated_amount"] > 0
-            ]
+        return (
+            self._shared_data.expenses.filter(pl.col("allocated_amount") > 0)
+            .select(pl.col("category").unique())
+            .collect()
+            .shape[0]
         )
 
     @rx.var
     def total_allocations(self) -> float:
         """"""
-        return sum(x["allocated_amount"] for x in self.expense_allocation_rows)
+        return (
+            self._shared_data.expenses.select(
+                pl.col("allocated_amount").sum()
+            ).collect()
+        ).item(0, 0)
 
     @rx.var
     def total_expenses(self) -> float:
