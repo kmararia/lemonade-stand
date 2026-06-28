@@ -130,7 +130,9 @@ class UserData:
             )
             table_dict[table] = {
                 "dataframe": (
-                    cleaner.output_df.filter(filter_condition).with_row_index("index")
+                    cleaner.output_df.filter(filter_condition).with_columns(
+                        index=pl.int_range(pl.len(), dtype=pl.UInt32)
+                    )
                 ),
             }
 

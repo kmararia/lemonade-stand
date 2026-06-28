@@ -85,13 +85,7 @@ class HomeState(DataState):
         """"""
 
         return (
-            self._shared_data.expenses.join(
-                pl.LazyFrame(self.allocation_rows),
-                on="category",
-                how="left",
-                coalesce=True,
-            )
-            .group_by(
+            self._shared_data.expenses.group_by(
                 allocated_amount=pl.col("allocated_amount"),
                 payment_type=pl.col("payment_type"),
                 category=(

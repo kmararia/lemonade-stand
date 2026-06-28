@@ -6,7 +6,7 @@ import reflex as rx
 class UIState(rx.State):
     """State for UI interactions like sidebar toggling."""
 
-    is_sidebar_collapsed: bool = False
+    is_sidebar_collapsed: bool = True
 
     @rx.event
     def toggle_sidebar(self):
@@ -17,6 +17,11 @@ class UIState(rx.State):
     def collapse_sidebar(self):
         """"""
         self.is_sidebar_collapsed = True
+
+    @rx.event
+    def uncollapse_sidebar(self):
+        """"""
+        self.is_sidebar_collapsed = False
 
 
 class ActivityState(rx.State):
