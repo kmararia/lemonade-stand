@@ -7,7 +7,11 @@ from dataclasses import fields
 from pathlib import Path
 from types import SimpleNamespace
 
+from lemonade_stand.utils import set_up_logger
+
 from .metadata import BASE_CONFIG
+
+LOGGER = set_up_logger(__name__)
 
 
 @dataclass
@@ -107,6 +111,8 @@ class UserConfig:
         with user_config.open("w") as file:
             json.dump(config_dict, file, indent=4)
 
+        LOGGER.info("User configuration saved to: \n\t%s", user_config)
+
     def get_user_configs(self):
         """Sets up application configurations. Uses saved configs or user input configs"""
 
@@ -114,6 +120,8 @@ class UserConfig:
 
         # Search for the configuration file in the path
         if user_config.exists():
+            LOGGER.info("Loading user configuration file from: \n\t%s", user_config)
+
             with user_config.open("r") as file:
                 config_dict = json.load(file)
 
@@ -130,6 +138,7 @@ class UserConfig:
                         elif isinstance(sub_val, bool):
                             config_dict[key][sub_key] = bool(config_dict[key][sub_key])
         else:
+            LOGGER.info("User configuration file not found. Using base configuration.")
             config_dict = BASE_CONFIG
 
         return config_dict
@@ -144,6 +153,10 @@ class UserConfig:
             None
 
         """
+
+        LOGGER.info(
+            "Updating user configuration with the following mappings: \n%s", mappings
+        )
 
         # Update the object variables
         for attr, new_val in mappings.items():
