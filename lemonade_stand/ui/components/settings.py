@@ -82,7 +82,7 @@ def preferences_settings_tab() -> rx.Component:
                     title="Always skip login",
                     description="Bypass session identity confirmation checks on app launch",
                     control=rx.switch(
-                        is_checked=UIState.user_config.always_skip_login,
+                        default_checked=UIState.user_config.always_skip_login,
                         on_change=lambda x: UIState.set_config_value(
                             "always_skip_login", x
                         ),
@@ -92,7 +92,7 @@ def preferences_settings_tab() -> rx.Component:
                     title="Always refresh data",
                     description="Build & recalculate transactions from scratch on app launch",
                     control=rx.switch(
-                        is_checked=UIState.user_config.always_refresh_data,
+                        default_checked=UIState.user_config.always_refresh_data,
                         on_change=lambda x: UIState.set_config_value(
                             "always_refresh_data", x
                         ),
@@ -243,7 +243,7 @@ def security_settings_tab() -> rx.Component:
                     title="Two-Factor Authentication",
                     description="Add an extra layer of security to your account during login.",
                     control=rx.switch(
-                        is_checked=UIState.user_account.enable_2fa,
+                        default_checked=UIState.user_account.enable_2fa,
                         on_change=lambda x: UIState.set_user_account_value(
                             "enable_2fa", x
                         ),

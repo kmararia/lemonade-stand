@@ -40,8 +40,6 @@ class UIState(rx.State):
     config_updates: dict[str, typing.Any] = {}
     is_sidebar_collapsed: bool = True
 
-    _refresh_tick: int = 0
-
     @rx.var
     def user_account(self) -> AccountConfig:
         """Returns the current user configuration on the settings page."""
@@ -55,7 +53,6 @@ class UIState(rx.State):
     @rx.var
     def user_config(self) -> SettingsConfig:
         """Returns the current user configuration on the settings page."""
-        _ = self._refresh_tick + 1
         config = self.app_config
 
         return SettingsConfig(
@@ -66,8 +63,6 @@ class UIState(rx.State):
             always_skip_login=config.ui.always_skip_login,
             theme=config.ui.theme,
         )
-        LOGGER.info("check2: \n%s", self._refresh_tick)
-        LOGGER.info("check22: \n%s", self.user_config)
 
     @rx.event
     def toggle_sidebar(self):
@@ -99,12 +94,7 @@ class UIState(rx.State):
         """"""
         self.app_config.update_attribute(mappings=self.config_updates)
         self.app_config = UserConfig()
-        LOGGER.info("Updated user configuration: \n%s", self.app_config)
         self.config_updates.clear()
-        self._refresh_tick += 1
-
-        LOGGER.info("check1: \n%s", self.user_config)
-        LOGGER.info("check11: \n%s", self._refresh_tick)
 
 
 class ActivityState(rx.State):
