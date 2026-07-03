@@ -3,6 +3,7 @@
 import reflex as rx
 
 from lemonade_stand.ui.components.settings import settings
+from lemonade_stand.ui.states.ui_state import UIState
 
 
 def header() -> rx.Component:
@@ -41,7 +42,7 @@ def header() -> rx.Component:
                     rx.el.button(
                         rx.icon("user", size=18, class_name="text-gray-500 mr-2"),
                         rx.el.span(
-                            "Kelvin M.",
+                            f"{UIState.user_account.first_name} {UIState.user_account.last_name}",
                             class_name="text-sm font-medium text-gray-700 dark:text-gray-200",
                         ),
                         class_name="flex items-center group cursor-pointer",
