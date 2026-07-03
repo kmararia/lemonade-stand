@@ -108,10 +108,13 @@ class UserConfig:
         user_config = AppPaths().config_dir / "user_config.json"
         user_config.parent.mkdir(parents=True, exist_ok=True)
 
-        with user_config.open("w") as file:
-            json.dump(config_dict, file, indent=4)
+        if user_config.exists() and config_dict == json.load(user_config.open("r")):
+            pass
+        else:
+            with user_config.open("w") as file:
+                json.dump(config_dict, file, indent=4)
 
-        LOGGER.info("User configuration saved to: \n\t%s", user_config)
+            LOGGER.info("User configuration saved to: \n\t%s", user_config)
 
     def get_user_configs(self):
         """Sets up application configurations. Uses saved configs or user input configs"""
