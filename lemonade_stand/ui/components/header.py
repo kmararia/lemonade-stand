@@ -2,6 +2,9 @@
 
 import reflex as rx
 
+from lemonade_stand.ui.components.settings import settings
+from lemonade_stand.ui.states.ui_state import UIState
+
 
 def header() -> rx.Component:
     """"""
@@ -32,18 +35,14 @@ def header() -> rx.Component:
                 rx.color_mode.button(
                     class_name="mr-6 text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-cyan-400"
                 ),
-                # Settings Link
-                rx.el.a(
-                    "Settings",
-                    href="/settings",
-                    class_name="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-200 mr-6 transition-colors",
-                ),
+                # Settings Modal Trigger
+                settings(),
                 # User Profile
                 rx.el.div(
                     rx.el.button(
                         rx.icon("user", size=18, class_name="text-gray-500 mr-2"),
                         rx.el.span(
-                            "Kelvin M.",
+                            f"{UIState.user_account.first_name} {UIState.user_account.last_name}",
                             class_name="text-sm font-medium text-gray-700 dark:text-gray-200",
                         ),
                         class_name="flex items-center group cursor-pointer",
