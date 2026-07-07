@@ -24,7 +24,7 @@ class SavingsState(DataState):
         """Filter data based on the selected date range from DateState."""
 
         row_iterator = (
-            self._shared_data.savings.select(
+            self.shared_data.savings.select(
                 "index",
                 "date",
                 "description",
@@ -57,9 +57,7 @@ class SavingsState(DataState):
         return [
             TransactionActivity(**row)
             for row in (
-                self._shared_data.savings.sort(
-                    "amount", "date", descending=[True, True]
-                )
+                self.shared_data.savings.sort("amount", "date", descending=[True, True])
                 .select(
                     date=pl.col("date").dt.strftime("%m/%d/%Y"),
                     description=pl.col("description"),
@@ -88,7 +86,7 @@ class SavingsState(DataState):
         category_names = [x["name"] for x in self.savings_distribution_data]
 
         return (
-            self._shared_data.savings.filter(
+            self.shared_data.savings.filter(
                 pl.col("category").is_in(category_names)
                 & (
                     pl.col("date")
@@ -118,7 +116,7 @@ class SavingsState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.savings.group_by("category", "allocated_amount")
+            self.shared_data.savings.group_by("category", "allocated_amount")
             .agg(spent_amount=pl.col("amount").sum())
             .select(
                 "category",
@@ -168,7 +166,7 @@ class SavingsState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.savings.group_by(name=pl.col("category"))
+            self.shared_data.savings.group_by(name=pl.col("category"))
             .agg(pl.col("amount").sum())
             .sort("amount", descending=True)
             .with_row_index("index", offset=1)
@@ -206,7 +204,7 @@ class SavingsState(DataState):
         """"""
         return {
             x: (
-                self._shared_data.savings.select(pl.col(x).cast(pl.String).unique())
+                self.shared_data.savings.select(pl.col(x).cast(pl.String).unique())
                 .drop_nulls()
                 .collect()
                 .to_series()
@@ -219,7 +217,7 @@ class SavingsState(DataState):
     def active_budgets(self) -> int:
         """"""
         return (
-            self._shared_data.savings.filter(pl.col("allocated_amount") > 0)
+            self.shared_data.savings.filter(pl.col("allocated_amount") > 0)
             .select(pl.col("category").unique())
             .collect()
             .shape[0]
@@ -229,7 +227,7 @@ class SavingsState(DataState):
     def total_budget(self) -> float:
         """"""
         return (
-            self._shared_data.savings.select(pl.col("allocated_amount").sum())
+            self.shared_data.savings.select(pl.col("allocated_amount").sum())
             .collect()
             .item(0, 0)
         )
@@ -238,9 +236,7 @@ class SavingsState(DataState):
     def total_savings(self) -> float:
         """"""
         return (
-            self._shared_data.savings.select(pl.col("amount").sum())
-            .collect()
-            .item(0, 0)
+            self.shared_data.savings.select(pl.col("amount").sum()).collect().item(0, 0)
         )
 
     @rx.var

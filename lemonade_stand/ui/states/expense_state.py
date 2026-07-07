@@ -24,7 +24,7 @@ class ExpenseState(DataState):
         """Filter data based on the selected date range from DateState."""
 
         row_iterator = (
-            self._shared_data.expenses.select(
+            self.shared_data.expenses.select(
                 "index",
                 "date",
                 "description",
@@ -57,7 +57,7 @@ class ExpenseState(DataState):
         return [
             TransactionActivity(**row)
             for row in (
-                self._shared_data.expenses.sort(
+                self.shared_data.expenses.sort(
                     "amount", "date", descending=[True, True]
                 )
                 .select(
@@ -88,7 +88,7 @@ class ExpenseState(DataState):
         category_names = [x["name"] for x in self.expense_distribution_data]
 
         return (
-            self._shared_data.expenses.filter(
+            self.shared_data.expenses.filter(
                 pl.col("category").is_in(category_names)
                 & (
                     pl.col("date")
@@ -118,7 +118,7 @@ class ExpenseState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.expenses.group_by("category", "allocated_amount")
+            self.shared_data.expenses.group_by("category", "allocated_amount")
             .agg(spent_amount=pl.col("amount").sum())
             .select(
                 "category",
@@ -168,7 +168,7 @@ class ExpenseState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.expenses.group_by(name=pl.col("category"))
+            self.shared_data.expenses.group_by(name=pl.col("category"))
             .agg(pl.col("amount").sum())
             .sort("amount", descending=True)
             .with_row_index("index", offset=1)
@@ -205,7 +205,7 @@ class ExpenseState(DataState):
         """"""
         return {
             x: (
-                self._shared_data.expenses.select(pl.col(x).cast(pl.String).unique())
+                self.shared_data.expenses.select(pl.col(x).cast(pl.String).unique())
                 .drop_nulls()
                 .collect()
                 .to_series()
@@ -218,7 +218,7 @@ class ExpenseState(DataState):
     def active_budgets(self) -> int:
         """"""
         return (
-            self._shared_data.expenses.filter(pl.col("allocated_amount") > 0)
+            self.shared_data.expenses.filter(pl.col("allocated_amount") > 0)
             .select(pl.col("category").unique())
             .collect()
             .shape[0]
@@ -228,16 +228,14 @@ class ExpenseState(DataState):
     def total_allocations(self) -> float:
         """"""
         return (
-            self._shared_data.expenses.select(
-                pl.col("allocated_amount").sum()
-            ).collect()
+            self.shared_data.expenses.select(pl.col("allocated_amount").sum()).collect()
         ).item(0, 0)
 
     @rx.var
     def total_expenses(self) -> float:
         """"""
         return (
-            self._shared_data.expenses.select(pl.col("amount").sum()).collect()
+            self.shared_data.expenses.select(pl.col("amount").sum()).collect()
         ).item(0, 0)
 
     @rx.var
@@ -256,7 +254,7 @@ class ExpenseState(DataState):
     def percentage_of_income_spent(self) -> float:
         """"""
         income_amount = (
-            self._shared_data.income.select(pl.col("amount").sum()).collect()
+            self.shared_data.income.select(pl.col("amount").sum()).collect()
         ).item(0, 0)
 
         if income_amount == 0:

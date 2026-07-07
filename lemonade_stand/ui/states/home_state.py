@@ -49,9 +49,9 @@ class HomeState(DataState):
             for row in (
                 pl.concat(
                     [
-                        self._shared_data.income,
-                        self._shared_data.savings,
-                        self._shared_data.expenses,
+                        self.shared_data.income,
+                        self.shared_data.savings,
+                        self.shared_data.expenses,
                     ]
                 )
                 .sort("date", descending=True)
@@ -85,7 +85,7 @@ class HomeState(DataState):
         """"""
 
         return (
-            self._shared_data.expenses.group_by(
+            self.shared_data.expenses.group_by(
                 allocated_amount=pl.col("allocated_amount"),
                 payment_type=pl.col("payment_type"),
                 category=(
