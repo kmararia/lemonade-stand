@@ -24,7 +24,7 @@ class IncomeState(DataState):
         """Filter data based on the selected date range from DateState."""
 
         row_iterator = (
-            self._shared_data.income.select(
+            self.shared_data.income.select(
                 "index",
                 "date",
                 "description",
@@ -57,7 +57,7 @@ class IncomeState(DataState):
         return [
             TransactionActivity(**row)
             for row in (
-                self._shared_data.income.sort("amount", "date", descending=[True, True])
+                self.shared_data.income.sort("amount", "date", descending=[True, True])
                 .select(
                     date=pl.col("date").dt.strftime("%m/%d/%Y"),
                     description=pl.col("description"),
@@ -86,7 +86,7 @@ class IncomeState(DataState):
         category_names = [x["name"] for x in self.income_distribution_data]
 
         return (
-            self._shared_data.income.filter(
+            self.shared_data.income.filter(
                 pl.col("category").is_in(category_names)
                 & (
                     pl.col("date")
@@ -116,7 +116,7 @@ class IncomeState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.income.group_by("category", "allocated_amount")
+            self.shared_data.income.group_by("category", "allocated_amount")
             .agg(spent_amount=pl.col("amount").sum())
             .select(
                 "category",
@@ -166,7 +166,7 @@ class IncomeState(DataState):
         """"""
 
         row_iterator = (
-            self._shared_data.income.group_by(name=pl.col("category"))
+            self.shared_data.income.group_by(name=pl.col("category"))
             .agg(pl.col("amount").sum())
             .sort("amount", descending=True)
             .with_row_index("index", offset=1)
@@ -204,7 +204,7 @@ class IncomeState(DataState):
         """"""
         return {
             x: (
-                self._shared_data.income.select(pl.col(x).cast(pl.String).unique())
+                self.shared_data.income.select(pl.col(x).cast(pl.String).unique())
                 .drop_nulls()
                 .collect()
                 .to_series()
@@ -217,7 +217,7 @@ class IncomeState(DataState):
     def active_budgets(self) -> int:
         """"""
         return (
-            self._shared_data.income.filter(pl.col("allocated_amount") > 0)
+            self.shared_data.income.filter(pl.col("allocated_amount") > 0)
             .select(pl.col("category").unique())
             .collect()
             .shape[0]
@@ -227,7 +227,7 @@ class IncomeState(DataState):
     def total_allocations(self) -> float:
         """"""
         return (
-            self._shared_data.income.select(pl.col("allocated_amount").sum())
+            self.shared_data.income.select(pl.col("allocated_amount").sum())
             .collect()
             .item(0, 0)
         )
@@ -236,7 +236,7 @@ class IncomeState(DataState):
     def total_earnings(self) -> float:
         """"""
         return (
-            self._shared_data.income.select(pl.col("amount").sum()).collect().item(0, 0)
+            self.shared_data.income.select(pl.col("amount").sum()).collect().item(0, 0)
         )
 
     @rx.var

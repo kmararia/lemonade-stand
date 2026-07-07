@@ -93,7 +93,7 @@ class DataState(rx.State):
     """"""
 
     _master_data: UserData | None = None
-    _filtered_data: UserData | None = None
+    _shared_data: UserData | None = None
     allocations: dict[str, list[dict[str, typing.Any]]] = {
         "income": [],
         "savings": [],
@@ -106,96 +106,100 @@ class DataState(rx.State):
     is_edit_modal_open: bool = False
     edit_values: dict[str, typing.Any] = {}
 
-    @property
-    def _shared_data(self) -> UserData:
+    @rx.var
+    def shared_data(self) -> UserData:
         """Lazily loads the user data when accessed for the first time."""
 
-        if self._filtered_data is None:
+        if self._shared_data is None:
             return create_empty_placeholder()
 
-        return self._filtered_data
+        return self._shared_data
 
-    @_shared_data.setter
-    def _shared_data(self, value: UserData):
-        self._filtered_data = value
+    def apply_allocations(self, name: str, data_df: pl.LazyFrame) -> pl.LazyFrame:
+        """"""
+        if len(self.allocations[name]) == 0:
+            new_allocations = (
+                data_df.select(
+                    category=pl.col("category"),
+                    allocated_amount=pl.coalesce(
+                        (
+                            pl.col("amount").abs().mean().over("category")
+                            * pl.col("date").dt.strftime("%Y-%m").n_unique()
+                        ),
+                        pl.lit(0),
+                    ).round(0),
+                )
+                .unique()
+                .collect()
+            ).to_dicts()
 
-    @rx.event
-    def load_shared_data(self) -> None:
-        """Lazily load user-data when page is loaded."""
+            if len(new_allocations) == 0:
+                return data_df.with_columns(allocated_amount=pl.lit(0).cast(pl.Float64))
+            else:
+                self.allocations[name] = new_allocations
 
-        def apply_allocations(name: str, data_df: pl.LazyFrame) -> pl.LazyFrame:
-            """"""
-            if len(self.allocations[name]) == 0:
-                new_allocations = (
-                    data_df.select(
-                        category=pl.col("category"),
-                        allocated_amount=pl.coalesce(
-                            (
-                                pl.col("amount").abs().mean().over("category")
-                                * pl.col("date").dt.strftime("%Y-%m").n_unique()
-                            ),
-                            pl.lit(0),
-                        ).round(0),
-                    )
-                    .unique()
-                    .collect()
-                ).to_dicts()
-
-                if len(new_allocations) == 0:
-                    return data_df.with_columns(
-                        allocated_amount=pl.lit(0).cast(pl.Float64)
-                    )
-                else:
-                    self.allocations[name] = new_allocations
-
-            return data_df.join(
-                pl.LazyFrame(self.allocations[name]),
-                on="category",
-                how="left",
-                coalesce=True,
-            )
-
-        if self._master_data is None:
-            LOGGER.info("User session active: Fetching transaction data from disk...")
-            self._master_data = get_data(config=UserConfig())
-
-            # Sync initial filtered view with our master data copy
-            self._filtered_data = UserData(
-                income=apply_allocations("income", self._master_data.income),
-                savings=apply_allocations("savings", self._master_data.savings),
-                expenses=apply_allocations("expenses", self._master_data.expenses),
-                unknown=apply_allocations("unknown", self._master_data.unknown),
-            )
+        return data_df.join(
+            pl.LazyFrame(self.allocations[name]),
+            on="category",
+            how="left",
+            coalesce=True,
+        )
 
     def filter_data_dates(self) -> None:
         """Filter data based on the selected date range from DateState."""
 
-        def apply_filters(data_df: pl.LazyFrame) -> pl.LazyFrame:
+        def apply_filters(name: str, data_df: pl.LazyFrame) -> pl.LazyFrame:
             """"""
             if self.selected_month != "" and self.selected_year != "":
-                return data_df.filter(
+                return_df = data_df.filter(
                     (pl.col("date").dt.strftime("%Y") == self.selected_year)
                     & (pl.col("date").dt.strftime("%B") == self.selected_month)
                 )
 
             elif self.selected_year != "":
-                return data_df.filter(
+                return_df = data_df.filter(
                     pl.col("date").dt.strftime("%Y") == self.selected_year
                 )
 
             else:
-                return data_df
+                return_df = data_df
+
+            return self.apply_allocations(name, return_df)
 
         # Safety fallback for if user triggers a filter before data finishes loading
         if self._master_data is None:
             self.load_shared_data()
 
         self._shared_data = UserData(
-            expenses=apply_filters(typing.cast(UserData, self._master_data).expenses),
-            income=apply_filters(typing.cast(UserData, self._master_data).income),
-            savings=apply_filters(typing.cast(UserData, self._master_data).savings),
-            unknown=apply_filters(typing.cast(UserData, self._master_data).unknown),
+            income=apply_filters(
+                "income", typing.cast(UserData, self._master_data).income
+            ),
+            savings=apply_filters(
+                "savings", typing.cast(UserData, self._master_data).savings
+            ),
+            expenses=apply_filters(
+                "expenses", typing.cast(UserData, self._master_data).expenses
+            ),
+            unknown=apply_filters(
+                "unknown", typing.cast(UserData, self._master_data).unknown
+            ),
         )
+
+    @rx.event
+    def load_shared_data(self) -> None:
+        """Lazily load user-data when page is loaded."""
+
+        if self._master_data is None:
+            LOGGER.info("User session active: Fetching transaction data from disk...")
+            self._master_data = get_data(config=UserConfig())
+
+            # Sync initial filtered view with our master data copy
+            self._shared_data = UserData(
+                income=self.apply_allocations("income", self._master_data.income),
+                savings=self.apply_allocations("savings", self._master_data.savings),
+                expenses=self.apply_allocations("expenses", self._master_data.expenses),
+                unknown=self.apply_allocations("unknown", self._master_data.unknown),
+            )
 
     @rx.var
     def available_months(self) -> list[str]:
@@ -225,9 +229,9 @@ class DataState(rx.State):
             (
                 pl.concat(
                     [
-                        self._shared_data.income,
-                        self._shared_data.savings,
-                        self._shared_data.expenses,
+                        self.shared_data.income,
+                        self.shared_data.savings,
+                        self.shared_data.expenses,
                     ]
                 )
                 .select(
