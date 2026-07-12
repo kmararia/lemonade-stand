@@ -65,6 +65,19 @@ class UIState(rx.State):
         )
 
     @rx.event
+    def cycle_theme(self):
+        """Cycles to the next theme in the list."""
+        themes = ["light", "dark", "dark-green", "cream"]
+        try:
+            current_index = themes.index(self.user_config.theme)
+            next_index = (current_index + 1) % len(themes)
+            self.app_config.update_attribute(mappings={"theme": themes[next_index]})
+        except ValueError:
+            self.app_config.update_attribute(mappings={"theme": "light"})
+        finally:
+            self.app_config = UserConfig()
+
+    @rx.event
     def toggle_sidebar(self):
         """"""
         self.is_sidebar_collapsed = not self.is_sidebar_collapsed
