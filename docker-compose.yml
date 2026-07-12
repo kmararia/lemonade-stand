@@ -12,6 +12,7 @@ services:
         volumes:
       # Sync local logic with the container for hot-reloading
             - ./lemonade_stand:/lemonade-stand/lemonade_stand
+            - ./assets:/lemonade-stand/assets
 
       # Map app's home dir & run statements dir
             - ./_dev/container/home/.lemonade-stand:/root/.lemonade-stand
