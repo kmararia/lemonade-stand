@@ -25,16 +25,25 @@ def activity_feed(
                 rx.icon(
                     transaction.payment_type,
                     size=18,
-                    class_name=f"text-{transaction.health_color}-600 dark:text-{transaction.health_color}-400 shrink-0",
+                    class_name=f"""
+                        shrink-0
+                        {
+                        rx.cond(
+                            transaction.amount < 0,
+                            "text-[var(--warning-text)]",
+                            "text-[var(--healthy-text)]",
+                        )
+                    }
+                    """,
                 ),
                 rx.el.div(
                     rx.el.span(
                         transaction.description,
-                        class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 w-full block truncate",
+                        class_name="text-sm font-semibold text-[var(--text-main)] w-full block truncate",
                     ),
                     rx.el.span(
                         transaction.date,
-                        class_name="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5",
+                        class_name="text-xs font-medium text-[var(--text-muted)] mt-0.5",
                     ),
                     class_name="flex flex-col justify-center flex-1 min-w-0 pr-5",
                 ),
@@ -48,13 +57,18 @@ def activity_feed(
                 ),
                 class_name=f"""
                     text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-22 text-center
-                    text-{transaction.health_color}-800 dark:text-{transaction.health_color}-400
-                    bg-{transaction.health_color}-100 dark:bg-{transaction.health_color}-900/30
+                    {
+                    rx.cond(
+                        transaction.amount < 0,
+                        "bg-[var(--warning-bg)] text-[var(--warning-text)]",
+                        "bg-[var(--healthy-bg)] text-[var(--healthy-text)]",
+                    )
+                }
                 """,
             ),
             class_name="""
                 flex justify-between items-center p-3 rounded-lg
-                bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl border border-white/50 dark:border-gray-700/50
+                bg-[var(--bg-subtle)] backdrop-blur-xl border border-[var(--border-subtle)]
                 transition-all duration-200 group cursor-default
                 shrink-0 ml-4
             """,
@@ -64,7 +78,7 @@ def activity_feed(
         rx.el.div(
             rx.el.h3(
                 title,
-                class_name="px-2 text-lg font-bold text-gray-900 dark:text-gray-100",
+                class_name="px-2 text-lg font-bold text-[var(--text-main)]",
             ),
             rx.el.select(
                 rx.el.option("All", value="All"),
@@ -74,8 +88,8 @@ def activity_feed(
                 value=ActivityState.activity_filter,
                 on_change=ActivityState.set_activity_filter,
                 class_name="""
-                    text-xs font-medium text-gray-600 dark:text-gray-400
-                    bg-gray-50 dark:bg-gray-800 border-none rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700
+                    text-xs font-medium text-[var(--text-muted)]
+                    bg-[var(--bg-subtle)] border-none rounded-lg hover:bg-[var(--bg-card)]
                     focus:ring-1 focus:ring-indigo-500 py-1 pl-2 pr-8 cursor-pointer transition-colors
                 """,
             ),
@@ -87,7 +101,7 @@ def activity_feed(
         ),
         class_name="""
             py-6 px-4 flex flex-col
-            bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl border border-white/50 dark:border-gray-700/50
+            bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl border border-[var(--border-subtle)]
             shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full min-h-0 overflow-hidden
         """,
     )
@@ -105,19 +119,19 @@ def budget_health_widget(
             rx.el.div(
                 rx.el.span(
                     budget.category,
-                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100 w-32 truncate",
+                    class_name="text-sm font-semibold text-[var(--text-main)] w-32 truncate",
                 ),
                 rx.el.div(
                     rx.el.div(
                         class_name=f"h-2 rounded-full {budget.progress_color}",
                         style={"width": f"{budget.utilization}%"},
                     ),
-                    class_name="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mx-3",
+                    class_name="flex-1 h-2 bg-[var(--bg-subtle)] rounded-full overflow-hidden mx-3",
                 ),
                 rx.el.div(
                     rx.el.span(
                         f"{budget.utilization}%",
-                        class_name="text-xs font-bold text-gray-700 dark:text-gray-300 w-12 text-right mr-3",
+                        class_name="text-xs font-bold text-[var(--text-muted)] w-12 text-right mr-3",
                     ),
                     rx.el.span(
                         rx.cond(
@@ -130,11 +144,11 @@ def budget_health_widget(
                             {
                             rx.cond(
                                 budget.utilization > 90,
-                                "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                                "bg-[var(--critical-bg)] text-[var(--critical-text)]",
                                 rx.cond(
                                     budget.utilization > 75,
-                                    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-                                    "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                                    "bg-[var(--warning-bg)] text-[var(--warning-text)]",
+                                    "bg-[var(--healthy-bg)] text-[var(--healthy-text)]",
                                 ),
                             )
                         }
@@ -144,7 +158,7 @@ def budget_health_widget(
                 ),
                 class_name="flex items-center",
             ),
-            class_name="py-3 px-2 border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors rounded-lg",
+            class_name="py-3 px-2 border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-subtle)] transition-colors rounded-lg",
         )
 
     return rx.el.div(
@@ -152,18 +166,18 @@ def budget_health_widget(
             rx.el.div(
                 rx.el.h3(
                     "Budget Health Overview",
-                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                    class_name="text-lg font-bold text-[var(--text-main)]",
                 ),
                 rx.el.span(
                     f"$ {total_expenses:,.0f}",
-                    class_name="text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
+                    class_name="text-3xl font-bold text-[var(--text-main)] tracking-tight",
                 ),
                 class_name="flex flex-col justify-between gap-5 mb-5 animate-in fade-in slide-in-from-bottom-4 duration-700",
             ),
             rx.el.a(
                 "Manage",
                 href="/budgets",
-                class_name="text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:text-indigo-800 transition-colors",
+                class_name="text-sm font-medium text-[var(--selected-color)] hover:text-[var(--healthy-text)] transition-colors",
             ),
             class_name="flex items-center justify-between mb-4",
         ),
@@ -171,7 +185,7 @@ def budget_health_widget(
             rx.foreach(health_stats, budget_health_row),
             class_name="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar pr-2",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-7 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-7 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -190,18 +204,23 @@ def category_distribution_widget(
                 rx.icon(
                     icon,
                     size=24,
-                    class_name="text-blue-600 dark:text-blue-400/60 transition-colors",
+                    class_name="text-[var(--selected-color)] transition-colors",
                 ),
                 rx.el.h3(
                     card_title,
-                    class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                    class_name="text-lg font-bold text-[var(--text-main)]",
                 ),
                 class_name="flex justify-left gap-4",
             ),
             rx.el.button(
                 "All accounts",
                 rx.icon("chevron-down", size=14, class_name="ml-1"),
-                class_name="flex items-center text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:text-indigo-800 transition-colors",
+                class_name="""
+                    flex items-center
+                    text-xs font-medium text-[var(--text-muted)]
+                    bg-[var(--bg-subtle)] border-none rounded-lg hover:bg-[var(--bg-card)]
+                    focus:ring-1 focus:ring-indigo-500 py-1 px-2 cursor-pointer transition-colors
+                """,
             ),
             class_name="flex justify-between items-center mb-8",
         ),
@@ -229,7 +248,7 @@ def category_distribution_widget(
             rx.el.div(
                 rx.el.span(
                     f"$ {total_earnings:,.0f}",
-                    class_name="pb-10 text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight",
+                    class_name="pb-10 text-3xl font-bold text-[var(--text-main)] tracking-tight",
                 ),
                 class_name="absolute inset-0 flex items-center justify-center pointer-events-none",
             ),
@@ -246,14 +265,14 @@ def category_distribution_widget(
                     ),
                     rx.el.span(
                         item["name"],
-                        class_name="text-xs font-medium text-gray-500 dark:text-gray-400",
+                        class_name="text-xs font-medium text-[var(--text-muted)]",
                     ),
                     class_name="flex items-center",
                 ),
             ),
             class_name="flex justify-center gap-6",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -281,14 +300,14 @@ def top_category_widget(
                 ),
                 rx.el.p(
                     category.name,
-                    class_name="text-sm font-semibold text-gray-900 dark:text-gray-100",
+                    class_name="text-sm font-semibold text-[var(--text-main)]",
                 ),
                 class_name="flex items-center flex-1",
             ),
             rx.el.div(
                 rx.el.p(
                     f"${category.amount:,.0f}",
-                    class_name="text-sm font-bold text-gray-900 dark:text-gray-100",
+                    class_name="text-sm font-bold text-[var(--text-main)]",
                 ),
                 rx.el.p(
                     amount_title,
@@ -296,17 +315,17 @@ def top_category_widget(
                 ),
                 class_name="text-right",
             ),
-            class_name="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700/50 last:border-0",
+            class_name="flex items-center justify-between py-3 px-2 rounded-xl hover:bg-[var(--bg-subtle)] transition-colors border-b border-[var(--border-subtle)] last:border-0",
         )
 
     return rx.el.div(
         rx.el.h3(
             card_title,
-            class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 pb-2",
+            class_name="text-lg font-bold text-[var(--text-main)] mb-4 pb-2",
         ),
         rx.el.div(
             rx.foreach(top_category_list, top_category_row),
             class_name="flex flex-col",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-50 dark:border-gray-700/50 shadow-sm h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm h-full",
     )

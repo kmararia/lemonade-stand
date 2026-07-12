@@ -13,6 +13,11 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
 
     def status_badge(status: bool) -> rx.Component:
         """"""
+
+        base_class = (
+            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+        )
+
         return typing.cast(
             rx.Component,
             rx.match(
@@ -21,19 +26,19 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
                     True,
                     rx.el.span(
                         "Include",
-                        class_name="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                        class_name=f"{base_class} bg-[var(--healthy-bg)] text-[var(--healthy-text)]",
                     ),
                 ),
                 (
                     False,
                     rx.el.span(
                         "Exclude",
-                        class_name="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+                        class_name=f"{base_class} bg-[var(--critical-bg)] text-[var(--critical-text)]",
                     ),
                 ),
                 rx.el.span(
-                    status,
-                    class_name="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+                    "Unknown",
+                    class_name=f"{base_class} bg-[var(--warning-bg)] text-[var(--warning-text)]",
                 ),
             ),
         )
@@ -43,7 +48,7 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
             rx.el.div(
                 rx.el.span(
                     table.date,
-                    class_name="text-sm font-medium text-gray-900 dark:text-gray-100",
+                    class_name="text-sm font-medium text-[var(--text-main)]",
                 ),
                 rx.cond(
                     table.recurring_flag,
@@ -51,15 +56,17 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
                         rx.icon(
                             "repeat",
                             size=12,
-                            class_name="text-indigo-500 dark:text-cyan-400",
+                            class_name="text-[var(--critical-text)]",
                         ),
-                        class_name="ml-2 p-1 bg-indigo-50 dark:bg-cyan-900/30 rounded-full",
+                        class_name="ml-2 p-1 bg-[var(--critical-bg)] rounded-full",
                     ),
                 ),
                 rx.cond(
                     table.has_source_file,
                     rx.el.div(
-                        rx.icon("paperclip", size=12, class_name="text-gray-400"),
+                        rx.icon(
+                            "paperclip", size=12, class_name="text-[var(--text-muted)]"
+                        ),
                         class_name="ml-2",
                         title=table.source_file,
                     ),
@@ -70,10 +77,10 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
         ),
         rx.el.td(
             rx.el.div(
-                rx.icon("tag", size=14, class_name="mr-2 text-gray-400"),
+                rx.icon("tag", size=14, class_name="mr-2 text-[var(--text-muted)]"),
                 rx.el.span(
                     table.category,
-                    class_name="text-sm text-gray-700 dark:text-gray-300",
+                    class_name="text-sm text-[var(--text-main)]",
                 ),
                 class_name="flex items-center",
             ),
@@ -82,14 +89,14 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
         rx.el.td(
             rx.el.span(
                 f"${table.amount:,.2f}",
-                class_name="text-sm font-semibold text-gray-900 dark:text-gray-100",
+                class_name="text-sm font-semibold text-[var(--text-main)]",
             ),
             class_name="px-6 py-4 whitespace-nowrap",
         ),
         rx.el.td(
             rx.el.span(
                 table.payment_type,
-                class_name="text-sm text-gray-500 dark:text-gray-400",
+                class_name="text-sm text-[var(--text-main)]",
             ),
             class_name="px-6 py-4 whitespace-nowrap",
         ),
@@ -97,7 +104,7 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
             rx.el.div(
                 rx.el.span(
                     table.description,
-                    class_name="text-sm text-gray-500 dark:text-gray-400 max-w-[200px] truncate block",
+                    class_name="text-sm text-[var(--text-main)] max-w-[200px] truncate block",
                 ),
                 rx.cond(
                     table.location.length() > 0,  # type: ignore
@@ -106,7 +113,7 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
                             table.location,
                             lambda tag: rx.el.span(
                                 tag,
-                                class_name="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300",
+                                class_name="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-card)] text-[var(--text-main)]",
                             ),
                         ),
                         class_name="flex gap-1 mt-1 flex-wrap",
@@ -134,11 +141,11 @@ def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
                         "exclude_flag": table.exclude_flag,
                     }
                 ),
-                class_name="text-gray-400 hover:text-indigo-600 dark:hover:text-cyan-400 hover:bg-indigo-50 dark:hover:bg-cyan-900/30 rounded-lg transition-all",
+                class_name="text-[var(--text-main)] hover:text-[var(--selected-color)] rounded-lg transition-all",
             ),
             class_name="pr-6 py-4 whitespace-nowrap text-right",
         ),
-        class_name="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors even:bg-gray-50/50 dark:even:bg-gray-800/30",
+        class_name="hover:bg-[var(--bg-subtle)] even:bg-[var(--bg-card)] transition-colors",
     )
 
 
@@ -156,10 +163,11 @@ def data_table(
         """A reusable, clickable header for sorting columns."""
 
         th_class = """
-            sticky top-0 z-10 px-6 py-4 text-left text-xs font-semibold
-            text-gray-500 dark:text-gray-400 uppercase tracking-wider
-            bg-gray-50/90 dark:bg-gray-800/90 backdrop-blur-md shadow-sm
-            border-b border-gray-200 dark:border-gray-700
+            sticky top-0 z-10 px-6 py-4 tracking-wider
+            font-semibold font-bold
+            text-left text-sm text-[var(--text-main)] uppercase
+            bg-[var(--bg-header)] backdrop-blur-md shadow-sm
+            border-b border-[var(--border-main)]
         """
 
         if label == "":
@@ -171,11 +179,12 @@ def data_table(
                 rx.icon(
                     "arrow-up-down",
                     size=14,
-                    class_name="ml-1.5 text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 dark:group-hover:text-cyan-400 transition-colors",
+                    class_name="ml-1.5 text-[var(--text-muted)] group-hover:text-[var(--selected-color)] transition-colors",
                 ),
                 class_name="flex items-center group cursor-pointer select-none",
-                # Run backend sorting logic when header is clicked
-                on_click=on_sort(sort_key),
+                on_click=on_sort(
+                    sort_key
+                ),  # Run backend sorting logic when header is clicked
             ),
             class_name=th_class,
         )
@@ -184,12 +193,16 @@ def data_table(
         rx.el.div(
             rx.el.h3(
                 title,
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                class_name="text-lg font-bold text-[var(--text-main)]",
             ),
             rx.el.a(
                 "View All",
                 href=view_all_href,
-                class_name="text-sm font-medium text-indigo-600 dark:text-cyan-400 hover:text-indigo-800 transition-colors bg-indigo-50 dark:bg-cyan-900/30 px-3 py-1 rounded-lg",
+                class_name="""
+                    font-medium text-sm text-[var(--healthy-text)] hover:text-[var(--warning-text)]
+                    bg-[var(--healthy-bg)] hover:bg-[var(--warning-bg)]
+                    transition-colors px-3 py-1 rounded-lg
+                """,
             ),
             class_name="flex items-center justify-between mb-6",
         ),
@@ -210,37 +223,37 @@ def data_table(
                             ),
                             sortable_header(label="Status", sort_key="exclude_flag"),
                             sortable_header(label="", sort_key=""),
-                            class_name="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700/50",
+                            class_name="bg-[var(--bg-subtle)] border-b border-[var(--border-subtle)]",
                         )
                     ),
                     rx.el.tbody(
                         rx.foreach(
                             rows, lambda row: table_row(table=row, on_edit=on_edit)
                         ),
-                        class_name="bg-white/50 dark:bg-transparent divide-y divide-gray-100 dark:divide-gray-700/50",
+                        class_name="bg-[var(--bg-card)] divide-y divide-[var(--border-subtle)]",
                     ),
-                    class_name="min-w-full divide-y divide-gray-200 dark:divide-gray-700/50",
+                    class_name="min-w-full divide-y divide-[var(--border-subtle)]",
                 ),
-                class_name="overflow-x-auto overflow-y-auto max-h-[550px] rounded-xl border border-gray-100/50 dark:border-gray-700/50 custom-scrollbar",
+                class_name="overflow-x-auto overflow-y-auto max-h-[550px] rounded-xl border border-[var(--border-subtle)] custom-scrollbar",
             ),
             rx.el.div(
                 rx.el.div(
                     rx.icon(
                         "receipt",
                         size=48,
-                        class_name="text-gray-300 dark:text-gray-600 mb-3 mx-auto",
+                        class_name="text-[var(--text-main)] mb-3 mx-auto",
                     ),
                     rx.el.p(
                         "No transactions recorded yet.",
-                        class_name="text-gray-500 dark:text-gray-400 font-medium",
+                        class_name="text-[var(--text-muted)] font-medium",
                     ),
                     class_name="text-center py-12",
                 ),
-                class_name="bg-gray-50/30 dark:bg-gray-800/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700",
+                class_name="bg-[var(--bg-card)] rounded-xl border-2 border-dashed border-[var(--border-subtle)]",
             ),
         ),
         edit_modal_func(),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
     )
 
 
@@ -249,10 +262,14 @@ def budget_variance_table(
 ) -> rx.Component:
     """A detailed budget variance table"""
 
-    sticky_th = "sticky top-0 z-10 bg-gray-50 dark:bg-gray-900 shadow-[inset_0_-2px_0_0_#d1d5db] dark:shadow-[inset_0_-2px_0_0_#4b5563]"
-    th_comp_class = sticky_th + " px-3 pb-2 font-bold text-gray-800 dark:text-gray-200"
-    td_comp_class = "px-3 py-1.5 text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-700/50"
-    tb_comp_class = "italic px-3 py-2"
+    sticky_th = (
+        "sticky top-0 bg-[var(--bg-card)] border-b-[3px] border-[var(--border-subtle)]"
+    )
+    th_comp_class = f"{sticky_th} px-3 pb-1 font-bold text-[var(--text-main)]"
+    td_comp_class = (
+        "px-3 py-1.5 text-[var(--text-muted)] border-b border-[var(--border-subtle)]"
+    )
+    tb_comp_class = "italic px-3 py-2 text-[var(--text-muted)]"
 
     def render_row(item: DataVariance) -> rx.Component:
         """"""
@@ -262,8 +279,8 @@ def budget_variance_table(
                 item.category,
                 class_name="""
                     font-bold text-left pl-3 pr-2 py-1.5
-                    bg-[#f3dfc1] dark:bg-orange-900/30 text-gray-900 dark:text-gray-100
-                    border-b-[3px] border-r-[3px] border-white dark:border-gray-800
+                    bg-[var(--orange-color)] text-[var(--text-main)]
+                    border-b-[2px] border-r-[3px] border-[var(--border-subtle)]
                 """,
             ),
             rx.el.td(f"{item.spent_amount:,.2f}", class_name=td_comp_class),
@@ -271,31 +288,32 @@ def budget_variance_table(
             rx.el.td(
                 f"{item.utilization:,.0f}%",
                 class_name=(
-                    f"""{td_comp_class}
+                    f"""
                     {
                         rx.cond(
                             item.utilization <= 50,
-                            "text-green-600 dark:text-green-400",
+                            "text-[var(--healthy-text)]",
                             rx.cond(
                                 item.utilization <= 100,
-                                "text-yellow-600 dark:text-yellow-400",
-                                "text-red-500 dark:text-red-500",
+                                "text-[var(--warning-text)]",
+                                "text-[var(--critical-text)]",
                             ),
                         )
                     }
+                    px-3 py-1.5 border-b border-[var(--border-subtle)]
                     """
                 ),
             ),
             rx.el.td(f"{item.remaining_amount:,.2f}", class_name=td_comp_class),
             rx.el.td(f"{item.excess_amount:,.2f}", class_name=td_comp_class),
-            class_name="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors",
+            class_name="hover:bg-[var(--bg-subtle)] transition-colors",
         )
 
     return rx.el.div(
         # Header
         rx.el.h2(
             title,
-            class_name="text-[21px] font-bold text-[#c75d2c] dark:text-orange-500 mb-4 tracking-tight",
+            class_name="font-bold text-[21px] text-[#c75d2c] tracking-tight mb-4",
         ),
         # Table Container
         rx.el.div(
@@ -303,7 +321,7 @@ def budget_variance_table(
                 # Table Head
                 rx.el.thead(
                     rx.el.tr(
-                        rx.el.th("", class_name=sticky_th + " pb-2"),  # Empty corner
+                        rx.el.th("", class_name=f"{sticky_th} pb-2"),  # Empty corner
                         rx.el.th("Actual", class_name=th_comp_class),
                         rx.el.th("Planned", class_name=th_comp_class),
                         rx.el.th("%Util", class_name=th_comp_class),
@@ -332,13 +350,17 @@ def budget_variance_table(
                             totals_dict["excess_amount"],  # type: ignore
                             class_name=tb_comp_class,
                         ),
-                        class_name="text-slate-500 dark:text-slate-400 border-b border-gray-200 dark:border-gray-700/50",
+                        class_name="text-[var(--text-muted)] border-b border-[var(--border-subtle)]",
                     ),
                     rx.foreach(table_data, lambda item: render_row(item)),
                 ),
-                class_name="w-full text-sm text-right whitespace-nowrap",
+                class_name="text-sm text-right whitespace-nowrap w-full",
             ),
             class_name="max-h-[350px] overflow-auto custom-scrollbar",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full h-full",
+        class_name="""
+            bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl
+            border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+            w-full h-full
+        """,
     )

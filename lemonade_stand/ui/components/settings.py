@@ -28,12 +28,8 @@ def setting_row(title: str, description: str, control: rx.Component) -> rx.Compo
     """Standardizes the layout for every individual setting item."""
     return rx.hstack(
         rx.vstack(
-            rx.el.span(
-                title, class_name="text-m font-medium text-gray-900 dark:text-gray-100"
-            ),
-            rx.el.span(
-                description, class_name="text-sm text-gray-500 dark:text-gray-400"
-            ),
+            rx.el.span(title, class_name="text-m font-medium text-[var(--text-main)]"),
+            rx.el.span(description, class_name="text-sm text-[var(--text-muted)]"),
             align_items="start",
             spacing="1",
         ),
@@ -109,11 +105,15 @@ def preferences_settings_tab() -> rx.Component:
                         rx.select.trigger(width="150px"),
                         rx.select.content(
                             rx.select.item("Light", value="light"),
-                            rx.select.item("Dark-Blue", value="dark"),
+                            rx.select.item("Cream", value="cream"),
+                            rx.select.item("Dark", value="dark"),
+                            rx.select.item("Dark-Blue", value="dark-blue"),
                             rx.select.item("Dark-Green", value="dark-green"),
-                            rx.select.item("System", value="system"),
+                            rx.select.item(
+                                "System", value=rx.color_mode_cond("light", "dark")
+                            ),
                         ),
-                        value=UIState.user_config.theme,
+                        default_value=UIState.user_config.theme,
                         on_change=lambda x: UIState.set_config_value("theme", x),
                     ),
                 ),
@@ -139,7 +139,7 @@ def account_settings_tab() -> rx.Component:
                     rx.vstack(
                         rx.el.span(
                             "First Name",
-                            class_name="text-m font-medium text-gray-900 dark:text-gray-100",
+                            class_name="text-m font-medium text-[var(--text-main)]",
                         ),
                         rx.input(
                             value=UIState.user_account.first_name,
@@ -155,7 +155,7 @@ def account_settings_tab() -> rx.Component:
                     rx.vstack(
                         rx.el.span(
                             "Last Name",
-                            class_name="text-m font-medium text-gray-900 dark:text-gray-100",
+                            class_name="text-m font-medium text-[var(--text-main)]",
                         ),
                         rx.input(
                             value=UIState.user_account.last_name,
@@ -171,7 +171,7 @@ def account_settings_tab() -> rx.Component:
                     rx.vstack(
                         rx.el.span(
                             "Email Address",
-                            class_name="text-m font-medium text-gray-900 dark:text-gray-100",
+                            class_name="text-m font-medium text-[var(--text-main)]",
                         ),
                         rx.input(
                             value=UIState.user_account.email,
@@ -281,7 +281,7 @@ def settings() -> rx.Component:
         rx.dialog.trigger(
             rx.el.a(
                 "Settings",
-                class_name="text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-200 mr-6 transition-colors",
+                class_name="text-sm font-medium text-[var(--text-main)] hover:text-[var(--selected-color)] mr-6 transition-colors",
             ),
         ),
         rx.dialog.content(
@@ -289,13 +289,13 @@ def settings() -> rx.Component:
             rx.el.div(
                 rx.dialog.title(
                     "Application Settings",
-                    class_name="mb-6 text-lg font-bold text-gray-900 dark:text-gray-100",
+                    class_name="mb-6 text-lg font-bold text-[var(--text-main)]",
                 ),
                 rx.dialog.close(
                     rx.el.button(
                         rx.icon("x"),
                         variant="ghost",
-                        class_name="absolute top-4 right-4 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 transition-colors",
+                        class_name="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--selected-color)] transition-colors",
                     ),
                 ),
                 class_name="flex justify-between items-center gap-4 mb-2",
@@ -304,7 +304,7 @@ def settings() -> rx.Component:
             rx.el.div(
                 rx.el.label(
                     "Application version:",
-                    class_name="flex items-center block text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider",
+                    class_name="flex items-center block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider",
                 ),
                 rx.input(
                     value=UIState.user_config.app_version,
@@ -344,8 +344,8 @@ def settings() -> rx.Component:
             ),
             class_name="""
                 flex-1 p-6 md:p-8 max-w-4xl w-full
-                bg-gray-100 dark:bg-gray-950 backdrop-blur-2xl rounded-2xl
-                border border-white/20 dark:border-gray-700/50
+                bg-[var(--bg-card)] backdrop-blur-2xl rounded-2xl
+                border border-[var(--border-main)]
                 shadow-2xl outline-none overflow-y-auto scroll-smooth
             """,
         ),
