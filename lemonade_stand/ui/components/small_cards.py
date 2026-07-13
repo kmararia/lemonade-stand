@@ -139,7 +139,14 @@ def summary_stats_card(
                 rx.icon(
                     subtext_items[1],
                     size=14,
-                    class_name=f"text-{subtext_items[2]}-500 mr-1",
+                    class_name=rx.match(
+                        subtext_items[2],
+                        ("red", "text-[var(--critical-text)] mr-1"),
+                        ("yellow", "text-[var(--warning-text)] mr-1"),
+                        ("emerald", "text-[var(--healthy-text)] mr-1"),
+                        ("green", "text-green-500 mr-1"),
+                        f"text-{subtext_items[2]}-500 mr-1",
+                    ),
                 ),
                 rx.el.span(
                     subtext_items[0],

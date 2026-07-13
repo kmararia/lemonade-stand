@@ -122,8 +122,8 @@ def expense_page() -> rx.Component:
                         f"{ExpenseState.remaining_budget_percentage:.0f}% of total",
                         rx.cond(
                             ExpenseState.remaining_budget_percentage > 0,
-                            "trending-down",
                             "trending-up",
+                            "trending-down",
                         ),
                         rx.cond(
                             ExpenseState.remaining_budget_percentage > 0,
