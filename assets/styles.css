@@ -4,6 +4,21 @@
     font-family: 'JetBrains Mono', 'Lato', sans-serif !important;
 }
 
+/*  -------  ROOT SCROLLBARS  -------  */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-muted) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+/* Make the track completely invisible */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 
 /*  -------  THEMES  -------  */
 
@@ -28,11 +43,13 @@
   --critical-text: #f55656;
 }
 
+/* Non-Shared theme variables */
+
 /* Light Theme */
 [data-theme="light"] {
-  --app-bg-outer: rgba(219, 223, 230, 0.6);
-  --app-bg-inner: #edeff3;
-  --bg-header: rgba(255, 255, 255, 0.7);
+  --app-bg-outer: rgba(246, 249, 255, 0.9);
+  --app-bg-inner: #edf5f3;
+  --bg-header: #edeae2;
   --bg-card: #FBFBFC;
   --bg-subtle: #edeae2;
   --text-main: #111827;
@@ -45,10 +62,10 @@
 
 /* Cream Theme */
 [data-theme="cream"] {
-  --app-bg-outer: #EAE6DF;
+  --app-bg-outer: #eae6df;
   --app-bg-inner: #f5e8ce;
   --bg-header: rgba(239, 231, 213, 0.9);
-  --bg-card: #F5E4C2;
+  --bg-card: #f3d9cb;
   --bg-subtle: #d1cec9;
   --text-main: #4A4036;
   --text-muted: #4b5563;
@@ -91,15 +108,15 @@
 
 /* Dark Green Theme */
 [data-theme="dark-green"] {
-  --app-bg-outer: #02210f; /* deep forest green */
-  --app-bg-inner: #01251c;
-  --bg-header: rgba(6, 78, 59, 0.5);
-  --bg-card: #043A2C;
-  --bg-subtle: #065f46;
+  --app-bg-outer: #05130d;
+  --app-bg-inner: #081a13;
+  --bg-header: rgba(12, 36, 26, 0.8);
+  --bg-card: #0c241a;
+  --bg-subtle: #133828;
   --text-main: #ecfdf5;
-  --text-muted: #a7f3d0;
-  --border-main: #1f2937;
-  --border-subtle: rgba(4, 120, 87, 0.5);
+  --text-muted: #93bca6;
+  --border-main: #183d2b;
+  --border-subtle: rgba(24, 61, 43, 0.5);
   --accent-color: #10b981;
   --orange-color: #7c2d124d;
 }
