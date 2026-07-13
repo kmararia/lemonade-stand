@@ -67,7 +67,7 @@ class UIState(rx.State):
     @rx.event
     def cycle_theme(self):
         """Cycles to the next theme in the list."""
-        themes = ["light", "dark", "dark-green", "cream"]
+        themes = ["light", "dark", "dark-blue", "dark-green", "cream"]
         try:
             current_index = themes.index(self.user_config.theme)
             next_index = (current_index + 1) % len(themes)
