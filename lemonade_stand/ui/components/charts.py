@@ -9,57 +9,35 @@ from lemonade_stand.ui.states.expense_state import TopCategory
 
 def custom_tooltip() -> rx.Component:
     """A highly styled, reusable tooltip for all charts."""
+
     return rx.recharts.graphing_tooltip(
         separator="  —  ",
         animation_duration=250,
         animation_easing="ease-out",
-        cursor=rx.color_mode_cond(
-            {"fill": "#f8fafc", "opacity": 0.5}, {"fill": "#1f2937", "opacity": 0.5}
-        ),
-        label_style=rx.color_mode_cond(
-            {
-                "fontWeight": "700",
-                "fontSize": "13px",
-                "letterSpacing": "0.5px",
-                "textTransform": "uppercase",
-                "marginBottom": "8px",
-                "borderBottom": "1px solid rgba(0, 0, 0, 0.05)",
-                "paddingBottom": "6px",
-                "color": "#9ca3af",
-            },
-            {
-                "fontWeight": "700",
-                "fontSize": "13px",
-                "letterSpacing": "0.5px",
-                "textTransform": "uppercase",
-                "marginBottom": "8px",
-                "borderBottom": "1px solid rgba(255, 255, 255, 0.1)",
-                "paddingBottom": "6px",
-                "color": "#6b7280",
-            },
-        ),
-        item_style=rx.color_mode_cond(
-            {"color": "#111827", "fontWeight": "600", "fontSize": "14px"},
-            {"color": "#f9fafb", "fontWeight": "600", "fontSize": "14px"},
-        ),
-        content_style=rx.color_mode_cond(
-            {
-                "backgroundColor": "rgba(255, 255, 255, 0.85)",
-                "borderRadius": "16px",
-                "border": "1px solid rgba(255, 255, 255, 0.8)",
-                "boxShadow": "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)",
-                "backdropFilter": "blur(16px)",
-                "padding": "12px 16px",
-            },
-            {
-                "backgroundColor": "rgba(17, 24, 39, 0.85)",
-                "borderRadius": "16px",
-                "border": "1px solid rgba(255, 255, 255, 0.05)",
-                "boxShadow": "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)",
-                "backdropFilter": "blur(16px)",
-                "padding": "12px 16px",
-            },
-        ),
+        cursor={"fill": "var(--bg-subtle)", "opacity": 0.5},
+        label_style={
+            "fontWeight": "700",
+            "fontSize": "13px",
+            "letterSpacing": "0.5px",
+            "textTransform": "uppercase",
+            "marginBottom": "8px",
+            "borderBottom": "1px solid var(--border-subtle)",
+            "paddingBottom": "6px",
+            "color": "var(--text-muted)",
+        },
+        item_style={
+            "color": "var(--text-main)",
+            "fontWeight": "600",
+            "fontSize": "14px",
+        },
+        content_style={
+            "backgroundColor": "var(--bg-card)",
+            "borderRadius": "16px",
+            "border": "1px solid var(--border-subtle)",
+            "boxShadow": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+            "backdropFilter": "blur(16px)",
+            "padding": "12px 16px",
+        },
         custom_attrs={
             "formatter": rx.Var(
                 """
@@ -75,6 +53,27 @@ def custom_tooltip() -> rx.Component:
     )
 
 
+def chart_view_selector(
+    title_option: str,
+    selected_value: str | rx.Var,
+    on_change_event: rx.event.EventHandler,
+) -> rx.Component:
+    """"""
+
+    return rx.el.select(
+        rx.el.option(f"{title_option} Trends", value="Trend"),
+        rx.el.option(f"{title_option} Distribution", value="Distribution"),
+        value=selected_value,
+        on_change=on_change_event,
+        class_name="""
+            text-xs font-medium text-[var(--text-muted)]
+            bg-[var(--bg-subtle)] border-none rounded-lg
+            focus:ring-1 focus:ring-[var(--selected-color)]
+            py-1.5 pl-3 pr-8 cursor-pointer transition-colors
+        """,
+    )
+
+
 def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Component:
     """"""
 
@@ -85,7 +84,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
             rx.el.div(
                 class_name="w-3 h-3 rounded-full mr-2", style={"backgroundColor": color}
             ),
-            rx.el.span(name, class_name="text-sm text-gray-600 dark:text-gray-400"),
+            rx.el.span(name, class_name="text-sm text-[var(--text-muted)]"),
             class_name="flex items-center mr-6",
         )
 
@@ -102,12 +101,12 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
         rx.el.div(
             rx.el.h3(
                 "Budget vs. Actual Spend",
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100",
+                class_name="text-lg font-bold text-[var(--text-main)]",
             ),
             rx.el.button(
                 "Export",
                 rx.icon("download", size=14, class_name="ml-2"),
-                class_name="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-cyan-400 flex items-center transition-colors px-3 py-1.5 hover:bg-indigo-50 dark:hover:bg-cyan-900/30 rounded-lg",
+                class_name="text-sm font-medium text-[var(--text-muted)] hover:text-[var(--selected-color)] flex items-center transition-colors px-3 py-1.5 hover:bg-[var(--bg-subtle)] rounded-lg",
             ),
             class_name="flex items-center justify-between mb-6",
         ),
@@ -118,26 +117,28 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
                     rx.recharts.cartesian_grid(
                         stroke_dasharray="3 3",
                         vertical=False,
-                        class_name="stroke-gray-100 dark:stroke-gray-700/50",
+                        class_name="stroke-[var(--bg-subtle)] bg-[var(--bg-subtle)]",
                     ),
                     rx.recharts.x_axis(
                         type_="number",
                         axis_line=False,
                         tick_line=False,
-                        tick=rx.color_mode_cond(
-                            {"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},
-                            {"fontSize": 12, "fill": "#6b7280", "fontWeight": 500},
-                        ),
+                        tick={
+                            "fontSize": 12,
+                            "fill": "var(--text-muted)",
+                            "fontWeight": 500,
+                        },
                         dy=10,
                     ),
                     rx.recharts.y_axis(
                         type_="category",
                         data_key="category",
                         width=150,
-                        tick=rx.color_mode_cond(
-                            {"fontSize": 12, "fill": "#9ca3af", "fontWeight": 500},
-                            {"fontSize": 12, "fill": "#6b7280", "fontWeight": 500},
-                        ),
+                        tick={
+                            "fontSize": 12,
+                            "fill": "var(--text-muted)",
+                            "fontWeight": 500,
+                        },
                     ),
                     rx.recharts.bar(
                         data_key="allocated_amount",
@@ -165,7 +166,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-white/50 dark:border-gray-700/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
     )
 
 
@@ -184,7 +185,7 @@ def trend_chart(
         rx.el.div(
             rx.el.h3(
                 title,
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
+                class_name="text-lg font-bold text-[var(--text-main)] mb-6",
             ),
             header_action,
             class_name="flex items-center justify-between mb-6",
@@ -194,17 +195,17 @@ def trend_chart(
                 rx.recharts.cartesian_grid(
                     stroke_dasharray="3 3",
                     vertical=False,
-                    class_name="stroke-gray-200 dark:stroke-gray-700/50",
+                    class_name="stroke-[var(--border-subtle)]",
                 ),
                 rx.recharts.x_axis(
                     data_key="date",
-                    tick={"fontSize": 12, "fill": "#6b7280"},
+                    tick={"fontSize": 12, "fill": "var(--text-muted)"},
                     dy=10,
                 ),
                 rx.recharts.y_axis(
                     axis_line=False,
                     tick_line=False,
-                    tick={"fontSize": 12, "fill": "#6b7280"},
+                    tick={"fontSize": 12, "fill": "var(--text-muted)"},
                 ),
                 custom_tooltip(),
                 *[
@@ -234,7 +235,7 @@ def trend_chart(
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl pt-6 px-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl pt-6 px-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm w-full",
     )
 
 
@@ -268,7 +269,7 @@ def pie_chart(
             ),
             rx.el.span(
                 item["name"],
-                class_name="text-xs font-medium text-gray-600 dark:text-gray-400",
+                class_name="text-xs font-medium text-[var(--text-main)]",
             ),
             class_name="flex items-center gap-2 py-1.5",
         )
@@ -277,7 +278,7 @@ def pie_chart(
         rx.el.div(
             rx.el.h3(
                 title,
-                class_name="text-lg font-bold text-gray-900 dark:text-gray-100 mb-6",
+                class_name="text-lg font-bold text-[var(--text-main)] mb-6",
             ),
             header_action,
             class_name="flex items-center justify-between mb-1",
@@ -296,8 +297,8 @@ def pie_chart(
                                 data_key="percent_label",
                                 position="outside",
                                 offset=25,
-                                fill=rx.color_mode_cond("#1f2937", "#e5e7eb"),
-                                stroke=rx.color_mode_cond("#1f2937", "#e5e7eb"),
+                                fill="var(--text-muted)",
+                                stroke="var(--text-muted)",
                                 stroke_width=4,
                                 style={"paintOrder": "stroke"},
                             ),
@@ -309,7 +310,7 @@ def pie_chart(
                             inner_radius=0,
                             outer_radius=120,
                             label_line={
-                                "stroke": rx.color_mode_cond("#9ca3af", "#4b5563"),
+                                "stroke": "var(--text-muted)",
                                 "strokeWidth": 1.5,
                             },
                             label={"fill": "transparent"},
@@ -328,9 +329,9 @@ def pie_chart(
                 rx.foreach(
                     pie_data, lambda item, index: custom_pie_legend(item, index)
                 ),
-                class_name="col-span-1 flex flex-col justify-center pl-4 border-l border-gray-50 dark:border-gray-700/30 h-full",
+                class_name="col-span-1 flex flex-col justify-center pl-4 border-l border-[var(--border-subtle)] h-full",
             ),
             class_name="grid grid-cols-3 w-full items-center",
         ),
-        class_name="bg-white/70 dark:bg-gray-800/50 backdrop-blur-xl p-6 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm w-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm w-full",
     )

@@ -18,7 +18,7 @@ def date_picker() -> rx.Component:
                 variant="soft",
                 radius="large",
                 color_scheme="mint",
-                class_name="cursor-pointer",
+                class_name="cursor-pointer text-[var(--accent-color)] hover:text-[var(--text-main)] transition-colors",
             ),
             class_name="pr-5 pl-0 flex justify-left",
         ),

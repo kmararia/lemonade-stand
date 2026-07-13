@@ -1,0 +1,122 @@
+/*  -------  ROOT FONTS  -------  */
+:root, .radix-themes {
+    --default-font-family: 'JetBrains Mono', 'Lato', sans-serif !important;
+    font-family: 'JetBrains Mono', 'Lato', sans-serif !important;
+}
+
+/*  -------  ROOT SCROLLBARS  -------  */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-muted) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+/* Make the track completely invisible */
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+/*  -------  THEMES  -------  */
+
+/* Shared variables for LIGHT vs DARK themes */
+[data-theme="light"], [data-theme="cream"] {
+    --selected-color: #15803d;
+    --healthy-bg: #dcfce3;
+    --healthy-text: #166534;
+    --warning-bg: #fef9c3;
+    --warning-text: #854d0e;
+    --critical-bg: #fee2e2;
+    --critical-text: #ab0303;
+}
+
+[data-theme="dark"], [data-theme="dark-blue"], [data-theme="dark-green"] {
+    --selected-color: #22d3ee;
+    --healthy-bg: #14532d4d;
+    --healthy-text: #4ade80;
+    --warning-bg: #713f124d;
+    --warning-text: #facc15;
+    --critical-bg: #7f1d1d4d;
+    --critical-text: #f55656;
+}
+
+/* Non-Shared theme variables */
+
+/* Light Theme */
+[data-theme="light"] {
+    --app-bg-outer: rgba(246, 249, 255, 0.9);
+    --app-bg-inner: #edf5f3;
+    --bg-header: #edeae2;
+    --bg-card: #FBFBFC;
+    --bg-subtle: #edeae2;
+    --text-main: #111827;
+    --text-muted: #4b5563;
+    --border-main: #fbfcff;
+    --border-subtle: #cecfd1;
+    --accent-color: #4f46e5;
+    --orange-color: #f9deb7;
+}
+
+/* Cream Theme */
+[data-theme="cream"] {
+    --app-bg-outer: #eae6df;
+    --app-bg-inner: #f5e8ce;
+    --bg-header: rgba(239, 231, 213, 0.9);
+    --bg-card: #f3d9cb;
+    --bg-subtle: #d1cec9;
+    --text-main: #4A4036;
+    --text-muted: #4b5563;
+    --border-main: #f3f4f6;
+    --border-subtle: rgb(243, 242, 241);
+    --accent-color: #C75D2C;
+    --orange-color: #b7efb9;
+}
+
+
+/* Dark Theme */
+[data-theme="dark"] {
+  --app-bg-outer: #111827;
+  --app-bg-inner: #030712;
+  --bg-header: rgba(42, 44, 48, 0.5);
+  --bg-card: #18181B;
+  --bg-subtle: #292b2e;
+  --text-main: #f3f4f6;
+  --text-muted: #9ca3af;
+  --border-main: #1f2937;
+  --border-subtle: rgba(55, 65, 81, 0.5);
+  --accent-color: #6366f1;
+  --orange-color: #7c2d124d;
+}
+
+/* Dark Blue Theme */
+[data-theme="dark-blue"] {
+    --app-bg-outer: #111827;
+    --app-bg-inner: #030712;
+    --bg-header: rgba(31, 41, 55, 0.5);
+    --bg-card: #111825;
+    --bg-subtle: #1f2937;
+    --text-main: #f3f4f6;
+    --text-muted: #9ca3af;
+    --border-main: #1f2937;
+    --border-subtle: rgba(55, 65, 81, 0.5);
+    --accent-color: #8e63f1;
+    --orange-color: #7c2d124d;
+}
+
+/* Dark Green Theme */
+[data-theme="dark-green"] {
+    --app-bg-outer: #05130d;
+    --app-bg-inner: #081a13;
+    --bg-header: rgba(12, 36, 26, 0.8);
+    --bg-card: #0c241a;
+    --bg-subtle: #133828;
+    --text-main: #ecfdf5;
+    --text-muted: #93bca6;
+    --border-main: #183d2b;
+    --border-subtle: rgba(24, 61, 43, 0.5);
+    --accent-color: #10b981;
+    --orange-color: #7c2d124d;
+}
