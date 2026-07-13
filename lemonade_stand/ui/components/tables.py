@@ -8,147 +8,6 @@ from lemonade_stand.ui.states.data_state import DataRow
 from lemonade_stand.ui.states.data_state import DataVariance
 
 
-def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
-    """"""
-
-    def status_badge(status: bool) -> rx.Component:
-        """"""
-
-        base_class = (
-            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-        )
-
-        return typing.cast(
-            rx.Component,
-            rx.match(
-                status,
-                (
-                    True,
-                    rx.el.span(
-                        "Include",
-                        class_name=f"{base_class} bg-[var(--healthy-bg)] text-[var(--healthy-text)]",
-                    ),
-                ),
-                (
-                    False,
-                    rx.el.span(
-                        "Exclude",
-                        class_name=f"{base_class} bg-[var(--critical-bg)] text-[var(--critical-text)]",
-                    ),
-                ),
-                rx.el.span(
-                    "Unknown",
-                    class_name=f"{base_class} bg-[var(--warning-bg)] text-[var(--warning-text)]",
-                ),
-            ),
-        )
-
-    return rx.el.tr(
-        rx.el.td(
-            rx.el.div(
-                rx.el.span(
-                    table.date,
-                    class_name="text-sm font-medium text-[var(--text-main)]",
-                ),
-                rx.cond(
-                    table.recurring_flag,
-                    rx.el.div(
-                        rx.icon(
-                            "repeat",
-                            size=12,
-                            class_name="text-[var(--critical-text)]",
-                        ),
-                        class_name="ml-2 p-1 bg-[var(--critical-bg)] rounded-full",
-                    ),
-                ),
-                rx.cond(
-                    table.has_source_file,
-                    rx.el.div(
-                        rx.icon(
-                            "paperclip", size=12, class_name="text-[var(--text-muted)]"
-                        ),
-                        class_name="ml-2",
-                        title=table.source_file,
-                    ),
-                ),
-                class_name="flex items-center",
-            ),
-            class_name="px-6 py-4 whitespace-nowrap",
-        ),
-        rx.el.td(
-            rx.el.div(
-                rx.icon("tag", size=14, class_name="mr-2 text-[var(--text-muted)]"),
-                rx.el.span(
-                    table.category,
-                    class_name="text-sm text-[var(--text-main)]",
-                ),
-                class_name="flex items-center",
-            ),
-            class_name="px-6 py-4 whitespace-nowrap",
-        ),
-        rx.el.td(
-            rx.el.span(
-                f"${table.amount:,.2f}",
-                class_name="text-sm font-semibold text-[var(--text-main)]",
-            ),
-            class_name="px-6 py-4 whitespace-nowrap",
-        ),
-        rx.el.td(
-            rx.el.span(
-                table.payment_type,
-                class_name="text-sm text-[var(--text-main)]",
-            ),
-            class_name="px-6 py-4 whitespace-nowrap",
-        ),
-        rx.el.td(
-            rx.el.div(
-                rx.el.span(
-                    table.description,
-                    class_name="text-sm text-[var(--text-main)] max-w-[200px] truncate block",
-                ),
-                rx.cond(
-                    table.location.length() > 0,  # type: ignore
-                    rx.el.div(
-                        rx.foreach(
-                            table.location,
-                            lambda tag: rx.el.span(
-                                tag,
-                                class_name="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-card)] text-[var(--text-main)]",
-                            ),
-                        ),
-                        class_name="flex gap-1 mt-1 flex-wrap",
-                    ),
-                ),
-                class_name="flex flex-col",
-            ),
-            class_name="px-6 py-4",
-        ),
-        rx.el.td(
-            status_badge(table.exclude_flag),
-            class_name="px-6 py-4 whitespace-nowrap",
-        ),
-        rx.el.td(
-            rx.el.button(
-                rx.icon("pencil", size=16),
-                on_click=lambda: on_edit(
-                    {
-                        "index": table.index,
-                        "date": table.date,
-                        "category": table.category,
-                        "amount": table.amount,
-                        "payment_type": table.payment_type,
-                        "description": table.description,
-                        "exclude_flag": table.exclude_flag,
-                    }
-                ),
-                class_name="text-[var(--text-main)] hover:text-[var(--selected-color)] rounded-lg transition-all",
-            ),
-            class_name="pr-6 py-4 whitespace-nowrap text-right",
-        ),
-        class_name="hover:bg-[var(--bg-subtle)] even:bg-[var(--bg-card)] transition-colors",
-    )
-
-
 def data_table(
     title: str,
     view_all_href: str,
@@ -158,6 +17,146 @@ def data_table(
     edit_modal_func: typing.Callable,
 ) -> rx.Component:
     """"""
+
+    def table_row(table: DataRow, on_edit: typing.Callable) -> rx.Component:
+        """"""
+
+        def status_badge(status: bool) -> rx.Component:
+            """"""
+
+            base_class = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+
+            return typing.cast(
+                rx.Component,
+                rx.match(
+                    status,
+                    (
+                        True,
+                        rx.el.span(
+                            "Include",
+                            class_name=f"{base_class} bg-[var(--healthy-bg)] text-[var(--healthy-text)]",
+                        ),
+                    ),
+                    (
+                        False,
+                        rx.el.span(
+                            "Exclude",
+                            class_name=f"{base_class} bg-[var(--critical-bg)] text-[var(--critical-text)]",
+                        ),
+                    ),
+                    rx.el.span(
+                        "Unknown",
+                        class_name=f"{base_class} bg-[var(--warning-bg)] text-[var(--warning-text)]",
+                    ),
+                ),
+            )
+
+        return rx.el.tr(
+            rx.el.td(
+                rx.el.div(
+                    rx.el.span(
+                        table.date,
+                        class_name="text-sm font-medium text-[var(--text-main)]",
+                    ),
+                    rx.cond(
+                        table.recurring_flag,
+                        rx.el.div(
+                            rx.icon(
+                                "repeat",
+                                size=12,
+                                class_name="text-[var(--critical-text)]",
+                            ),
+                            class_name="ml-2 p-1 bg-[var(--critical-bg)] rounded-full",
+                        ),
+                    ),
+                    rx.cond(
+                        table.has_source_file,
+                        rx.el.div(
+                            rx.icon(
+                                "paperclip",
+                                size=12,
+                                class_name="text-[var(--text-muted)]",
+                            ),
+                            class_name="ml-2",
+                            title=table.source_file,
+                        ),
+                    ),
+                    class_name="flex items-center",
+                ),
+                class_name="px-6 py-4 whitespace-nowrap",
+            ),
+            rx.el.td(
+                rx.el.div(
+                    rx.icon("tag", size=14, class_name="mr-2 text-[var(--text-muted)]"),
+                    rx.el.span(
+                        table.category,
+                        class_name="text-sm text-[var(--text-main)]",
+                    ),
+                    class_name="flex items-center",
+                ),
+                class_name="px-6 py-4 whitespace-nowrap",
+            ),
+            rx.el.td(
+                rx.el.span(
+                    f"${table.amount:,.2f}",
+                    class_name="text-sm font-semibold text-[var(--text-main)]",
+                ),
+                class_name="px-6 py-4 whitespace-nowrap",
+            ),
+            rx.el.td(
+                rx.el.span(
+                    table.payment_type,
+                    class_name="text-sm text-[var(--text-main)]",
+                ),
+                class_name="px-6 py-4 whitespace-nowrap",
+            ),
+            rx.el.td(
+                rx.el.div(
+                    rx.el.span(
+                        table.description,
+                        class_name="text-sm text-[var(--text-main)] max-w-[200px] truncate block",
+                    ),
+                    rx.cond(
+                        table.location.length() > 0,  # type: ignore
+                        rx.el.div(
+                            rx.foreach(
+                                table.location,
+                                lambda tag: rx.el.span(
+                                    tag,
+                                    class_name="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-[var(--bg-card)] text-[var(--text-main)]",
+                                ),
+                            ),
+                            class_name="flex gap-1 mt-1 flex-wrap",
+                        ),
+                    ),
+                    class_name="flex flex-col",
+                ),
+                class_name="px-6 py-4",
+            ),
+            rx.el.td(
+                status_badge(table.exclude_flag),
+                class_name="px-6 py-4 whitespace-nowrap",
+            ),
+            rx.el.td(
+                rx.el.button(
+                    rx.icon("pencil", size=16),
+                    on_click=lambda: on_edit(
+                        {
+                            "index": table.index,
+                            "date": table.date,
+                            "category": table.category,
+                            "amount": table.amount,
+                            "payment_type": table.payment_type,
+                            "description": table.description,
+                            "exclude_flag": table.exclude_flag,
+                        }
+                    ),
+                    class_name="text-[var(--text-main)] hover:text-[var(--selected-color)] rounded-lg transition-all",
+                ),
+                class_name="pr-6 py-4 whitespace-nowrap text-right",
+            ),
+            class_name="hover:bg-[var(--bg-subtle)] even:bg-[var(--bg-card)] transition-colors",
+        )
 
     def sortable_header(label: str, sort_key: str) -> rx.Component:
         """A reusable, clickable header for sorting columns."""
