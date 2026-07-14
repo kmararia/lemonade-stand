@@ -9,12 +9,14 @@ from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(__name__)
+_USER_CONFIG = UserConfig()
 
 
 @dataclass
 class AccountConfig:
     """"""
 
+    username: str
     first_name: str
     last_name: str
     email: str
@@ -33,22 +35,51 @@ class SettingsConfig:
     theme: str
 
 
-class UIState(rx.State):
-    """State for UI interactions like sidebar toggling."""
+class AccountState(rx.State):
+    """State for authentication interactions like login and logout."""
 
-    app_config: UserConfig = UserConfig()
-    config_updates: dict[str, typing.Any] = {}
-    is_sidebar_collapsed: bool = True
+    logged_in: bool = _USER_CONFIG.ui.always_skip_login
+    is_registering: bool = False
 
     @rx.var
     def user_account(self) -> AccountConfig:
-        """Returns the current user configuration on the settings page."""
+        """Returns the user account configuration."""
         return AccountConfig(
+            username="johndoe",
             first_name="John",
             last_name="Doe",
             email="john.doe@example.com",
             enable_2fa=False,
         )
+
+    @rx.event
+    def set_logged_in(self):
+        """Updates the login status of the user."""
+        self.logged_in = True
+
+    @rx.event
+    def set_logged_out(self):
+        """Updates the login status of the user."""
+        self.logged_in = False
+        _USER_CONFIG.update_attribute(mappings={"always_skip_login": False})
+
+    @rx.event
+    def set_user_account_value(self, config_key: str, new_value: typing.Any):
+        """Updates a specific field in the user account configuration."""
+        setattr(self.user_account, config_key, new_value)
+
+    @rx.event
+    def toggle_registering(self):
+        """Swaps the modal between Login and Create Account views."""
+        self.is_registering = not self.is_registering
+
+
+class UIState(rx.State):
+    """State for UI interactions like sidebar toggling."""
+
+    app_config: UserConfig = _USER_CONFIG
+    config_updates: dict[str, typing.Any] = {}
+    is_sidebar_collapsed: bool = True
 
     @rx.var
     def user_config(self) -> SettingsConfig:
@@ -96,11 +127,6 @@ class UIState(rx.State):
     def set_config_value(self, config_key: str, new_value: typing.Any):
         """Updates a specific field in the edit modal form."""
         self.config_updates[config_key] = new_value
-
-    @rx.event
-    def set_user_account_value(self, config_key: str, new_value: typing.Any):
-        """Updates a specific field in the user account configuration."""
-        setattr(self.user_account, config_key, new_value)
 
     @rx.event
     def apply_settings(self):

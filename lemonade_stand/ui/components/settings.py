@@ -5,6 +5,7 @@ This page allows users to manage their account settings, preferences, and securi
 
 import reflex as rx
 
+from lemonade_stand.ui.states.ui_state import AccountState
 from lemonade_stand.ui.states.ui_state import UIState
 
 
@@ -142,9 +143,9 @@ def account_settings_tab() -> rx.Component:
                             class_name="text-m font-medium text-[var(--text-main)]",
                         ),
                         rx.input(
-                            value=UIState.user_account.first_name,
+                            value=AccountState.user_account.first_name,
                             placeholder="Enter first name...",
-                            on_change=lambda x: UIState.set_user_account_value(
+                            on_change=lambda x: AccountState.set_user_account_value(
                                 "first_name", x
                             ),
                             width="300px",
@@ -158,9 +159,9 @@ def account_settings_tab() -> rx.Component:
                             class_name="text-m font-medium text-[var(--text-main)]",
                         ),
                         rx.input(
-                            value=UIState.user_account.last_name,
+                            value=AccountState.user_account.last_name,
                             placeholder="Enter last name...",
-                            on_change=lambda x: UIState.set_user_account_value(
+                            on_change=lambda x: AccountState.set_user_account_value(
                                 "last_name", x
                             ),
                             width="300px",
@@ -174,9 +175,9 @@ def account_settings_tab() -> rx.Component:
                             class_name="text-m font-medium text-[var(--text-main)]",
                         ),
                         rx.input(
-                            value=UIState.user_account.email,
+                            value=AccountState.user_account.email,
                             placeholder="Enter email address...",
-                            on_change=lambda x: UIState.set_user_account_value(
+                            on_change=lambda x: AccountState.set_user_account_value(
                                 "email", x
                             ),
                             width="300px",
@@ -243,8 +244,8 @@ def security_settings_tab() -> rx.Component:
                     title="Two-Factor Authentication",
                     description="Add an extra layer of security to your account during login.",
                     control=rx.switch(
-                        default_checked=UIState.user_account.enable_2fa,
-                        on_change=lambda x: UIState.set_user_account_value(
+                        default_checked=AccountState.user_account.enable_2fa,
+                        on_change=lambda x: AccountState.set_user_account_value(
                             "enable_2fa", x
                         ),
                     ),
@@ -256,11 +257,14 @@ def security_settings_tab() -> rx.Component:
                 setting_row(
                     title="Active Session",
                     description="Log out of your account.",
-                    control=rx.button(
-                        "Log out",
-                        variant="soft",
-                        color_scheme="orange",
-                        cursor="pointer",
+                    control=rx.dialog.close(
+                        rx.button(
+                            "Log out",
+                            variant="soft",
+                            color_scheme="orange",
+                            cursor="pointer",
+                            on_click=AccountState.set_logged_out,
+                        ),
                     ),
                 ),
                 title="Session Management",
@@ -338,7 +342,7 @@ def settings() -> rx.Component:
                     radius="large",
                     variant="outline",
                     color_scheme="green",
-                    on_click=UIState.apply_settings(),
+                    on_click=UIState.apply_settings,
                 ),
                 class_name="flex justify-end items-center",
             ),
