@@ -4,7 +4,9 @@ Page layout component
 
 import reflex as rx
 
+from lemonade_stand.ui.components.login import login_modal
 from lemonade_stand.ui.components.settings import settings
+from lemonade_stand.ui.states.ui_state import AccountState
 from lemonade_stand.ui.states.ui_state import UIState
 
 
@@ -59,7 +61,7 @@ def header() -> rx.Component:
                             "user", size=18, class_name="text-[var(--text-muted)] mr-2"
                         ),
                         rx.el.span(
-                            f"{UIState.user_account.first_name} {UIState.user_account.last_name}",
+                            f"{AccountState.user_account.first_name} {AccountState.user_account.last_name}",
                             class_name="text-sm font-medium text-[var(--text-main)]",
                         ),
                         class_name="flex items-center group cursor-pointer",
@@ -160,6 +162,7 @@ def page_layout(*main_content) -> rx.Component:
         rx.el.div(
             header(),
             rx.el.div(
+                login_modal(),
                 sidebar(),
                 rx.el.main(
                     *main_content,
