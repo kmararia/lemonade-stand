@@ -69,11 +69,6 @@ class SavingsState(DataState):
                         .then(pl.lit("credit_card"))
                         .otherwise(pl.lit("badge_cent"))
                     ),
-                    health_color=(
-                        pl.when(pl.col("amount") > 0)
-                        .then(pl.lit("yellow"))
-                        .otherwise(pl.lit("green"))
-                    ),
                 )
                 .collect()
             ).to_dicts()
