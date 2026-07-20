@@ -177,6 +177,13 @@ def login_modal() -> rx.Component:
                             variant="soft",
                             size="1",
                             disabled=True,
+                            class_name="""
+                                disabled:bg-[var(--bg-subtle)]
+                                disabled:text-[var(--text-muted)]
+                                disabled:[-webkit-text-fill-color:var(--text-muted)]
+                                disabled:opacity-100
+                                disabled:cursor-not-allowed
+                            """,
                         ),
                         class_name="flex justify-end items-end gap-4",
                     ),

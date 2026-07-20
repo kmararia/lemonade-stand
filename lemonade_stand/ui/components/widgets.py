@@ -123,7 +123,20 @@ def budget_health_widget(
                 ),
                 rx.el.div(
                     rx.el.div(
-                        class_name=f"h-2 rounded-full {budget.progress_color}",
+                        class_name=f"""
+                            h-2 rounded-full
+                            {
+                            rx.cond(
+                                budget.utilization > 90,
+                                "bg-[var(--critical-text)]",
+                                rx.cond(
+                                    budget.utilization > 75,
+                                    "bg-[var(--warning-text)]",
+                                    "bg-[var(--healthy-text)]",
+                                ),
+                            )
+                        }
+                        """,
                         style={"width": f"{budget.utilization}%"},
                     ),
                     class_name="flex-1 h-2 bg-[var(--bg-subtle)] rounded-full overflow-hidden mx-3",
