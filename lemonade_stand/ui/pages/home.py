@@ -8,7 +8,7 @@ import reflex as rx
 from lemonade_stand.ui.components.charts import budget_chart
 from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.layout import page_layout
-from lemonade_stand.ui.components.small_cards import stats_card
+from lemonade_stand.ui.components.small_cards import summary_stats_card
 from lemonade_stand.ui.components.widgets import activity_feed
 from lemonade_stand.ui.components.widgets import budget_health_widget
 from lemonade_stand.ui.components.widgets import category_distribution_widget
@@ -42,7 +42,7 @@ def quick_actions_panel(
                 ),
                 class_name="""
                     flex flex-col items-center justify-center p-4
-                    bg-[var(--bg-card)] rounded-xl border border-[var(--border-subtle)]
+                    bg-[var(--bg-card)] rounded-xl border border-[var(--border-main)]
                     shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1
                     w-full h-full group
                 """,
@@ -74,42 +74,74 @@ def quick_actions_panel(
 
 
 def stats_grid(
-    total_earnings: rx.Var[int | float | Decimal],
-    total_expenses: rx.Var[int | float | Decimal],
     remaining_earnings: rx.Var[int | float | Decimal],
     utilization_pct: rx.Var[int | float | Decimal],
 ) -> rx.Component:
     """"""
 
     return rx.el.div(
-        stats_card(
+        summary_stats_card(
             "Total Earnings",
-            f"${total_earnings:,.0f}",
-            "wallet",
-            trend="+12% from last Q",
-            color="blue",
-            trend_up=True,
+            f"${IncomeState.total_earnings:,.0f}",
+            (
+                "+12% from last Q",  # TODO: update with real values
+                rx.cond(
+                    IncomeState.percentage_of_target_earned >= 20,
+                    "trending-up",
+                    "trending-down",
+                ),
+                rx.cond(
+                    IncomeState.percentage_of_target_earned >= 20,
+                    "emerald",
+                    "red",
+                ),
+            ),
+            icon="wallet",
+            icon_color="emerald",
         ),
-        stats_card(
+        summary_stats_card(
             "Total Spent",
-            f"${total_expenses:,.0f}",
-            "credit-card",
-            trend="+5% vs target",
-            color="indigo",
-            trend_up=False,
+            f"${ExpenseState.total_expenses:,.2f}",
+            (
+                f"{ExpenseState.remaining_budget_percentage:.0f}% of total",
+                rx.cond(
+                    ExpenseState.percentage_of_income_spent < 100,
+                    "trending-up",
+                    "trending-down",
+                ),
+                rx.cond(
+                    ExpenseState.percentage_of_income_spent < 100,
+                    "emerald",
+                    "red",
+                ),
+            ),
+            icon="dollar-sign",
+            icon_color="orange",
         ),
-        stats_card(
+        summary_stats_card(
             "Remaining Earnings",
             f"${remaining_earnings:,.0f}",
-            "piggy-bank",
-            color="indigo",
+            (
+                f"{utilization_pct:.0f}% utilized",
+                rx.cond(
+                    remaining_earnings.to(float) > 0, "trending-up", "trending-down"
+                ),
+                rx.cond(remaining_earnings.to(float) > 0, "emerald", "red"),
+            ),
+            icon="piggy-bank",
+            icon_color="blue",
             progress=utilization_pct,
         ),
-        stats_card(
+        summary_stats_card(
             "Utilization",
-            f"{utilization_pct}%",
-            "pie-chart",
-            color="purple",
+            f"{utilization_pct:.0f}% utilization",
+            (
+                f"{utilization_pct:.0f}% utilized",
+                rx.cond(utilization_pct.to(float) > 80, "trending-up", "trending-down"),
+                rx.cond(utilization_pct.to(float) > 80, "red", "emerald"),
+            ),
+            icon="pie-chart",
+            icon_color="purple",
             progress=utilization_pct,
         ),
         class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5",
@@ -157,8 +189,6 @@ def home_content() -> rx.Component:
             ),
             rx.el.div(
                 stats_grid(
-                    total_earnings=IncomeState.total_earnings,
-                    total_expenses=ExpenseState.total_expenses,
                     remaining_earnings=(
                         IncomeState.total_earnings - ExpenseState.total_expenses
                     ),
