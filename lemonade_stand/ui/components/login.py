@@ -33,7 +33,8 @@ def login_form() -> rx.Component:
         ),
         # Action Buttons
         rx.button(
-            "Log In",
+            rx.icon("fingerprint", size=18),
+            rx.el.span("Log In"),
             size="3",
             radius="large",
             on_click=AccountState.set_logged_in,
