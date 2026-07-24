@@ -252,7 +252,7 @@ def data_table(
             ),
         ),
         edit_modal_func(),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
     )
 
 
@@ -279,7 +279,7 @@ def budget_variance_table(
                 class_name="""
                     font-bold text-left pl-3 pr-2 py-1.5
                     bg-[var(--orange-color)] text-[var(--text-main)]
-                    border-b-[2px] border-r-[3px] border-[var(--border-subtle)]
+                    border-b-[3px] border-r-[3px] border-[var(--border-main)]
                 """,
             ),
             rx.el.td(f"{item.spent_amount:,.2f}", class_name=td_comp_class),
@@ -359,7 +359,7 @@ def budget_variance_table(
         ),
         class_name="""
             bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl
-            border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)]
+            border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)]
             w-full h-full
         """,
     )

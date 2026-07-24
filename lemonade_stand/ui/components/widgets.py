@@ -101,7 +101,7 @@ def activity_feed(
         ),
         class_name="""
             py-6 px-4 flex flex-col
-            bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl border border-[var(--border-subtle)]
+            bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl border border-[var(--border-main)]
             shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full min-h-0 overflow-hidden
         """,
     )
@@ -198,7 +198,7 @@ def budget_health_widget(
             rx.foreach(health_stats, budget_health_row),
             class_name="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar pr-2",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-7 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-7 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -285,7 +285,7 @@ def category_distribution_widget(
             ),
             class_name="flex justify-center gap-6",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -340,5 +340,5 @@ def top_category_widget(
             rx.foreach(top_category_list, top_category_row),
             class_name="flex flex-col",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-sm h-full",
     )
