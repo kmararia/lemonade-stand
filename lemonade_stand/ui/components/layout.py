@@ -6,6 +6,7 @@ import reflex as rx
 
 from lemonade_stand.ui.components.login import login_modal
 from lemonade_stand.ui.components.settings import settings
+from lemonade_stand.ui.states.data_state import DataState
 from lemonade_stand.ui.states.ui_state import AccountState
 from lemonade_stand.ui.states.ui_state import UIState
 
@@ -119,7 +120,33 @@ def sidebar() -> rx.Component:
             ),
             href=href,
             title=text,
-            class_name="w-full block mb-1 px-4",
+            class_name="w-full block mb-1 px-6",
+        )
+
+    def power_item(
+        text: str, icon_name: str, action: rx.event, is_destructive: bool = False
+    ) -> rx.Component:
+        """A sleek, fully clickable menu row for the power menu in the sidebar."""
+
+        # Dynamically set colors
+        text_color = rx.cond(
+            is_destructive,
+            "text-red-500 hover:text-red-600",
+            "text-[var(--text-main)] hover:text-[var(--accent-color)]",
+        )
+        bg_hover = rx.cond(
+            is_destructive, "hover:bg-red-500/10", "hover:bg-[var(--bg-subtle)]"
+        )
+
+        return rx.el.button(
+            rx.icon(icon_name, size=18, class_name="shrink-0"),
+            rx.el.span(text, class_name="ml-3 font-medium text-sm"),
+            on_click=action,
+            class_name=f"""
+                flex items-center w-full px-3 py-2 rounded-md
+                transition-all duration-200 cursor-pointer
+                {text_color} {bg_hover}
+            """,
         )
 
     return rx.el.aside(
@@ -145,7 +172,45 @@ def sidebar() -> rx.Component:
                     sidebar_item("Savings", "piggy-bank", href="/savings"),
                     sidebar_item("Expenses", "wallet", href="/expenses"),
                     sidebar_item("Goals", "badge_check", href="/goals"),
-                    class_name="space-y-1 py-6 px-2",
+                    class_name="space-y-1 py-6",
+                ),
+                rx.popover.root(
+                    rx.popover.trigger(
+                        rx.icon_button(
+                            rx.icon("power", size=20),
+                            variant="ghost",
+                            class_name="""
+                                absolute bottom-10 ml-6 text-[var(--warning-text)]
+                                hover:text-[var(--critical-text)] hover:bg-[var(--critical-bg)]
+                                transition-colors cursor-pointer
+                            """,
+                        ),
+                    ),
+                    rx.popover.content(
+                        rx.el.div(
+                            power_item(
+                                text="Refresh",
+                                icon_name="refresh-cw",
+                                action=DataState.reload_data,
+                            ),
+                            power_item(
+                                text="Logout",
+                                icon_name="log-out",
+                                action=AccountState.set_logged_out,
+                            ),
+                            power_item(
+                                text="Purge Data",
+                                icon_name="trash-2",
+                                action=DataState.purge_data,
+                                is_destructive=True,
+                            ),
+                            class_name="flex flex-col w-40 p-1 gap-0.5",
+                        ),
+                        side="right",
+                        align="end",
+                        custom_attrs={"data-theme": UIState.user_config.theme},
+                        class_name="bg-[var(--bg-card)] border border-[var(--border-main)] rounded-xl shadow-xl overflow-hidden",
+                    ),
                 ),
             ),
             class_name="relative h-full bg-[var(--app-bg-inner)]",
