@@ -14,10 +14,13 @@ from .utils import UserData
 LOGGER = set_up_logger(Path(__file__).stem)
 
 
-def get_data(config: UserConfig) -> UserData:
+def get_data(config: UserConfig, full_refresh: bool = False) -> UserData:
     """A function to read data from database if exists otherwise process from start"""
 
-    if not config.data.always_refresh_data:
+    if bool(config.data.always_refresh_data) or full_refresh:
+        return UserData.generate_from_scratch(user_config=config)
+
+    else:
         LOGGER.info("Reading pre-processed tables from data directory")
 
         try:
@@ -35,9 +38,6 @@ def get_data(config: UserConfig) -> UserData:
             )
 
             return UserData.generate_from_scratch(user_config=config)
-
-    else:
-        return UserData.generate_from_scratch(user_config=config)
 
 
 # Expose only the user data

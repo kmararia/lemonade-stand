@@ -185,13 +185,19 @@ class DataState(rx.State):
             ),
         )
 
-    @rx.event
-    def load_shared_data(self) -> None:
-        """Lazily load user-data when page is loaded."""
+    def load_user_data(self, full_refresh: bool = False) -> None:
+        """Load user data from disk or refresh from scratch."""
 
-        if self._master_data is None:
-            LOGGER.info("User session active: Fetching transaction data from disk...")
-            self._master_data = get_data(config=UserConfig())
+        if full_refresh or self._master_data is None:
+            if full_refresh:
+                LOGGER.info("Reloading transaction data from scratch...")
+                self._master_data = get_data(config=UserConfig(), full_refresh=True)
+
+            elif self._master_data is None:
+                LOGGER.info(
+                    "User session active: Fetching transaction data from disk..."
+                )
+                self._master_data = get_data(config=UserConfig())
 
             # Sync initial filtered view with our master data copy
             self._shared_data = UserData(
@@ -200,6 +206,21 @@ class DataState(rx.State):
                 expenses=self.apply_allocations("expenses", self._master_data.expenses),
                 unknown=self.apply_allocations("unknown", self._master_data.unknown),
             )
+
+    @rx.event
+    def load_shared_data(self) -> None:
+        """Lazily load user-data when page is loaded."""
+        self.load_user_data(full_refresh=False)
+
+    @rx.event
+    def reload_data(self) -> None:
+        """Reload user-data from scratch."""
+        self.load_user_data(full_refresh=True)
+
+    @rx.event
+    def purge_data(self) -> None:
+        """Purge all user data and reset the state."""
+        pass
 
     @rx.var
     def available_months(self) -> list[str]:
