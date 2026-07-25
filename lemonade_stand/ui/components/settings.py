@@ -79,7 +79,7 @@ def preferences_settings_tab() -> rx.Component:
                     title="Always skip login",
                     description="Bypass session identity confirmation checks on app launch",
                     control=rx.switch(
-                        default_checked=UIState.user_config.always_skip_login,
+                        default_checked=AccountState.user_account.always_skip_login,
                         on_change=lambda x: UIState.set_config_value(
                             "always_skip_login", x
                         ),

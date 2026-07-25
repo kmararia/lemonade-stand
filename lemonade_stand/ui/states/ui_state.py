@@ -21,7 +21,6 @@ class SettingsConfig:
     app_version: str
     statement_dir: str
     training_file: str
-    always_skip_login: bool
     always_refresh_data: bool
     theme: str
 
@@ -87,7 +86,6 @@ class UIState(rx.State):
             statement_dir=str(config.data.statement_dir),
             training_file=str(config.model.training_file),
             always_refresh_data=config.data.always_refresh_data,
-            always_skip_login=config.ui.always_skip_login,
             theme=config.ui.theme,
         )
 
