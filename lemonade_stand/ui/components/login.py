@@ -1,0 +1,226 @@
+""" """
+
+import reflex as rx
+
+from lemonade_stand.ui.states.ui_state import AccountState
+from lemonade_stand.ui.states.ui_state import UIState
+
+
+def login_form() -> rx.Component:
+    """The standard username and password inputs."""
+    return rx.el.div(
+        # Inputs
+        rx.el.div(
+            rx.el.label(
+                "Username",
+                class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+            ),
+            rx.input(placeholder="Enter your username", size="3", radius="large"),
+            class_name="mb-4",
+        ),
+        rx.el.div(
+            rx.el.label(
+                "Password",
+                class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+            ),
+            rx.input(
+                placeholder="Enter your password",
+                type="password",
+                size="3",
+                radius="large",
+            ),
+            class_name="mb-10",
+        ),
+        # Action Buttons
+        rx.button(
+            rx.icon("fingerprint", size=18),
+            rx.el.span("Log In"),
+            size="3",
+            radius="large",
+            on_click=AccountState.set_logged_in,
+            class_name="w-full bg-[var(--accent-color)] text-[var(--app-bg-inner)] font-bold hover:opacity-90 transition-opacity",
+        ),
+        rx.el.div(
+            rx.el.span(
+                "Don't have an account?",
+                class_name="text-[var(--text-muted)] text-sm mr-2",
+            ),
+            rx.el.button(
+                "Create one",
+                on_click=AccountState.toggle_registering,
+                class_name="text-sm font-semibold text-[var(--accent-color)] hover:underline",
+            ),
+            class_name="mt-10 text-center",
+        ),
+        class_name="w-full max-w-md mx-auto mt-12 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
+    )
+
+
+def register_form() -> rx.Component:
+    """The account creation inputs."""
+    return rx.el.div(
+        # Inputs
+        rx.el.div(
+            rx.el.div(
+                rx.el.label(
+                    "First Name",
+                    class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+                ),
+                rx.input(
+                    placeholder=AccountState.user_account.first_name,
+                    size="3",
+                    radius="large",
+                ),
+            ),
+            rx.el.div(
+                rx.el.label(
+                    "Last Name",
+                    class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+                ),
+                rx.input(
+                    placeholder=AccountState.user_account.last_name,
+                    size="3",
+                    radius="large",
+                ),
+            ),
+            class_name="grid grid-cols-2 gap-4 mb-4",
+        ),
+        rx.el.div(
+            rx.el.label(
+                "Email Address",
+                class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+            ),
+            rx.input(
+                placeholder=AccountState.user_account.email,
+                type="email",
+                size="3",
+                radius="large",
+            ),
+            class_name="mb-4",
+        ),
+        rx.el.div(
+            rx.el.label(
+                "Username",
+                class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+            ),
+            rx.input(
+                placeholder=AccountState.user_account.username, size="3", radius="large"
+            ),
+            class_name="mb-4",
+        ),
+        rx.el.div(
+            rx.el.label(
+                "Password",
+                class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
+            ),
+            rx.input(
+                placeholder="Create a password",
+                type="password",
+                size="3",
+                radius="large",
+            ),
+            class_name="mb-10",
+        ),
+        # Action Buttons
+        rx.button(
+            "Create Account",
+            size="3",
+            radius="large",
+            on_click=AccountState.set_logged_in,
+            class_name="w-full bg-[var(--accent-color)] text-[var(--app-bg-inner)] font-bold hover:opacity-90 transition-opacity",
+        ),
+        rx.el.div(
+            rx.el.span(
+                "Already have an account?",
+                class_name="text-[var(--text-muted)] text-sm mr-2",
+            ),
+            rx.el.button(
+                "Log in instead",
+                on_click=AccountState.toggle_registering,
+                class_name="text-sm font-semibold text-[var(--accent-color)] hover:underline",
+            ),
+            class_name="mt-10 text-center",
+        ),
+        class_name="w-full max-w-md mx-auto mt-12 mb-4 animate-in fade-in slide-in-from-bottom-2 duration-300",
+    )
+
+
+def login_modal() -> rx.Component:
+    """Login modal window."""
+
+    return rx.cond(
+        AccountState.logged_in,
+        rx.fragment(),
+        rx.el.div(
+            # Modal Content Container
+            rx.el.div(
+                rx.el.div(
+                    # Header
+                    rx.el.div(
+                        rx.icon(
+                            "citrus", size=28, class_name="text-orange-500 shrink-0"
+                        ),
+                        rx.el.h1(
+                            rx.el.span("Lemonade"),
+                            rx.el.span("Stand", class_name="text-indigo-500"),
+                            class_name="flex items-center gap-1 text-xl font-bold text-[var(--text-main)] ml-3 tracking-tight",
+                        ),
+                        class_name="flex items-center",
+                    ),
+                    rx.el.div(
+                        rx.el.label(
+                            "Version:",
+                            class_name="p-1 block text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider",
+                        ),
+                        rx.input(
+                            value=UIState.user_config.app_version,
+                            color_scheme="gold",
+                            variant="soft",
+                            size="1",
+                            disabled=True,
+                            class_name="""
+                                disabled:bg-[var(--bg-subtle)]
+                                disabled:text-[var(--text-muted)]
+                                disabled:[-webkit-text-fill-color:var(--text-muted)]
+                                disabled:opacity-100
+                                disabled:cursor-not-allowed
+                            """,
+                        ),
+                        class_name="flex justify-end items-end gap-4",
+                    ),
+                    class_name="flex justify-between items-center gap-4 mt-4",
+                ),
+                # Dynamically switch the form based on state
+                rx.cond(
+                    AccountState.is_registering,
+                    register_form(),
+                    login_form(),
+                ),
+                # Theme
+                rx.el.div(
+                    rx.icon_button(
+                        rx.icon("palette", size=18),
+                        variant="ghost",
+                        radius="full",
+                        on_click=UIState.cycle_theme,
+                        class_name="""
+                            text-[var(--accent-color)] hover:text-[var(--accent-color)]
+                            hover:bg-[var(--bg-subtle)] transition-colors
+                        """,
+                    ),
+                    class_name="flex justify-end",
+                ),
+                class_name="""
+                    flex-1 p-6 md:p-8 w-full max-w-2xl
+                    bg-[var(--bg-card)] rounded-2xl
+                    border border-[var(--border-subtle)] shadow-lg
+                    shadow-2xl outline-none overflow-y-auto scroll-smooth
+                """,
+            ),
+            class_name="""
+                fixed inset-0 z-[9999]
+                flex items-center justify-center p-4
+                backdrop-blur-md bg-black/40
+            """,
+        ),
+    )

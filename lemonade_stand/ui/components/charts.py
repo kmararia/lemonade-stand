@@ -166,7 +166,7 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full",
     )
 
 
@@ -235,7 +235,7 @@ def trend_chart(
             ),
             class_name="w-full h-[340px]",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl pt-6 px-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm w-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl pt-6 px-6 rounded-2xl border border-[var(--border-main)] shadow-sm w-full",
     )
 
 
@@ -333,5 +333,5 @@ def pie_chart(
             ),
             class_name="grid grid-cols-3 w-full items-center",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm w-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-sm w-full",
     )

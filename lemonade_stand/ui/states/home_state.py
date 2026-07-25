@@ -17,7 +17,6 @@ class TransactionActivity:
     description: str
     amount: float
     payment_type: str
-    health_color: str
 
 
 @dataclass
@@ -29,9 +28,6 @@ class BudgetHealthStats:
     allocated_amount: float
     remaining_amount: float
     utilization: float
-    health_color: str
-    health_bg: str
-    progress_color: str
 
 
 class HomeState(DataState):
@@ -65,15 +61,6 @@ class HomeState(DataState):
                         )
                         .then(pl.lit("credit_card"))
                         .otherwise(pl.lit("badge_cent"))
-                    ),
-                    health_color=pl.col("payment_type").replace_strict(
-                        {
-                            "income": "green",
-                            "savings": "blue",
-                            "expenses": "yellow",
-                            "unknown": "gray",
-                        },
-                        default="gray",
                     ),
                 )
                 .collect()
@@ -154,9 +141,6 @@ class HomeState(DataState):
                 allocated_amount=x["allocated_amount"],
                 remaining_amount=x["remaining_amount"],
                 utilization=x["utilization"],
-                health_color=f"text-{x['color']}-500",
-                health_bg=f"bg-{x['color']}-50",
-                progress_color=f"bg-{x['color']}-500",
             )
             for x in self.home_page_data
         ]

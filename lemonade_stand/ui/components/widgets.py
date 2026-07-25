@@ -101,7 +101,7 @@ def activity_feed(
         ),
         class_name="""
             py-6 px-4 flex flex-col
-            bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl border border-[var(--border-subtle)]
+            bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl border border-[var(--border-main)]
             shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full min-h-0 overflow-hidden
         """,
     )
@@ -123,7 +123,20 @@ def budget_health_widget(
                 ),
                 rx.el.div(
                     rx.el.div(
-                        class_name=f"h-2 rounded-full {budget.progress_color}",
+                        class_name=f"""
+                            h-2 rounded-full
+                            {
+                            rx.cond(
+                                budget.utilization > 90,
+                                "bg-[var(--critical-text)]",
+                                rx.cond(
+                                    budget.utilization > 75,
+                                    "bg-[var(--warning-text)]",
+                                    "bg-[var(--healthy-text)]",
+                                ),
+                            )
+                        }
+                        """,
                         style={"width": f"{budget.utilization}%"},
                     ),
                     class_name="flex-1 h-2 bg-[var(--bg-subtle)] rounded-full overflow-hidden mx-3",
@@ -185,7 +198,7 @@ def budget_health_widget(
             rx.foreach(health_stats, budget_health_row),
             class_name="flex flex-col max-h-[300px] overflow-y-auto custom-scrollbar pr-2",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-7 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-7 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -272,7 +285,7 @@ def category_distribution_widget(
             ),
             class_name="flex justify-center gap-6",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
     )
 
 
@@ -327,5 +340,5 @@ def top_category_widget(
             rx.foreach(top_category_list, top_category_row),
             class_name="flex flex-col",
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-subtle)] shadow-sm h-full",
+        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-sm h-full",
     )
