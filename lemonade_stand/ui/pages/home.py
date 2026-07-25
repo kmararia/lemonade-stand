@@ -134,7 +134,7 @@ def stats_grid(
         ),
         summary_stats_card(
             "Utilization",
-            f"{utilization_pct:.0f}% utilization",
+            f"{utilization_pct:.0f}%",
             (
                 f"{utilization_pct:.0f}% utilized",
                 rx.cond(utilization_pct.to(float) > 80, "trending-up", "trending-down"),
