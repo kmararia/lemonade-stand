@@ -62,6 +62,13 @@ class AccountState(rx.State):
         """Swaps the modal between Login and Create Account views."""
         self.is_registering = not self.is_registering
 
+    @rx.event
+    def apply_account_settings(self):
+        """Applies the account settings."""
+        self.user_account.update_attribute(mappings=self.config_updates)
+        self.config_updates.clear()
+        self._refresh += 1
+
 
 class UIState(rx.State):
     """State for UI interactions like sidebar toggling."""

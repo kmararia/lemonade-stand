@@ -15,7 +15,14 @@ def login_form() -> rx.Component:
                 "Username",
                 class_name="block text-sm font-medium text-[var(--text-main)] mb-1",
             ),
-            rx.input(placeholder="Enter your username", size="3", radius="large"),
+            rx.input(
+                placeholder="Enter your username",
+                size="3",
+                radius="large",
+                on_key_down=lambda key: rx.cond(
+                    key == "Enter", AccountState.set_logged_in, None
+                ),
+            ),
             class_name="mb-4",
         ),
         rx.el.div(
@@ -28,6 +35,9 @@ def login_form() -> rx.Component:
                 type="password",
                 size="3",
                 radius="large",
+                on_key_down=lambda key: rx.cond(
+                    key == "Enter", AccountState.set_logged_in, None
+                ),
             ),
             class_name="mb-10",
         ),
@@ -118,6 +128,9 @@ def register_form() -> rx.Component:
                 type="password",
                 size="3",
                 radius="large",
+                on_key_down=lambda key: rx.cond(
+                    key == "Enter", AccountState.set_logged_in, None
+                ),
             ),
             class_name="mb-10",
         ),

@@ -357,7 +357,10 @@ def settings() -> rx.Component:
                     radius="large",
                     variant="outline",
                     color_scheme="green",
-                    on_click=UIState.apply_settings,
+                    on_click=[
+                        UIState.apply_settings,
+                        AccountState.apply_account_settings,
+                    ],
                 ),
                 class_name="flex justify-end items-center",
             ),
