@@ -283,9 +283,24 @@ def settings() -> rx.Component:
 
     return rx.dialog.root(
         rx.dialog.trigger(
-            rx.el.a(
-                "Settings",
-                class_name="text-sm font-medium text-[var(--text-main)] hover:text-[var(--selected-color)] mr-6 transition-colors",
+            # Swapped to rx.el.button so it can stretch dynamically
+            rx.el.button(
+                rx.icon("settings", size=20, class_name="shrink-0"),
+                # Adding the text so it perfectly matches the tabs when extended
+                rx.cond(
+                    ~UIState.is_sidebar_collapsed,
+                    rx.el.span(
+                        "Settings",
+                        class_name="whitespace-nowrap ml-3 transition-opacity duration-300",
+                    ),
+                    rx.fragment(),
+                ),
+                class_name=f"""
+                    flex items-center w-full px-4 py-3 rounded-2xl transition-all duration-300 ease-out
+                    hover:bg-[var(--bg-card)] text-[var(--selected-color)] hover:text-[var(--text-main)]
+                    border border-transparent z-0 hover:scale-105 cursor-pointer
+                    {rx.cond(UIState.is_sidebar_collapsed, "justify-center", "justify-start px-2")}
+                """,
             ),
         ),
         rx.dialog.content(
