@@ -38,7 +38,7 @@ class AccountState(rx.State):
     def user_account(self) -> AccountConfig:
         """Returns the user account configuration."""
         _ = self._refresh
-        return AccountConfig()
+        return _ACCOUNT_CONFIG
 
     @rx.event
     def set_logged_in(self):

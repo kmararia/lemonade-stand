@@ -137,7 +137,7 @@ def expense_page() -> rx.Component:
                 summary_stats_card(
                     "Top Category",
                     f"{ExpenseState.top_spending_category}",
-                    ("Most active expense category", "eye", "purple"),
+                    ("Most active expense category", "eye", "green"),
                     icon="tag",
                     icon_color="purple",
                 ),

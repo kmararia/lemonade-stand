@@ -41,4 +41,4 @@ def get_data(config: UserConfig, full_refresh: bool = False) -> UserData:
 
 
 # Expose only the user data
-__all__ = ["get_data"]
+__all__ = ["get_data", "UserData"]

@@ -81,25 +81,6 @@ def stats_grid(
 
     return rx.el.div(
         summary_stats_card(
-            "Total Earnings",
-            f"${IncomeState.total_earnings:,.0f}",
-            (
-                "+12% from last Q",  # TODO: update with real values
-                rx.cond(
-                    IncomeState.percentage_of_target_earned >= 20,
-                    "trending-up",
-                    "trending-down",
-                ),
-                rx.cond(
-                    IncomeState.percentage_of_target_earned >= 20,
-                    "emerald",
-                    "red",
-                ),
-            ),
-            icon="wallet",
-            icon_color="emerald",
-        ),
-        summary_stats_card(
             "Total Spent",
             f"${ExpenseState.total_expenses:,.2f}",
             (
@@ -117,6 +98,25 @@ def stats_grid(
             ),
             icon="dollar-sign",
             icon_color="orange",
+        ),
+        summary_stats_card(
+            "Total Earnings",
+            f"${IncomeState.total_earnings:,.0f}",
+            (
+                "+12% from last Q",  # TODO: update with real values
+                rx.cond(
+                    IncomeState.percentage_of_target_earned >= 20,
+                    "trending-up",
+                    "trending-down",
+                ),
+                rx.cond(
+                    IncomeState.percentage_of_target_earned >= 20,
+                    "emerald",
+                    "red",
+                ),
+            ),
+            icon="wallet",
+            icon_color="emerald",
         ),
         summary_stats_card(
             "Remaining Earnings",
