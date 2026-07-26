@@ -18,6 +18,7 @@ class AppPaths:
     config_dir: Path = field(init=False)
     data_dir: Path = field(init=False)
     model_dir: Path = field(init=False)
+    ui_dir: Path = field(init=False)
     metadata_path: Path = field(init=False)
 
     def __post_init__(self):
@@ -28,6 +29,7 @@ class AppPaths:
         self.config_dir = self.root_dir / "configs"
         self.data_dir = self.root_dir / "shared" / "data"
         self.model_dir = self.root_dir / "shared" / "model"
+        self.ui_dir = self.root_dir / "shared" / "ui"
 
     def __str__(self):
         """String representation of the class"""

@@ -12,6 +12,7 @@ from lemonade_stand.config import UserConfig
 from lemonade_stand.data import UserData
 from lemonade_stand.data import get_data
 from lemonade_stand.data.read import Statement
+from lemonade_stand.ui.utils import Allocations
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(__name__)
@@ -94,17 +95,13 @@ class DataState(rx.State):
 
     _master_data: UserData | None = None
     _shared_data: UserData | None = None
-    allocations: dict[str, list[dict[str, typing.Any]]] = {
-        "income": [],
-        "savings": [],
-        "expenses": [],
-        "unknown": [],
-    }
+    allocations: dict[str, Allocations] = {}
     selected_year: str = ""
     selected_month: str = ""
 
     is_edit_modal_open: bool = False
     edit_values: dict[str, typing.Any] = {}
+    allocation_updates: dict[str, tuple[str, float]] = {}
 
     @rx.var
     def shared_data(self) -> UserData:
@@ -116,33 +113,19 @@ class DataState(rx.State):
         return self._shared_data
 
     def apply_allocations(self, name: str, data_df: pl.LazyFrame) -> pl.LazyFrame:
-        """"""
-        if len(self.allocations[name]) == 0:
-            new_allocations = (
-                data_df.select(
-                    category=pl.col("category"),
-                    allocated_amount=pl.coalesce(
-                        (
-                            pl.col("amount").abs().mean().over("category")
-                            * pl.col("date").dt.strftime("%Y-%m").n_unique()
-                        ),
-                        pl.lit(0),
-                    ).round(0),
-                )
-                .unique()
-                .collect()
-            ).to_dicts()
+        """Applies allocations to the given data frame."""
 
-            if len(new_allocations) == 0:
-                return data_df.with_columns(allocated_amount=pl.lit(0).cast(pl.Float64))
-            else:
-                self.allocations[name] = new_allocations
+        self.allocations[name] = Allocations(name=name, _transaction_df=data_df)
 
         return data_df.join(
-            pl.LazyFrame(self.allocations[name]),
+            self.allocations[name].as_frame,
             on="category",
             how="left",
             coalesce=True,
+        ).with_columns(
+            allocated_amount=pl.coalesce(
+                pl.col("allocated_amount"), pl.lit(0).cast(pl.Float64)
+            )
         )
 
     def filter_data_dates(self) -> None:
