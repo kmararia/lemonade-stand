@@ -3,6 +3,7 @@
 import reflex as rx
 
 from lemonade_stand.ui.pages.expense import expense_page
+from lemonade_stand.ui.pages.goals import goals_page
 from lemonade_stand.ui.pages.home import home_content
 from lemonade_stand.ui.pages.income import income_page
 from lemonade_stand.ui.pages.savings import savings_page
@@ -23,3 +24,4 @@ app.add_page(home_content, route="/", on_load=DataState.load_shared_data)
 app.add_page(income_page, route="/income", on_load=DataState.load_shared_data)
 app.add_page(savings_page, route="/savings", on_load=DataState.load_shared_data)
 app.add_page(expense_page, route="/expenses", on_load=DataState.load_shared_data)
+app.add_page(goals_page, route="/goals", on_load=DataState.load_shared_data)
