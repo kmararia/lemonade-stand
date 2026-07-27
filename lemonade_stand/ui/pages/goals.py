@@ -5,6 +5,7 @@ import typing
 import reflex as rx
 
 from lemonade_stand.ui.components.layout import page_layout
+from lemonade_stand.ui.components.widgets import category_distribution_widget
 from lemonade_stand.ui.states.goals_state import GoalState
 from lemonade_stand.ui.states.goals_state import UserGoal
 
@@ -135,7 +136,7 @@ def budgets_widget() -> rx.Component:
             ),
             class_name="flex gap-3 items-center mt-2 pt-4 border-t border-[var(--border-subtle)]",
         ),
-        class_name="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-main)] shadow-sm w-full mb-10",
+        class_name="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-main)] shadow-sm w-full h-full mb-10",
     )
 
 
@@ -470,8 +471,20 @@ def goals_page() -> rx.Component:
             ),
             # TOP HALF: BUDGETS
             rx.el.div(
-                budgets_widget(),
-                class_name="animate-in fade-in slide-in-from-bottom-4 duration-500",
+                rx.el.div(
+                    budgets_widget(),
+                    class_name="lg:col-span-2 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                ),
+                rx.el.div(
+                    category_distribution_widget(
+                        icon="wallet",
+                        card_title="Total Income",
+                        total_earnings=GoalState.total_budget_amount,
+                        earnings_categories=GoalState.budget_distribution_data,
+                    ),
+                    class_name="lg:col-span-1",
+                ),
+                class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700",
             ),
             # BOTTOM HALF: GOALS
             rx.el.div(
