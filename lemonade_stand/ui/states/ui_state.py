@@ -28,17 +28,10 @@ class SettingsConfig:
 class AccountState(rx.State):
     """State for authentication interactions like login and logout."""
 
+    user_account: AccountConfig = _ACCOUNT_CONFIG
     config_updates: dict[str, typing.Any] = {}
     logged_in: bool = _ACCOUNT_CONFIG.always_skip_login
     is_registering: bool = False
-
-    _refresh: int = 0
-
-    @rx.var
-    def user_account(self) -> AccountConfig:
-        """Returns the user account configuration."""
-        _ = self._refresh
-        return _ACCOUNT_CONFIG
 
     @rx.event
     def set_logged_in(self):
@@ -66,7 +59,6 @@ class AccountState(rx.State):
         """Applies the account settings."""
         self.user_account.update_attribute(mappings=self.config_updates)
         self.config_updates.clear()
-        self._refresh += 1
 
 
 class UIState(rx.State):

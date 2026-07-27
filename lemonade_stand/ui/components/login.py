@@ -47,7 +47,10 @@ def login_form() -> rx.Component:
             rx.el.span("Log In"),
             size="3",
             radius="large",
-            on_click=AccountState.set_logged_in,
+            on_click=[
+                AccountState.set_logged_in,
+                AccountState.apply_account_settings,
+            ],
             class_name="w-full bg-[var(--accent-color)] text-[var(--app-bg-inner)] font-bold hover:opacity-90 transition-opacity",
         ),
         rx.el.div(
@@ -209,8 +212,27 @@ def login_modal() -> rx.Component:
                     register_form(),
                     login_form(),
                 ),
-                # Theme
+                # Login switch and Theme
                 rx.el.div(
+                    rx.cond(
+                        AccountState.is_registering,
+                        rx.fragment(),
+                        rx.hstack(
+                            rx.switch(
+                                size="1",
+                                radius="small",
+                                default_checked=AccountState.user_account.always_skip_login,
+                                on_change=lambda x: AccountState.set_user_account_value(
+                                    "always_skip_login", x
+                                ),
+                                class_name="items-end shrink-0",
+                            ),
+                            rx.el.label(
+                                "always skip login",
+                                class_name="block text-sm font-medium text-[var(--text-muted)]",
+                            ),
+                        ),
+                    ),
                     rx.icon_button(
                         rx.icon("palette", size=18),
                         variant="ghost",
@@ -221,7 +243,7 @@ def login_modal() -> rx.Component:
                             hover:bg-[var(--bg-subtle)] transition-colors
                         """,
                     ),
-                    class_name="flex justify-end",
+                    class_name="flex justify-between mt-3",
                 ),
                 class_name="""
                     flex-1 p-6 md:p-8 w-full max-w-2xl
