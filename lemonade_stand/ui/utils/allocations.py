@@ -174,6 +174,17 @@ class Allocations:
                         )
                     ),
                     "allocated_amount": allocated_amount,
+                    "progress": (
+                        (
+                            self.transaction_info.get(category, {}).get(
+                                "transaction_amount", 0
+                            )
+                            / allocated_amount
+                            * 100
+                        )
+                        if allocated_amount > 0
+                        else 0
+                    ),
                 }
             )
             self.as_frame = pl.LazyFrame(self.as_dicts)

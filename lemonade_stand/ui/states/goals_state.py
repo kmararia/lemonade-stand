@@ -20,6 +20,9 @@ class GoalState(DataState):
     current_goal: UserGoal = UserGoal()
     goals_obj: AllGoals = AllGoals()
 
+    new_category_name: str = ""
+    new_allocation_amount: str | int | float = ""
+
     @rx.var
     def goals(self) -> list[UserGoal]:
         """Return the list of goals."""
@@ -90,13 +93,16 @@ class GoalState(DataState):
 
     @rx.event
     def set_allocation_update(
-        self, category_type: str, new_category: str, new_amount: float
+        self, category_type: str, new_category: str, new_amount: str | int | float
     ):
         """Updates a specific allocation setting."""
-        curr_updates = self.allocation_updates.get(category_type, ("", 0.0))
+        curr_updates = self.allocation_updates.get(category_type, ("", ""))
+
+        self.new_category_name = new_category if new_category != "" else curr_updates[0]
+        self.new_allocation_amount = new_amount if new_amount != "" else curr_updates[1]
         self.allocation_updates[category_type] = (
-            new_category if new_category != "" else curr_updates[0],
-            new_amount if float(new_amount) != 0.0 else curr_updates[1],
+            self.new_category_name,
+            float(self.new_allocation_amount),
         )
 
     @rx.event
@@ -109,11 +115,16 @@ class GoalState(DataState):
                 self.allocations[category_type] = Allocations(
                     name=category_type, _transaction_df=self.shared_data.expenses
                 )
+
             self.allocations[category_type].add_allocation(
                 category=updates[0], allocated_amount=float(updates[1])
             )
+            self.allocations = self.allocations
 
             # Reset the allocation update after adding
             self.allocation_updates = {
                 k: v for k, v in self.allocation_updates.items() if k != category_type
             }
+
+            self.new_category_name = ""
+            self.new_allocation_amount = ""

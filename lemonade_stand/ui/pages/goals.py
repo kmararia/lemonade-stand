@@ -117,18 +117,20 @@ def budgets_widget() -> rx.Component:
         rx.el.div(
             rx.el.input(
                 placeholder="New budget name...",
-                on_change=lambda x: GoalState.set_allocation_update("expense", x, 0.0),
+                value=GoalState.new_category_name,
+                on_change=lambda x: GoalState.set_allocation_update("expenses", x, ""),
                 class_name="flex-1 bg-[var(--app-bg-inner)] border border-[var(--border-main)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-main)] focus:border-[var(--accent-color)] outline-none shadow-sm",
             ),
             rx.el.input(
                 type="number",
                 placeholder="$ Amount",
-                on_change=lambda x: GoalState.set_allocation_update("expense", "", x),
+                value=GoalState.new_allocation_amount,
+                on_change=lambda x: GoalState.set_allocation_update("expenses", "", x),
                 class_name="w-45 bg-[var(--app-bg-inner)] border border-[var(--border-main)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-main)] focus:border-[var(--accent-color)] outline-none shadow-sm",
             ),
             rx.el.button(
                 rx.icon("plus", size=20),
-                on_click=lambda _: GoalState.add_new_allocation("expense"),
+                on_click=lambda _: GoalState.add_new_allocation("expenses"),
                 class_name="p-2.5 bg-[var(--accent-color)] text-[var(--app-bg-inner)] rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm flex items-center justify-center",
             ),
             class_name="flex gap-3 items-center mt-2 pt-4 border-t border-[var(--border-subtle)]",
