@@ -4,8 +4,10 @@ import typing
 
 import reflex as rx
 
+from lemonade_stand.ui.components.date_picker import date_picker
 from lemonade_stand.ui.components.layout import page_layout
 from lemonade_stand.ui.components.widgets import category_distribution_widget
+from lemonade_stand.ui.states.goals_state import BudgetState
 from lemonade_stand.ui.states.goals_state import GoalState
 from lemonade_stand.ui.states.goals_state import UserGoal
 
@@ -50,9 +52,18 @@ def budgets_widget() -> rx.Component:
 
         return rx.el.div(
             rx.el.div(
-                rx.el.span(
-                    budget["category"],
-                    class_name="text-sm font-semibold text-[var(--text-main)] truncate mb-3",
+                rx.el.div(
+                    rx.el.button(
+                        rx.icon("pencil", size=14),
+                        on_click=lambda: BudgetState.open_edit_modal(budget),
+                        class_name="text-[var(--text-muted)] hover:text-[var(--accent-color)] transition-colors cursor-pointer py-1.5 px-2 rounded-md hover:bg-[var(--bg-subtle)] flex items-center justify-center outline-none",
+                        title="Edit Budget",
+                    ),
+                    rx.el.span(
+                        budget["category"],
+                        class_name="text-sm font-semibold text-[var(--text-main)] truncate",
+                    ),
+                    class_name="flex justify-start items-center w-full mb-1.5",
                 ),
                 rx.el.div(
                     rx.el.div(
@@ -79,64 +90,164 @@ def budgets_widget() -> rx.Component:
                 "Active Budgets", class_name="text-lg font-bold text-[var(--text-main)]"
             ),
             rx.icon("wallet", size=20, class_name="text-[var(--text-muted)]"),
-            class_name="flex items-center justify-between mb-6",
+            class_name="flex items-center justify-between mb-6 shrink-0",
         ),
         # Stats Row
         rx.el.div(
             budget_stat_item(
                 "Total Budgets",
-                f"${GoalState.total_budget_amount:,.0f}",
+                f"${BudgetState.total_budget_amount:,.0f}",
                 "bar_chart_3",
                 "--accent-color",
             ),
             budget_stat_item(
                 "Active Budgets",
-                f"{GoalState.total_budget_count:,.0f}",
+                f"{BudgetState.total_budget_count:,.0f}",
                 "eye",
                 "--accent-color",
             ),
             budget_stat_item(
                 "Good Standing",
-                f"{GoalState.good_budget_count:,.0f}",
+                f"{BudgetState.good_budget_count:,.0f}",
                 "circle_check_big",
                 "--healthy-text",
             ),
             budget_stat_item(
                 "At Risk",
-                f"{GoalState.at_risk_budget_count:,.0f}",
+                f"{BudgetState.at_risk_budget_count:,.0f}",
                 "badge_alert",
                 "--critical-text",
             ),
-            class_name="flex gap-4 mb-6",
+            class_name="flex gap-4 mb-5 shrink-0",
         ),
         # Budget Rows
         rx.el.div(
-            rx.foreach(GoalState.expense_allocations, budget_row_item),
-            class_name="flex flex-col mb-4 max-h-[280px] overflow-auto custom-scrollbar",
+            rx.foreach(BudgetState.expense_allocations, budget_row_item),
+            class_name="flex flex-col mb-3 flex-1 min-h-0 overflow-y-auto custom-scrollbar pr-2",
         ),
         # Quick Add Row
         rx.el.div(
             rx.el.input(
                 placeholder="New budget name...",
-                value=GoalState.new_category_name,
-                on_change=lambda x: GoalState.set_allocation_update("expenses", x, ""),
+                value=BudgetState.new_category_name,
+                on_change=lambda x: BudgetState.set_allocation_update(
+                    "expenses", x, ""
+                ),
                 class_name="flex-1 bg-[var(--app-bg-inner)] border border-[var(--border-main)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-main)] focus:border-[var(--accent-color)] outline-none shadow-sm",
             ),
             rx.el.input(
                 type="number",
                 placeholder="$ Amount",
-                value=GoalState.new_allocation_amount,
-                on_change=lambda x: GoalState.set_allocation_update("expenses", "", x),
+                value=BudgetState.new_allocation_amount,
+                on_change=lambda x: BudgetState.set_allocation_update(
+                    "expenses", "", x
+                ),
                 class_name="w-45 bg-[var(--app-bg-inner)] border border-[var(--border-main)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-main)] focus:border-[var(--accent-color)] outline-none shadow-sm",
             ),
             rx.el.button(
                 rx.icon("plus", size=20),
-                on_click=lambda _: GoalState.add_new_allocation("expenses"),
+                on_click=lambda _: BudgetState.add_new_allocation("expenses"),
                 class_name="p-2.5 bg-[var(--accent-color)] text-[var(--app-bg-inner)] rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-sm flex items-center justify-center",
             ),
-            class_name="flex gap-3 items-center mt-2 pt-4 border-t border-[var(--border-subtle)]",
+            class_name="flex gap-3 items-center mt-2 pt-4 border-t border-[var(--border-subtle)] shrink-0",
         ),
-        class_name="bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-main)] shadow-sm w-full h-full mb-10",
+        class_name="flex flex-col bg-[var(--bg-card)] p-6 rounded-2xl border border-[var(--border-main)] shadow-sm w-full h-full overflow-hidden",
+    )
+
+
+def edit_budget_modal() -> rx.Component:
+    """Modal for editing an existing budget allocation."""
+
+    input_class = """
+        text-[var(--text-main)] w-full rounded-lg shadow-sm
+        bg-[var(--app-bg-inner)] border border-[var(--border-main)]
+        focus:border-[var(--accent-color)] focus:ring-[var(--accent-color)] px-4 py-2
+    """
+
+    return rx.cond(
+        BudgetState.edit_budget_modal_open,
+        rx.el.div(
+            # Background overlay
+            rx.el.div(
+                class_name="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity",
+                on_click=BudgetState.close_edit_modal,
+            ),
+            # Modal content
+            rx.el.div(
+                rx.el.div(
+                    rx.el.h3(
+                        "Edit Budget",
+                        class_name="text-lg font-bold text-[var(--text-main)]",
+                    ),
+                    rx.el.button(
+                        "X",
+                        on_click=BudgetState.close_edit_modal,
+                        class_name="""
+                            px-4 py-2 font-medium text-sm text-[var(--text-main)]
+                            bg-[var(--bg-card)] hover:bg-[var(--bg-subtle)]
+                            rounded-lg transition-colors cursor-pointer
+                        """,
+                    ),
+                    class_name="flex justify-between items-center mb-8",
+                ),
+                rx.el.div(
+                    rx.el.label(
+                        "Category Name",
+                        class_name="block text-sm font-medium text-[var(--text-main)] mb-2",
+                    ),
+                    rx.el.input(
+                        value=BudgetState.edit_budget_name,
+                        on_change=BudgetState.set_edit_budget_name,
+                        class_name=input_class,
+                    ),
+                    class_name="mb-4",
+                ),
+                # Dual Inputs Row
+                rx.el.div(
+                    rx.el.div(
+                        rx.el.label(
+                            "Allocated Amount",
+                            class_name="block text-sm font-medium text-[var(--text-main)] mb-2",
+                        ),
+                        rx.el.input(
+                            type="number",
+                            value=BudgetState.edit_budget_amount,
+                            on_change=BudgetState.set_edit_budget_amount,
+                            class_name=input_class,
+                        ),
+                    ),
+                    # Transaction Amount (Locked)
+                    rx.el.div(
+                        rx.el.label(
+                            "Total Used (Locked)",
+                            class_name="block text-sm font-medium text-[var(--text-muted)] mb-2",
+                        ),
+                        rx.el.input(
+                            value=BudgetState.edit_budget_used,
+                            disabled=True,
+                            class_name=f"{input_class} opacity-60 cursor-not-allowed bg-[var(--bg-subtle)]",
+                        ),
+                    ),
+                    class_name="grid grid-cols-2 gap-4 mb-6",
+                ),
+                # Apply Button
+                rx.el.div(
+                    rx.el.button(
+                        "Apply Edit",
+                        on_click=BudgetState.save_budget_edit,
+                        class_name="""
+                            px-4 py-2 text-sm font-semibold text-[var(--app-bg-inner)]
+                            bg-[var(--accent-color)] rounded-lg
+                            hover:opacity-90 transition-opacity cursor-pointer
+                        """,
+                    ),
+                    class_name="flex justify-end",
+                ),
+                class_name="relative bg-[var(--bg-card)] rounded-2xl shadow-2xl border border-[var(--border-main)] max-w-md w-full p-6 z-50 animate-in fade-in zoom-in duration-200",
+            ),
+            class_name="fixed inset-0 z-50 flex items-center justify-center p-4",
+        ),
+        rx.el.div(),
     )
 
 
@@ -467,24 +578,25 @@ def goals_page() -> rx.Component:
                         class_name="text-sm text-[var(--text-muted)] mt-2",
                     ),
                 ),
-                class_name="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10",
+                date_picker(),
+                class_name="flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 mb-10",
             ),
             # TOP HALF: BUDGETS
             rx.el.div(
                 rx.el.div(
                     budgets_widget(),
-                    class_name="lg:col-span-2 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                    class_name="lg:col-span-2 h-[550px] animate-in fade-in slide-in-from-bottom-4 duration-500",
                 ),
                 rx.el.div(
                     category_distribution_widget(
                         icon="wallet",
                         card_title="Total Income",
-                        total_earnings=GoalState.total_budget_amount,
-                        earnings_categories=GoalState.budget_distribution_data,
+                        total_earnings=BudgetState.total_budget_amount,
+                        earnings_categories=BudgetState.budget_distribution_data,
                     ),
-                    class_name="lg:col-span-1",
+                    class_name="lg:col-span-1 h-[550px]",
                 ),
-                class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5 animate-in fade-in slide-in-from-bottom-8 duration-700",
+                class_name="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10 animate-in fade-in slide-in-from-bottom-8 duration-700",
             ),
             # BOTTOM HALF: GOALS
             rx.el.div(
@@ -526,7 +638,7 @@ def goals_page() -> rx.Component:
                                     hover:opacity-90 transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 cursor-pointer
                                 """,
                             ),
-                            class_name="text-center py-12 px-4",
+                            class_name="text-center py-10 px-4",
                         ),
                         class_name="""
                             bg-[var(--bg-card)] rounded-3xl border-2 border-dashed border-[var(--border-main)]
@@ -538,6 +650,7 @@ def goals_page() -> rx.Component:
             ),
             # FLOATING ADD GOAL BUTTON & MODAL
             goal_modal(),
+            edit_budget_modal(),
             rx.el.div(
                 rx.el.button(
                     rx.icon("plus", size=22),

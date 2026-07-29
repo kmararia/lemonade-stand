@@ -35,8 +35,8 @@ STROKE_COLORS = [
 ]
 
 
-class GoalState(DataState):
-    """State for managing savings goals and targets."""
+class GoalState(rx.State):
+    """State for managing goals."""
 
     is_modal_open: bool = False
     current_goal: UserGoal = UserGoal()
@@ -49,6 +49,55 @@ class GoalState(DataState):
     def goals(self) -> list[UserGoal]:
         """Return the list of goals."""
         return self.goals_obj.load_goals()
+
+    @rx.event
+    def open_add_modal(self):
+        """Open the add goal modal with default values."""
+        self.current_goal = UserGoal()
+        self.is_modal_open = True
+
+    @rx.event
+    def open_edit_modal(self, goal: UserGoal):
+        """Open the edit goal modal with the specified goal."""
+        self.current_goal = goal
+        self.is_modal_open = True
+
+    @rx.event
+    def close_modal(self):
+        """Close the add/edit goal modal."""
+        self.is_modal_open = False
+
+    @rx.event
+    def update_current_goal(self, key: str, value: str):
+        """Update a field in the current goal."""
+        if key in ["target_amount", "current_amount"]:
+            setattr(self.current_goal, key, float(value))
+        else:
+            setattr(self.current_goal, key, value)
+
+    @rx.event
+    def save_goal(self):
+        """Save the current goal, either updating an existing one or adding a new one."""
+        self.goals_obj.add_goal(**self.current_goal.__dict__)
+        self.close_modal()
+
+    @rx.event
+    def delete_goal(self, id: str):
+        """Delete a goal by its ID."""
+        self.goals_obj.delete_goal(id)
+
+
+class BudgetState(DataState):
+    """State for managing budgets and expense allocations."""
+
+    current_allocation: dict[str, typing.Any] = {}
+    new_category_name: str = ""
+    new_allocation_amount: str | int | float = ""
+    edit_budget_modal_open: bool = False
+    edit_budget_old_name: str = ""
+    edit_budget_name: str = ""
+    edit_budget_amount: str = ""
+    edit_budget_used: str = ""
 
     @rx.var
     def expense_allocations(self) -> list[dict[str, typing.Any]]:
@@ -94,40 +143,32 @@ class GoalState(DataState):
         ]
 
     @rx.event
-    def open_add_modal(self):
-        """Open the add goal modal with default values."""
-        self.current_goal = UserGoal()
-        self.is_modal_open = True
+    def open_edit_modal(self, budget: dict[str, typing.Any]):
+        """Pre-fills and opens the edit modal with the selected budget data."""
+        self.edit_budget_old_name = budget["category"]
+        self.edit_budget_name = budget["category"]
+        self.edit_budget_amount = str(budget["allocated_amount"])
+        self.edit_budget_used = str(budget["transaction_amount"])
+        self.edit_budget_modal_open = True
 
     @rx.event
-    def open_edit_modal(self, goal: UserGoal):
-        """Open the edit goal modal with the specified goal."""
-        self.current_goal = goal
-        self.is_modal_open = True
+    def set_edit_budget_name(self, new_name: str):
+        """Sets the new name for the budget being edited."""
+        self.edit_budget_name = new_name
 
     @rx.event
-    def close_modal(self):
-        """Close the add/edit goal modal."""
-        self.is_modal_open = False
+    def set_edit_budget_amount(self, new_amount: str | int | float):
+        """Sets the new allocated amount for the budget being edited."""
+        self.edit_budget_amount = str(new_amount)
 
     @rx.event
-    def update_current_goal(self, key: str, value: str):
-        """Update a field in the current goal."""
-        if key in ["target_amount", "current_amount"]:
-            setattr(self.current_goal, key, float(value))
-        else:
-            setattr(self.current_goal, key, value)
-
-    @rx.event
-    def save_goal(self):
-        """Save the current goal, either updating an existing one or adding a new one."""
-        self.goals_obj.add_goal(**self.current_goal.__dict__)
-        self.close_modal()
-
-    @rx.event
-    def delete_goal(self, id: str):
-        """Delete a goal by its ID."""
-        self.goals_obj.delete_goal(id)
+    def close_edit_modal(self):
+        """Close the add/edit allocation modal."""
+        self.edit_budget_old_name = ""
+        self.edit_budget_name = ""
+        self.edit_budget_amount = ""
+        self.edit_budget_used = ""
+        self.edit_budget_modal_open = False
 
     @rx.event
     def set_allocation_update(
@@ -140,7 +181,7 @@ class GoalState(DataState):
         self.new_allocation_amount = new_amount if new_amount != "" else curr_updates[1]
         self.allocation_updates[category_type] = (
             self.new_category_name,
-            float(self.new_allocation_amount),
+            self.new_allocation_amount,
         )
 
     @rx.event
@@ -154,15 +195,50 @@ class GoalState(DataState):
                     name=category_type, _transaction_df=self.shared_data.expenses
                 )
 
-            self.allocations[category_type].add_allocation(
+            completion_check = self.allocations[category_type].add_allocation(
                 category=updates[0], allocated_amount=float(updates[1])
             )
-            self.allocations = self.allocations
 
-            # Reset the allocation update after adding
-            self.allocation_updates = {
-                k: v for k, v in self.allocation_updates.items() if k != category_type
-            }
+            if not completion_check:
+                return rx.toast.error(
+                    f"'{updates[0]}' budget already exists. Please use the editing feature.",
+                )
+            else:
+                self.allocations = self.allocations
 
-            self.new_category_name = ""
-            self.new_allocation_amount = ""
+                # Reset the allocation update after adding
+                self.allocation_updates = {
+                    k: v
+                    for k, v in self.allocation_updates.items()
+                    if k != category_type
+                }
+
+                self.new_category_name = ""
+                self.new_allocation_amount = ""
+
+    @rx.event
+    def save_budget_edit(self):
+        """Passes the updated data to the Allocations backend and saves."""
+        if "expenses" not in self.allocations:
+            return rx.toast.error("Allocations data not found.")
+
+        try:
+            new_amount = float(self.edit_budget_amount)
+        except ValueError:
+            new_amount = 0.0
+
+        success = self.allocations["expenses"].update_allocation(
+            old_category=self.edit_budget_old_name,
+            new_category=self.edit_budget_name,
+            new_allocated_amount=new_amount,
+        )
+
+        if not success:
+            return rx.toast.error(
+                f"Failed to update. Category '{self.edit_budget_name}' may already exist."
+            )
+
+        # Trigger the UI to refresh with the newly saved data
+        self.allocations = self.allocations
+        self.close_edit_modal()
+        return rx.toast.success("Budget updated successfully.")
