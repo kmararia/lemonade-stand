@@ -33,6 +33,10 @@ COPY . .
 # Initialize Reflex
 RUN uv run reflex init
 
+# Explicitly accept the API_URL from host environment
+ARG API_URL
+ENV API_URL=$API_URL
+
 # Pre-compile the frontend in the build stage
 RUN uv run reflex export --frontend-only\
     && unzip frontend.zip -d public \
