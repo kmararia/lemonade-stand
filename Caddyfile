@@ -1,0 +1,9 @@
+:8080 {
+    # Route interactive events and uploads to the Python backend
+    reverse_proxy /_event* 127.0.0.1:8000
+    reverse_proxy /ping* 127.0.0.1:8000
+    reverse_proxy /upload* 127.0.0.1:8000
+
+    # Route all other regular page visits to the React frontend
+    reverse_proxy * 127.0.0.1:3000
+}
