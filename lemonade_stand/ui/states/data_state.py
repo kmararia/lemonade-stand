@@ -101,7 +101,7 @@ class DataState(rx.State):
 
     is_edit_modal_open: bool = False
     edit_values: dict[str, typing.Any] = {}
-    allocation_updates: dict[str, tuple[str, float]] = {}
+    allocation_updates: dict[str, tuple[str, typing.Any]] = {}
 
     @rx.var
     def shared_data(self) -> UserData:
