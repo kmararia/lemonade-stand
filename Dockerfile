@@ -35,4 +35,4 @@ RUN uv run reflex init
 EXPOSE 8080
 
 # Start Caddy in the background, then start Reflex in production mode
-CMD ["sh", "-c", "caddy start --config Caddyfile && uv run reflex run --env prod"]
+CMD ["sh", "-c", "caddy start --config Caddyfile && unset PORT && uv run reflex run --env prod"]
