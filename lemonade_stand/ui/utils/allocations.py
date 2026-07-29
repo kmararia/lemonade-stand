@@ -191,3 +191,35 @@ class Allocations:
             self.save_config()
 
             return True
+
+    def update_allocation(
+        self, old_category: str, new_category: str, new_allocated_amount: float
+    ) -> bool:
+        """Updates an existing allocation and saves to the config."""
+
+        # Prevent renaming to a category name that already exists
+        if old_category != new_category and any(
+            x["category"] == new_category for x in self.as_dicts
+        ):
+            return False
+
+        for row in self.as_dicts:
+            if row["category"] == old_category:
+                row["category"] = new_category
+                row["allocated_amount"] = new_allocated_amount
+
+                # Recalculate progress based on the newly allocated amount
+                transaction_amount = row.get("transaction_amount", 0)
+                row["progress"] = (
+                    (transaction_amount / new_allocated_amount * 100)
+                    if new_allocated_amount > 0
+                    else 0
+                )
+
+                # Rebuild the DataFrame and push to the JSON config
+                self.as_frame = pl.LazyFrame(self.as_dicts)
+                self.save_config()
+
+                return True
+
+        return False
