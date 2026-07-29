@@ -1,9 +1,11 @@
 """Bring up functions from the modules"""
 
-from .utils import AppPaths
-from .utils import UserConfig
+from .account import AccountConfig
+from .metadata import UserConfig
+from .paths import AppPaths
 
 __all__ = [
     "AppPaths",
+    "AccountConfig",
     "UserConfig",
 ]

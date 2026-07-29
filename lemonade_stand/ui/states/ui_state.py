@@ -5,22 +5,13 @@ from dataclasses import dataclass
 
 import reflex as rx
 
+from lemonade_stand.config import AccountConfig
 from lemonade_stand.config import UserConfig
 from lemonade_stand.utils import set_up_logger
 
 LOGGER = set_up_logger(__name__)
 _USER_CONFIG = UserConfig()
-
-
-@dataclass
-class AccountConfig:
-    """"""
-
-    username: str
-    first_name: str
-    last_name: str
-    email: str
-    enable_2fa: bool
+_ACCOUNT_CONFIG = AccountConfig()
 
 
 @dataclass
@@ -30,7 +21,6 @@ class SettingsConfig:
     app_version: str
     statement_dir: str
     training_file: str
-    always_skip_login: bool
     always_refresh_data: bool
     theme: str
 
@@ -38,19 +28,10 @@ class SettingsConfig:
 class AccountState(rx.State):
     """State for authentication interactions like login and logout."""
 
-    logged_in: bool = _USER_CONFIG.ui.always_skip_login
+    user_account: AccountConfig = _ACCOUNT_CONFIG
+    config_updates: dict[str, typing.Any] = {}
+    logged_in: bool = _ACCOUNT_CONFIG.always_skip_login
     is_registering: bool = False
-
-    @rx.var
-    def user_account(self) -> AccountConfig:
-        """Returns the user account configuration."""
-        return AccountConfig(
-            username="johndoe",
-            first_name="John",
-            last_name="Doe",
-            email="john.doe@example.com",
-            enable_2fa=False,
-        )
 
     @rx.event
     def set_logged_in(self):
@@ -61,17 +42,23 @@ class AccountState(rx.State):
     def set_logged_out(self):
         """Updates the login status of the user."""
         self.logged_in = False
-        _USER_CONFIG.update_attribute(mappings={"always_skip_login": False})
+        self.user_account.update_attribute(mappings={"always_skip_login": False})
 
     @rx.event
     def set_user_account_value(self, config_key: str, new_value: typing.Any):
         """Updates a specific field in the user account configuration."""
-        setattr(self.user_account, config_key, new_value)
+        self.config_updates[config_key] = new_value
 
     @rx.event
     def toggle_registering(self):
         """Swaps the modal between Login and Create Account views."""
         self.is_registering = not self.is_registering
+
+    @rx.event
+    def apply_account_settings(self):
+        """Applies the account settings."""
+        self.user_account.update_attribute(mappings=self.config_updates)
+        self.config_updates.clear()
 
 
 class UIState(rx.State):
@@ -91,7 +78,6 @@ class UIState(rx.State):
             statement_dir=str(config.data.statement_dir),
             training_file=str(config.model.training_file),
             always_refresh_data=config.data.always_refresh_data,
-            always_skip_login=config.ui.always_skip_login,
             theme=config.ui.theme,
         )
 
@@ -130,7 +116,7 @@ class UIState(rx.State):
 
     @rx.event
     def apply_settings(self):
-        """"""
+        """Applies the main settings."""
         self.app_config.update_attribute(mappings=self.config_updates)
         self.app_config = UserConfig()
         self.config_updates.clear()

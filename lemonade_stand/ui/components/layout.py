@@ -100,7 +100,7 @@ def sidebar() -> rx.Component:
                 rx.icon(
                     icon_name,
                     size=20,
-                    class_name=f"shrink-0 {rx.cond(is_current_page, 'fill-[var(--selected-color)]', '')}",
+                    class_name="shrink-0",
                 ),
                 rx.cond(
                     ~UIState.is_sidebar_collapsed,
@@ -169,7 +169,7 @@ def sidebar() -> rx.Component:
                     sidebar_item("Income", "signal", href="/income"),
                     sidebar_item("Savings", "piggy-bank", href="/savings"),
                     sidebar_item("Expenses", "wallet", href="/expenses"),
-                    sidebar_item("Goals", "badge_check", href="/goals"),
+                    sidebar_item("Budget & Goals", "badge_check", href="/goals"),
                     class_name="space-y-1 py-6",
                 ),
                 rx.el.div(

@@ -235,7 +235,7 @@ def category_distribution_widget(
                     focus:ring-1 focus:ring-indigo-500 py-1 px-2 cursor-pointer transition-colors
                 """,
             ),
-            class_name="flex justify-between items-center mb-8",
+            class_name="flex justify-between items-center mb-10",
         ),
         # Chart Section
         rx.el.div(
@@ -256,16 +256,16 @@ def category_distribution_widget(
                     ),
                 ),
                 width="100%",
-                height=220,
+                height="100%",
             ),
             rx.el.div(
                 rx.el.span(
                     f"$ {total_earnings:,.0f}",
-                    class_name="pb-10 text-3xl font-bold text-[var(--text-main)] tracking-tight",
+                    class_name="text-3xl font-bold text-[var(--text-main)] tracking-tight",
                 ),
                 class_name="absolute inset-0 flex items-center justify-center pointer-events-none",
             ),
-            class_name="relative h-[300px] pt-6 w-full",
+            class_name="relative flex-1 min-h-0 w-full mb-10",
         ),
         # Custom Legend Section
         rx.el.div(
@@ -273,19 +273,22 @@ def category_distribution_widget(
                 earnings_categories,
                 lambda item: rx.el.div(
                     rx.el.div(
-                        class_name="w-2.5 h-2.5 rounded-full mr-2",
+                        class_name="w-2.5 h-2.5 rounded-full mr-2 shrink-0",
                         style={"backgroundColor": item["fill"]},
                     ),
                     rx.el.span(
                         item["name"],
-                        class_name="text-xs font-medium text-[var(--text-muted)]",
+                        class_name="text-xs font-medium text-[var(--text-muted)] truncate",
                     ),
-                    class_name="flex items-center",
+                    class_name="flex items-center mx-4",
                 ),
             ),
-            class_name="flex justify-center gap-6",
+            class_name="""
+                grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3 mx-auto w-fit
+                max-h-32 overflow-y-auto pr-2 custom-scrollbar
+            """,
         ),
-        class_name="bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-full",
+        class_name="flex flex-col bg-[var(--bg-card)] backdrop-blur-xl p-6 rounded-2xl border border-[var(--border-main)] shadow-sm h-full overflow-hidden",
     )
 
 

@@ -10,8 +10,8 @@ from types import SimpleNamespace
 import pytest
 
 from lemonade_stand.config.metadata import BASE_CONFIG
-from lemonade_stand.config.utils import AppPaths
-from lemonade_stand.config.utils import UserConfig
+from lemonade_stand.config.metadata import UserConfig
+from lemonade_stand.config.paths import AppPaths
 
 TEST_CWD = Path(__file__).parent
 
