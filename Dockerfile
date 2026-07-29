@@ -34,8 +34,7 @@ COPY . .
 RUN uv run reflex init
 
 # Explicitly accept the API_URL from host environment
-ARG API_URL
-ENV API_URL=$API_URL
+ENV API_URL="https://lemonade-stand-jj9j.onrender.com"
 
 # Pre-compile the frontend in the build stage
 RUN uv run reflex export --frontend-only\
