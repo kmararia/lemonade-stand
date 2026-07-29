@@ -1,13 +1,24 @@
 :{$PORT:8080} {
-    # Route interactive events and uploads to the Python backend
-    reverse_proxy /_event* 127.0.0.1:8000
-    reverse_proxy /ping* 127.0.0.1:8000
-    reverse_proxy /upload* 127.0.0.1:8000
+    # Backend API & WebSockets
+    handle /_event* {
+        reverse_proxy 127.0.0.1:8000
+    }
+    handle /ping* {
+        reverse_proxy 127.0.0.1:8000
+    }
+    handle /upload* {
+        reverse_proxy 127.0.0.1:8000
+    }
 
-    # Serve the static React frontend directly via Caddy
-    root * /lemonade-stand/public
-    file_server
+    # (Reflex sometimes uses /_upload instead of /upload depending on the version)
+    handle /_upload* {
+        reverse_proxy 127.0.0.1:8000
+    }
 
-    # Handle client-side routing (React/NextJS)
-    try_files {path} {path}.html /404.html
+    # React Frontend Static Files
+    handle {
+        root * /lemonade-stand/public
+        try_files {path} {path}.html /404.html
+        file_server
+    }
 }
