@@ -4,6 +4,10 @@
     reverse_proxy /ping* 127.0.0.1:8000
     reverse_proxy /upload* 127.0.0.1:8000
 
-    # Route all other regular page visits to the React frontend
-    reverse_proxy * 127.0.0.1:3000
+    # Serve the static React frontend directly via Caddy
+    root * /lemonade-stand/public
+    file_server
+
+    # Handle client-side routing (React/NextJS)
+    try_files {path} {path}.html /404.html
 }
