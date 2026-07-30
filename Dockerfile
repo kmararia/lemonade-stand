@@ -27,7 +27,8 @@ WORKDIR /lemonade-stand
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-cache
 
-# Copy application source code
+# Copy the processed Parquet data to root directory - To skip data processing hence avoid OOM issues
+COPY tests/_mocks/.lemonade-stand /root/
 COPY . .
 
 # Initialize Reflex
@@ -41,7 +42,6 @@ RUN uv run reflex export --frontend-only\
     && unzip frontend.zip -d public \
     && rm frontend.zip
 
-# Expose frontend and backend ports
 EXPOSE 8080
 
 # Start Caddy in the background, then start Reflex in production mode
