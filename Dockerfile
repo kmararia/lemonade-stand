@@ -28,7 +28,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-cache
 
 # Copy the processed Parquet data to root directory - To skip data processing hence avoid OOM issues
-COPY tests/_mocks/.lemonade-stand /root/
+COPY tests/_mocks/.lemonade-stand /root/.lemonade-stand
 COPY . .
 
 # Initialize Reflex
