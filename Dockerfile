@@ -39,7 +39,7 @@ ARG REFLEX_API_URL="http://localhost:8080"
 ENV REFLEX_API_URL=$REFLEX_API_URL
 
 # Pre-compile the frontend in the build stage
-RUN uv run reflex export --frontend-only\
+RUN uv run reflex export --frontend-only --loglevel debug\
     && unzip frontend.zip -d public \
     && rm frontend.zip
 
