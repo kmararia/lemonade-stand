@@ -1,21 +1,16 @@
 :{$PORT:8080} {
-    # Backend API & WebSockets
-    handle /_event* {
-        reverse_proxy 127.0.0.1:8000
-    }
-    handle /ping* {
-        reverse_proxy 127.0.0.1:8000
-    }
-    handle /upload* {
+    # Compress text responses to make the site load even faster
+    encode gzip
+
+    # Bundle all Python backend routes into a single named matcher
+    @backend_routes path /_event* /ping* /upload* /_upload*
+
+    # Route matched backend traffic to the FastAPI server
+    handle @backend_routes {
         reverse_proxy 127.0.0.1:8000
     }
 
-    # (Reflex sometimes uses /_upload instead of /upload depending on the version)
-    handle /_upload* {
-        reverse_proxy 127.0.0.1:8000
-    }
-
-    # React Frontend Static Files
+    # Route all other traffic to the unzipped static React frontend
     handle {
         root * /lemonade-stand/public
         try_files {path} {path}.html /404.html
