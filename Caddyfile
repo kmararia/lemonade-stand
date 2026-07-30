@@ -13,7 +13,7 @@
     # Route all other traffic to the unzipped static React frontend
     handle {
         root * /lemonade-stand/public
-        try_files {path} {path}.html /404.html
+        try_files {path} {path}/ {path}.html /404.html
         file_server
     }
 }

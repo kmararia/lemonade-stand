@@ -35,7 +35,8 @@ COPY . .
 RUN uv run reflex init
 
 # Explicitly accept the API_URL from host environment
-ENV API_URL="https://lemonade-stand-jj9j.onrender.com"
+ARG REFLEX_API_URL="http://localhost:8080"
+ENV REFLEX_API_URL=$REFLEX_API_URL
 
 # Pre-compile the frontend in the build stage
 RUN uv run reflex export --frontend-only\
@@ -44,5 +45,5 @@ RUN uv run reflex export --frontend-only\
 
 EXPOSE 8080
 
-# Start Caddy in the background, then start Reflex in production mode
+# Start Caddy in the background, then Reflex in production mode
 CMD ["sh", "-c", "caddy start --config Caddyfile && unset PORT && uv run reflex run --env prod --backend-only"]
