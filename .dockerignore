@@ -24,9 +24,9 @@ Thumbs.db
 config.json
 
 # Ignore temporary directories
-*/_dev/
-*/_tmp_/
-*/tmp/
+_dev/
+_tmp_/
+tmp/
 
 # Reflex generated files
 .states
@@ -37,3 +37,9 @@ assets/external/
 
 # Ignore VS Code workspace settings
 .vscode/
+
+# Ignore tests suites and fixtures except the mock directory
+tests/*
+!tests/_mocks/
+!tests/data/inputs
+!tests/model/inputs/training.csv
