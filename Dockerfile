@@ -31,11 +31,11 @@ RUN uv sync --frozen --no-install-project --no-cache
 COPY tests/_mocks/.lemonade-stand /root/.lemonade-stand
 COPY . .
 
-# Initialize Reflex
-RUN uv run reflex init
+ARG REFLEX_API_URL
 
-# Pre-compile the frontend in the build stage
-RUN REFLEX_API_URL="https://lemonade-stand-jj9j.onrender.com" uv run reflex export --frontend-only --loglevel debug \
+# Initialize Reflex and pre-compile the frontend
+RUN uv run reflex init
+RUN REFLEX_API_URL=$REFLEX_API_URL uv run reflex export --frontend-only --loglevel debug \
     && unzip frontend.zip -d public \
     && rm frontend.zip
 
