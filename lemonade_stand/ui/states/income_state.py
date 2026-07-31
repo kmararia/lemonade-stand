@@ -80,6 +80,9 @@ class IncomeState(DataState):
 
         category_names = [x["name"] for x in self.income_distribution_data]
 
+        if not category_names:
+            return []
+
         return (
             self.shared_data.income.filter(
                 pl.col("category").is_in(category_names)

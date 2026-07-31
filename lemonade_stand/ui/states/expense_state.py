@@ -82,6 +82,9 @@ class ExpenseState(DataState):
 
         category_names = [x["name"] for x in self.expense_distribution_data]
 
+        if not category_names:
+            return []
+
         return (
             self.shared_data.expenses.filter(
                 pl.col("category").is_in(category_names)

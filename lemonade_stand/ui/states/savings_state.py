@@ -80,6 +80,9 @@ class SavingsState(DataState):
 
         category_names = [x["name"] for x in self.savings_distribution_data]
 
+        if not category_names:
+            return []
+
         return (
             self.shared_data.savings.filter(
                 pl.col("category").is_in(category_names)
