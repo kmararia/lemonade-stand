@@ -40,8 +40,8 @@ ENV REFLEX_API_URL=$REFLEX_API_URL
 
 # Pre-compile the frontend in the build stage
 RUN ls -la /root/.lemonade-stand
-RUN uv run reflex export --frontend-only --loglevel debug \
-    && unzip frontend.zip -d public \
+RUN uv run reflex export --frontend-only --loglevel debug
+RUN unzip frontend.zip -d public \
     && rm frontend.zip
 
 EXPOSE 8080
