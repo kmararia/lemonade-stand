@@ -9,7 +9,6 @@ config = rx.Config(
     app_name="lemonade_stand",
     app_module_import="lemonade_stand.app",
     disable_plugins=[SitemapPlugin],
-    cors_allowed_origins=["*"],
     plugins=[
         rx.plugins.RadixThemesPlugin(theme=rx.theme(appearance="inherit")),
         rx.plugins.TailwindV3Plugin(
