@@ -36,12 +36,12 @@ COPY . .
 RUN uv run reflex init
 
 # Explicitly accept the API_URL from host environment
-ARG REFLEX_API_URL="http://localhost:8080"
+ARG REFLEX_API_URL="https://lemonade-stand-jj9j.onrender.com"
 ENV REFLEX_API_URL=$REFLEX_API_URL
 
 # Pre-compile the frontend in the build stage
 RUN uv run python -c "import lemonade_stand.app"
-RUN REFLEX_API_URL="http://localhost:8080" uv run reflex export --frontend-only --loglevel debug \
+RUN uv run reflex export --frontend-only --loglevel debug \
     && unzip frontend.zip -d public \
     && rm frontend.zip
 
