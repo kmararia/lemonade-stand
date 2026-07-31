@@ -222,16 +222,20 @@ class ExpenseState(DataState):
     @rx.var
     def total_allocations(self) -> float:
         """"""
-        return (
+        return_val = (
             self.shared_data.expenses.select(pl.col("allocated_amount").sum()).collect()
         ).item(0, 0)
+
+        return float(return_val) if return_val is not None else 0.0
 
     @rx.var
     def total_expenses(self) -> float:
         """"""
-        return (
+        return_val = (
             self.shared_data.expenses.select(pl.col("amount").sum()).collect()
         ).item(0, 0)
+
+        return float(return_val) if return_val is not None else 0.0
 
     @rx.var
     def remaining_budget(self) -> float:
@@ -252,7 +256,7 @@ class ExpenseState(DataState):
             self.shared_data.income.select(pl.col("amount").sum()).collect()
         ).item(0, 0)
 
-        if income_amount == 0:
+        if income_amount == 0 or income_amount is None:
             return 0.0
         return round(self.total_expenses / income_amount * 100, 1)
 
