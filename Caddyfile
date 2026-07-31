@@ -1,5 +1,4 @@
-:{$PORT:8080} {
-    # Compress text responses to make the site load even faster
+:8080 {
     encode gzip
 
     # Bundle all Python backend routes into a single named matcher

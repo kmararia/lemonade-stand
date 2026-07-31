@@ -9,6 +9,8 @@ services:
             - 8000:8000
         environment:
             - UV_PYTHON_INSTALL_DIR=/usr/local
+            - REFLEX_ENV=dev
+            - REFLEX_API_URL=http://localhost:8000
         volumes:
       # Sync local logic with the container for hot-reloading
             - ./lemonade_stand:/lemonade-stand/lemonade_stand

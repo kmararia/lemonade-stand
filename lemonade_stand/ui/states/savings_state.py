@@ -80,6 +80,9 @@ class SavingsState(DataState):
 
         category_names = [x["name"] for x in self.savings_distribution_data]
 
+        if not category_names:
+            return []
+
         return (
             self.shared_data.savings.filter(
                 pl.col("category").is_in(category_names)
@@ -221,18 +224,20 @@ class SavingsState(DataState):
     @rx.var
     def total_budget(self) -> float:
         """"""
-        return (
+        return_val = (
             self.shared_data.savings.select(pl.col("allocated_amount").sum())
             .collect()
             .item(0, 0)
         )
+        return float(return_val) if return_val is not None else 0.0
 
     @rx.var
     def total_savings(self) -> float:
         """"""
-        return (
+        return_val = (
             self.shared_data.savings.select(pl.col("amount").sum()).collect().item(0, 0)
         )
+        return float(return_val) if return_val is not None else 0.0
 
     @rx.var
     def top_saving_category(self) -> str:
