@@ -8,9 +8,8 @@ from reflex.plugins.sitemap import SitemapPlugin
 config = rx.Config(
     app_name="lemonade_stand",
     app_module_import="lemonade_stand.app",
-    api_url="https://lemonade-stand-jj9j.onrender.com",
-    cors_allowed_origins=["*"],
     disable_plugins=[SitemapPlugin],
+    cors_allowed_origins=["*"],
     plugins=[
         rx.plugins.RadixThemesPlugin(theme=rx.theme(appearance="inherit")),
         rx.plugins.TailwindV3Plugin(
