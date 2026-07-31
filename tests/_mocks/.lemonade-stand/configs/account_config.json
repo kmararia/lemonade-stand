@@ -4,5 +4,5 @@
     "last-name": "Doe",
     "email": "jane.doe@example.com",
     "enable-2fa": false,
-    "always-skip-login": true
+    "always-skip-login": false
 }
