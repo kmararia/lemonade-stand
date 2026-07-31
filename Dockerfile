@@ -15,6 +15,7 @@ RUN apt-get update && apt-get -y install \
     && rm -rf /var/lib/apt/lists/*
 
 # Optimize Python execution inside the container
+ENV PYTHONUNBUFFERED=1
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_PYTHON_INSTALL_DIR=/usr/local
@@ -39,9 +40,9 @@ ARG REFLEX_API_URL="http://localhost:8080"
 ENV REFLEX_API_URL=$REFLEX_API_URL
 
 # Pre-compile the frontend in the build stage
-RUN ls -la /root/.lemonade-stand
-RUN uv run reflex export --frontend-only --loglevel debug
-RUN unzip frontend.zip -d public \
+RUN uv run python -c "import lemonade_stand.app"
+RUN uv run reflex export --frontend-only --loglevel debug \
+    && unzip frontend.zip -d public \
     && rm frontend.zip
 
 EXPOSE 8080
