@@ -15,11 +15,13 @@ RUN apt-get update && apt-get -y install \
     && rm -rf /var/lib/apt/lists/*
 
 # Optimize Python execution inside the container
+ENV PYTHONUNBUFFERED=1
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 ENV UV_PYTHON_INSTALL_DIR=/usr/local
 
 ENV NODE_OPTIONS="--max-old-space-size=256"
+ENV REFLEX_API_URL=http://localhost:8080
 
 WORKDIR /lemonade-stand
 
@@ -27,11 +29,9 @@ WORKDIR /lemonade-stand
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-cache
 
-# Copy the processed Parquet data to root directory - To skip data processing hence avoid OOM issues
+# Copy the processed Parquet data to root directory
 COPY tests/_mocks/.lemonade-stand /root/.lemonade-stand
 COPY . .
-
-ENV REFLEX_API_URL=http://localhost:8080
 
 # Initialize Reflex and pre-compile the frontend
 RUN uv run reflex init
