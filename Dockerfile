@@ -41,7 +41,7 @@ ENV REFLEX_API_URL=$REFLEX_API_URL
 
 # Pre-compile the frontend in the build stage
 RUN uv run python -c "import lemonade_stand.app"
-RUN uv run reflex export --frontend-only --loglevel debug \
+RUN REFLEX_API_URL="http://localhost:8080" uv run reflex export --frontend-only --loglevel debug \
     && unzip frontend.zip -d public \
     && rm frontend.zip
 
