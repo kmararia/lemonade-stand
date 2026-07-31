@@ -112,55 +112,53 @@ def budget_chart(display_data: rx.Var[list[dict[str, typing.Any]]]) -> rx.Compon
         ),
         chart_legend(),
         rx.el.div(
-            rx.recharts.responsive_container(
-                rx.recharts.bar_chart(
-                    rx.recharts.cartesian_grid(
-                        stroke_dasharray="3 3",
-                        vertical=False,
-                        class_name="stroke-[var(--bg-subtle)] bg-[var(--bg-subtle)]",
-                    ),
-                    rx.recharts.x_axis(
-                        type_="number",
-                        axis_line=False,
-                        tick_line=False,
-                        tick={
-                            "fontSize": 12,
-                            "fill": "var(--text-muted)",
-                            "fontWeight": 500,
-                        },
-                        dy=10,
-                    ),
-                    rx.recharts.y_axis(
-                        type_="category",
-                        data_key="category",
-                        width=150,
-                        tick={
-                            "fontSize": 12,
-                            "fill": "var(--text-muted)",
-                            "fontWeight": 500,
-                        },
-                    ),
-                    rx.recharts.bar(
-                        data_key="allocated_amount",
-                        name="Allocated Budget",
-                        fill="#6366f1",
-                        radius=[0, 6, 6, 0],
-                        bar_size=9,
-                    ),
-                    rx.recharts.bar(
-                        data_key="spent_amount",
-                        name="Actual Spent",
-                        fill="#f97316",
-                        radius=[0, 6, 6, 0],
-                        bar_size=9,
-                    ),
-                    custom_tooltip(),
-                    data=display_data,
-                    bar_gap=0,
-                    layout="vertical",
-                    bar_category_gap="30%",
-                    margin={"top": 10, "right": 0, "left": -8, "bottom": -10},
+            rx.recharts.bar_chart(
+                rx.recharts.cartesian_grid(
+                    stroke_dasharray="3 3",
+                    vertical=False,
+                    class_name="stroke-[var(--bg-subtle)] bg-[var(--bg-subtle)]",
                 ),
+                rx.recharts.x_axis(
+                    type_="number",
+                    axis_line=False,
+                    tick_line=False,
+                    tick={
+                        "fontSize": 12,
+                        "fill": "var(--text-muted)",
+                        "fontWeight": 500,
+                    },
+                    dy=10,
+                ),
+                rx.recharts.y_axis(
+                    type_="category",
+                    data_key="category",
+                    width=150,
+                    tick={
+                        "fontSize": 12,
+                        "fill": "var(--text-muted)",
+                        "fontWeight": 500,
+                    },
+                ),
+                rx.recharts.bar(
+                    data_key="allocated_amount",
+                    name="Allocated Budget",
+                    fill="#6366f1",
+                    radius=[0, 6, 6, 0],
+                    bar_size=9,
+                ),
+                rx.recharts.bar(
+                    data_key="spent_amount",
+                    name="Actual Spent",
+                    fill="#f97316",
+                    radius=[0, 6, 6, 0],
+                    bar_size=9,
+                ),
+                custom_tooltip(),
+                data=display_data,
+                bar_gap=0,
+                layout="vertical",
+                bar_category_gap="30%",
+                margin={"top": 10, "right": 0, "left": -8, "bottom": -10},
                 width="100%",
                 height=340,
             ),
@@ -286,39 +284,37 @@ def pie_chart(
         rx.el.div(
             # Chart Column
             rx.el.div(
-                rx.recharts.responsive_container(
-                    rx.recharts.pie_chart(
-                        rx.recharts.pie(
-                            *[
-                                rx.recharts.cell(fill=pie_colors[i % len(pie_colors)])
-                                for i in range(len(pie_colors))
-                            ],
-                            rx.recharts.label_list(
-                                data_key="percent_label",
-                                position="outside",
-                                offset=25,
-                                fill="var(--text-muted)",
-                                stroke="var(--text-muted)",
-                                stroke_width=4,
-                                style={"paintOrder": "stroke"},
-                            ),
-                            data=pie_data,
-                            data_key="amount",
-                            name_key="name",
-                            cx="50%",
-                            cy="50%",
-                            inner_radius=0,
-                            outer_radius=120,
-                            label_line={
-                                "stroke": "var(--text-muted)",
-                                "strokeWidth": 1.5,
-                            },
-                            label={"fill": "transparent"},
-                            animation_easing="ease-in-out",
+                rx.recharts.pie_chart(
+                    rx.recharts.pie(
+                        *[
+                            rx.recharts.cell(fill=pie_colors[i % len(pie_colors)])
+                            for i in range(len(pie_colors))
+                        ],
+                        rx.recharts.label_list(
+                            data_key="percent_label",
+                            position="outside",
+                            offset=25,
+                            fill="var(--text-muted)",
+                            stroke="var(--text-muted)",
+                            stroke_width=4,
+                            style={"paintOrder": "stroke"},
                         ),
-                        custom_tooltip(),
-                        class_name="[&_text]:!text-[9px] [&_text]:!tracking-wide",
+                        data=pie_data,
+                        data_key="amount",
+                        name_key="name",
+                        cx="50%",
+                        cy="50%",
+                        inner_radius=0,
+                        outer_radius=120,
+                        label_line={
+                            "stroke": "var(--text-muted)",
+                            "strokeWidth": 1.5,
+                        },
+                        label={"fill": "transparent"},
+                        animation_easing="ease-in-out",
                     ),
+                    custom_tooltip(),
+                    class_name="[&_text]:!text-[9px] [&_text]:!tracking-wide",
                     width="100%",
                     height=338,
                 ),

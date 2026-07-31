@@ -240,20 +240,18 @@ def category_distribution_widget(
         # Chart Section
         rx.el.div(
             # The Recharts Doughnut
-            rx.recharts.responsive_container(
-                rx.recharts.pie_chart(
-                    rx.recharts.pie(
-                        data=earnings_categories,
-                        data_key="amount",
-                        name_key="name",
-                        cx="50%",
-                        cy="50%",
-                        inner_radius="90%",
-                        outer_radius="100%",
-                        padding_angle=6,
-                        corner_radius=8,
-                        stroke="none",
-                    ),
+            rx.recharts.pie_chart(
+                rx.recharts.pie(
+                    data=earnings_categories,
+                    data_key="amount",
+                    name_key="name",
+                    cx="50%",
+                    cy="50%",
+                    inner_radius="90%",
+                    outer_radius="100%",
+                    padding_angle=6,
+                    corner_radius=8,
+                    stroke="none",
                 ),
                 width="100%",
                 height="100%",
