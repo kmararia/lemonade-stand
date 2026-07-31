@@ -14,7 +14,7 @@
         "pymupdf-layout>=1.27.2.3",
         "pymupdf4llm==0.2.8",
         "python-dateutil>=2.9.0.post0",
-        "reflex==0.9.7",
+        "reflex==0.9.5.post2",
         "scikit-learn>=1.8.0",
     ]
 
