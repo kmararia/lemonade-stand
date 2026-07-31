@@ -1,0 +1,8 @@
+{
+    "username": "jane.doe",
+    "first-name": "Jane",
+    "last-name": "Doe",
+    "email": "jane.doe@example.com",
+    "enable-2fa": false,
+    "always-skip-login": true
+}
