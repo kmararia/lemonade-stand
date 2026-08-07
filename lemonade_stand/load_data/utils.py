@@ -10,8 +10,8 @@ import polars as pl
 
 from lemonade_stand.config import AppPaths
 from lemonade_stand.config import UserConfig
-from lemonade_stand.data.read import Statement
-from lemonade_stand.data.support import TransactionCleaner
+from lemonade_stand.load_data.read import Statement
+from lemonade_stand.load_data.support import TransactionCleaner
 from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils import write_delta

@@ -9,9 +9,9 @@ import polars as pl
 import reflex as rx
 
 from lemonade_stand.config import UserConfig
-from lemonade_stand.data import UserData
-from lemonade_stand.data import get_data
-from lemonade_stand.data.read import Statement
+from lemonade_stand.load_data import UserData
+from lemonade_stand.load_data import get_data
+from lemonade_stand.load_data.read import Statement
 from lemonade_stand.ui.utils import Allocations
 from lemonade_stand.utils import set_up_logger
 
