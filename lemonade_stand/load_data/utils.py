@@ -1,5 +1,7 @@
 """Holds dataclasses for the application statement transaction set up"""
 
+import itertools
+from collections.abc import Generator
 from dataclasses import dataclass
 from dataclasses import field
 from dataclasses import fields
@@ -7,15 +9,13 @@ from pathlib import Path
 from typing import overload
 
 import polars as pl
+from countrystatecity_countries import get_cities_of_country
+from countrystatecity_countries import get_cities_of_state
+from countrystatecity_countries import get_state_by_code
+from countrystatecity_countries import get_states_of_country
 
-from lemonade_stand.config import AppPaths
-from lemonade_stand.config import UserConfig
 from lemonade_stand.load_data.read import Statement
-from lemonade_stand.load_data.support import TransactionCleaner
-from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
-from lemonade_stand.utils import write_delta
-from lemonade_stand.utils.exceptions import DataLoadingError
 
 LOGGER = set_up_logger(Path(__file__).stem)
 
@@ -76,78 +76,97 @@ class Transactions:
         )
 
 
-@dataclass(frozen=True)
-class UserData:
-    """Dataclass for the user statement data"""
+@dataclass
+class StateCities:
+    """Data class to hold state and city information for the US"""
 
-    income: pl.LazyFrame
-    savings: pl.LazyFrame
-    expenses: pl.LazyFrame
-    unknown: pl.LazyFrame
+    country: str = "US"
+    state_name_regex: str = field(init=False)
+    state_code_regex: str = field(init=False)
+    regexmap_sname_city: dict = field(init=False)
+    regex_cities_generator: Generator[str, None, None] = field(init=False)
 
-    @classmethod
-    def generate_from_scratch(cls, user_config: UserConfig):
-        """Post initialization variables set up"""
-        LOGGER.info(
-            "Loading statements from path: \n\t%s\n",
-            str(user_config.data.statement_dir),
+    def __post_init__(self):
+        """Initializes the state and city data"""
+
+        LOGGER.debug("Loading state and city data...")
+
+        us_states = get_states_of_country(self.country)
+
+        state_city_map = {
+            x.name.upper(): [
+                y.name.upper() for y in get_cities_of_state(self.country, x.state_code)
+            ]
+            for x in us_states
+            if len(get_cities_of_state(self.country, x.state_code)) > 0
+        }
+
+        self.code_to_name_map = {self.get_state_code(x): x for x in state_city_map}
+
+        self.regexmap_sname_city = {
+            x: self.build_polars_regex(y) for x, y in state_city_map.items()
+        }
+
+        self.regex_cities_generator = self._sort_and_chunk(
+            itertools.chain.from_iterable(state_city_map.values())
         )
 
-        # Load all user transactions
-        statements_list = []
-        error_list = []
-
-        for file in Path(user_config.data.statement_dir).glob("*.pdf"):
-            try:
-                statements_list.append(Statement(file_path=file))
-            except DataLoadingError as e:
-                error_list.append((file, str(e)))
-
-        if len(error_list) > 0:
-            LOGGER.warning(
-                "The following files could not be loaded:\n\t%s",
-                "\n\t".join([f"{file}: \n\t\t{error}" for file, error in error_list]),
-            )
-
-        # Get all transactions from the statements and clean them
-        transactions = Transactions(statements_list=statements_list)
-        cleaner = TransactionCleaner(
-            user_config=user_config, input_df=transactions.data
+        self.state_name_regex = self.build_polars_regex(
+            list(self.regexmap_sname_city.keys())
+        )
+        self.state_code_regex = self.build_polars_regex(
+            list(self.code_to_name_map.keys())
         )
 
-        # Break down transactions into individual table types
-        tables = ["income", "savings", "expenses", "unknown"]
-        table_dict = {}
+    def _sort_and_chunk(
+        self, iter_list: list | itertools.chain[str]
+    ) -> Generator[str, None, None]:
+        """Sorts a list by length and returns regex chunks"""
 
-        for table in tables:
-            filter_condition = (
-                (pl.col("payment_type") == table)
-                if table != "unknown"
-                else (
-                    ~pl.col("payment_type").is_in([x for x in tables if x != "unknown"])
-                    | pl.col("payment_type").is_null()
+        sorted_list = sorted(iter_list, key=len, reverse=True)
+
+        skip_size = len(sorted_list) // len(self.regexmap_sname_city)
+
+        for i in range(0, len(sorted_list), skip_size):
+            yield self.build_polars_regex(sorted_list[i : i + skip_size])
+
+    def build_polars_regex(self, iter_list: list) -> str:
+        """Builds regex mapping for a polars extract search"""
+
+        return rf"(?i)\b({'|'.join(iter_list)})\b"
+
+    def get_state_code(self, state_name: str) -> str:
+        """Gets the state code for a given state name"""
+
+        states = get_states_of_country(self.country)
+
+        return next(
+            (
+                state.state_code
+                for state in states
+                if state.name.upper() == state_name.upper()
+            ),
+            "",
+        )
+
+    def get_city_state_mapping(self, cities_list: list) -> dict:
+        """Creates a dictionary mapping all the city and it's state for city names in only one state"""
+
+        city_state_map = {}
+
+        for city in cities_list:
+            matches = [
+                x
+                for x in get_cities_of_country(country_code=self.country)
+                if x.name.upper() == city
+            ]
+
+            if len(matches) == 1:
+                state_name = get_state_by_code(
+                    country_code=self.country, state_code=matches[0].state_code
                 )
-            )
-            table_dict[table] = {
-                "dataframe": (
-                    cleaner.output_df.filter(filter_condition).with_columns(
-                        index=pl.int_range(pl.len(), dtype=pl.UInt32)
-                    )
-                ),
-            }
+                city_state_map[city] = (
+                    state_name.name.upper() if state_name is not None else None
+                )
 
-        # Write out to delta lake
-        write_path = write_delta(
-            write_info_dict=table_dict,
-            write_dir=AppPaths().data_dir,
-        )
-
-        LOGGER.info("Written tables to delta lake path:\n\t%s", write_path)
-
-        # Return the fully formed object
-        return cls(
-            **{
-                table: read_delta(table=table, search_dir=write_path)
-                for table in tables
-            }
-        )
+        return city_state_map

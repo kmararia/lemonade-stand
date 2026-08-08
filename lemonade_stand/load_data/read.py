@@ -31,19 +31,10 @@ class Statement:
     schema: pl.schema.Schema = field(
         default_factory=lambda: pl.Schema(
             {
-                "index": pl.Int32(),
                 "date": pl.Date(),
-                "category": pl.String(),
                 "amount": pl.Float64(),
                 "payment": pl.String(),
                 "detail": pl.String(),
-                "description": pl.String(),
-                "merchant": pl.String(),
-                "state": pl.String(),
-                "city": pl.String(),
-                "payment_type": pl.String(),
-                "recurring_flag": pl.Boolean(),
-                "exclude_flag": pl.Boolean(),
                 "source_file": pl.String(),
                 "extract_date": pl.Datetime(time_unit="us", time_zone=None),
             }
@@ -56,7 +47,7 @@ class Statement:
         try_engines = ["pdfplumber", "pymullm-llama", "pymullm-layout"]
         used_engines = []
 
-        LOGGER.info("Setting up data structure for file %s", self.file_path.name)
+        LOGGER.info("\t> %s", self.file_path.name)
 
         while True:
             try:
@@ -205,19 +196,10 @@ class Statement:
         # Build dataframe from transaction line matches
         data = [
             (
-                None,
                 parse(row[0], default=file_year).date(),
-                None,
                 PyDecimal(re.sub(r"[,$]", "", row[2])),
                 "Credit/Debit Card",
                 row[1],
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
                 self.file_path.name,
                 datetime.now(),
             )
