@@ -40,7 +40,7 @@ def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
             f"Found file/dir does not contain any readable parquet files!! \n\t{parquet_path}"
         )
 
-    LOGGER.info("Reading deltalake: %s", parquet_path)
+    LOGGER.info("Reading deltalake:\t-> %s", parquet_path)
 
     return pl.scan_delta(source=parquet_path)
 
@@ -66,7 +66,7 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
 
         if parquet_path.exists():
             LOGGER.warning(
-                "Table '%s' already exists. Overwriting it in the following directory: \n\t%s",
+                "Table '%s' already exists. Overwriting it:\t-> %s",
                 table,
                 write_dir,
             )

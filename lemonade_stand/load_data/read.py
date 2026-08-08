@@ -19,6 +19,16 @@ from lemonade_stand.utils import set_up_logger
 from lemonade_stand.utils.exceptions import DataLoadingError
 
 LOGGER = set_up_logger(Path(__file__).stem)
+STATEMENT_DATA_SCHEMA = pl.Schema(
+    {
+        "date": pl.Date(),
+        "amount": pl.Float64(),
+        "payment": pl.String(),
+        "detail": pl.String(),
+        "source_file": pl.String(),
+        "extract_date": pl.Datetime(time_unit="us", time_zone=None),
+    }
+)
 
 
 @dataclass
@@ -29,16 +39,7 @@ class Statement:
     transactions: pl.LazyFrame = field(init=False)
     engine: str = "pymullm-layout"
     schema: pl.schema.Schema = field(
-        default_factory=lambda: pl.Schema(
-            {
-                "date": pl.Date(),
-                "amount": pl.Float64(),
-                "payment": pl.String(),
-                "detail": pl.String(),
-                "source_file": pl.String(),
-                "extract_date": pl.Datetime(time_unit="us", time_zone=None),
-            }
-        )
+        default_factory=lambda: STATEMENT_DATA_SCHEMA,
     )
 
     def __post_init__(self):
