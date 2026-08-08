@@ -3,19 +3,32 @@
 import typing
 from dataclasses import dataclass
 from dataclasses import field
-from dataclasses import fields
 
 import polars as pl
 import reflex as rx
 
+from lemonade_stand.config import AppPaths
 from lemonade_stand.config import UserConfig
-from lemonade_stand.load_data import UserData
-from lemonade_stand.load_data import get_data
-from lemonade_stand.load_data.read import Statement
+from lemonade_stand.load_data import run_import_pipeline
+from lemonade_stand.load_data import run_staging_pipeline
+from lemonade_stand.model import MODEL_DATA_SCHEMA
+from lemonade_stand.model import run_model_pipeline
 from lemonade_stand.ui.utils import Allocations
+from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
+from lemonade_stand.utils.exceptions import MissingDeltaError
 
 LOGGER = set_up_logger(__name__)
+
+
+@dataclass(frozen=True)
+class UserData:
+    """Dataclass for the user statement data"""
+
+    income: pl.LazyFrame
+    savings: pl.LazyFrame
+    expenses: pl.LazyFrame
+    unknown: pl.LazyFrame
 
 
 @dataclass
@@ -65,17 +78,11 @@ class DataRow:
 def create_empty_placeholder() -> UserData:
     """Creates an empty UserData object to serve as a placeholder when no data is available."""
 
-    data_schema = next(
-        typing.cast(typing.Any, x.default_factory)()
-        for x in fields(Statement)
-        if x.name == "schema"
-    )
-
     empty_df = (
         pl.Schema(
             {
-                **dict(data_schema),
-                "allocated_amount": pl.Int64,
+                **dict(MODEL_DATA_SCHEMA),
+                "allocated_amount": pl.Int64(),
             }
         )
         .to_frame()
@@ -171,16 +178,48 @@ class DataState(rx.State):
     def load_user_data(self, full_refresh: bool = False) -> None:
         """Load user data from disk or refresh from scratch."""
 
+        data_path = AppPaths().data_dir / "03_gold"
+        config = UserConfig()
+
+        def process_data_from_start(
+            config: UserConfig,
+        ) -> UserData:
+            """Processes data from scratch and returns a UserData object."""
+
+            # Run the import and staging pipelines
+            LOGGER.info("Processing data from start...")
+
+            transactions = run_import_pipeline(user_config=config)
+            staging_df = run_staging_pipeline(input_df=transactions.data)
+            model_dict = run_model_pipeline(config=config, input_data=staging_df)
+
+            # Return the fully formed object
+            return UserData(**model_dict)
+
         if full_refresh or self._master_data is None:
-            if full_refresh:
+            if bool(config.data.always_refresh_data) or full_refresh:
                 LOGGER.info("Reloading transaction data from scratch...")
-                self._master_data = get_data(config=UserConfig(), full_refresh=True)
+                self._master_data = process_data_from_start(config=config)
 
             elif self._master_data is None:
                 LOGGER.info(
                     "User session active: Fetching transaction data from disk..."
                 )
-                self._master_data = get_data(config=UserConfig())
+
+                try:
+                    read_dir = data_path
+                    self._master_data = UserData(
+                        income=read_delta(table="income", search_dir=read_dir),
+                        savings=read_delta(table="savings", search_dir=read_dir),
+                        expenses=read_delta(table="expenses", search_dir=read_dir),
+                        unknown=read_delta(table="unknown", search_dir=read_dir),
+                    )
+                except MissingDeltaError as e:
+                    LOGGER.warning(
+                        "An error occurred while reading pre-processed tables: %s. Processing data from start.",
+                        e,
+                    )
+                    self._master_data = process_data_from_start(config=config)
 
             # Sync initial filtered view with our master data copy
             self._shared_data = UserData(
