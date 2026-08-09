@@ -237,6 +237,42 @@ def sidebar() -> rx.Component:
     )
 
 
+def loading_modal():
+    """A modal that shows a loading and progress bar during data processing."""
+    return rx.dialog.root(
+        rx.dialog.content(
+            rx.vstack(
+                rx.spinner(size="3"),
+                rx.text(
+                    DataState.step_text,
+                    font_weight="bold",
+                    text_align="center",
+                    style={"text_shadow": "0px 2px 4px rgba(0,0,0,0.5)"},
+                ),
+                rx.progress(
+                    value=DataState.progress,
+                    color_scheme="blue",
+                    width="100%",
+                    style={
+                        "& .rt-ProgressIndicator": {
+                            "transition": f"transform {DataState.progress_speed} cubic-bezier(0.1, 1, 0, 1) !important"
+                        }
+                    },
+                ),
+                align="center",
+                spacing="4",
+                width="100%",
+                max_width="400px",
+                margin="auto",
+            ),
+            show_close_button=False,
+            background_color="transparent",
+            box_shadow="none",
+        ),
+        open=DataState.is_processing,
+    )
+
+
 def page_layout(*main_content) -> rx.Component:
     """The master wrapper for every page in the app."""
 
@@ -246,6 +282,7 @@ def page_layout(*main_content) -> rx.Component:
             header(),
             rx.el.div(
                 login_modal(),
+                loading_modal(),
                 sidebar(),
                 rx.el.main(
                     *main_content,

@@ -110,6 +110,12 @@ class DataState(rx.State):
     edit_values: dict[str, typing.Any] = {}
     allocation_updates: dict[str, tuple[str, typing.Any]] = {}
 
+    # Data loading vars
+    is_processing: bool = False
+    progress_speed: str = "1s"
+    progress: int = 0
+    step_text: str = ""
+
     @rx.var
     def shared_data(self) -> UserData:
         """Lazily loads the user data when accessed for the first time."""
@@ -135,7 +141,7 @@ class DataState(rx.State):
             )
         )
 
-    def filter_data_dates(self) -> None:
+    def filter_data_dates(self) -> typing.Generator:
         """Filter data based on the selected date range from DateState."""
 
         def apply_filters(name: str, data_df: pl.LazyFrame) -> pl.LazyFrame:
@@ -158,7 +164,7 @@ class DataState(rx.State):
 
         # Safety fallback for if user triggers a filter before data finishes loading
         if self._master_data is None:
-            self.load_shared_data()
+            yield from self.load_shared_data()
 
         self._shared_data = UserData(
             income=apply_filters(
@@ -174,8 +180,9 @@ class DataState(rx.State):
                 "unknown", typing.cast(UserData, self._master_data).unknown
             ),
         )
+        yield
 
-    def load_user_data(self, full_refresh: bool = False) -> None:
+    def load_user_data(self, full_refresh: bool = False) -> typing.Generator:
         """Load user data from disk or refresh from scratch."""
 
         data_path = AppPaths().data_dir / "03_gold"
@@ -183,15 +190,38 @@ class DataState(rx.State):
 
         def process_data_from_start(
             config: UserConfig,
-        ) -> UserData:
+        ) -> typing.Generator[None, None, UserData]:
             """Processes data from scratch and returns a UserData object."""
 
-            # Run the import and staging pipelines
             LOGGER.info("Processing data from start...")
 
+            self.is_processing = True
+            self.progress = 10
+            self.progress_speed = "1s"
+            self.step_text = "Initializing pipeline..."
+            yield
+
+            self.progress = 35
+            self.progress_speed = "10s"
+            self.step_text = "Loading statement data..."
+            yield
             transactions = run_import_pipeline(user_config=config)
+
+            self.progress = 65
+            self.step_text = "Processing the data..."
+            yield
             staging_df = run_staging_pipeline(input_df=transactions.data)
+
+            self.progress = 95
+            self.progress_speed = "10s"
+            self.step_text = "Running transaction model..."
+            yield
             model_dict = run_model_pipeline(config=config, input_data=staging_df)
+
+            self.progress = 100
+            self.progress_speed = "1s"
+            self.is_processing = False
+            yield
 
             # Return the fully formed object
             return UserData(**model_dict)
@@ -199,7 +229,7 @@ class DataState(rx.State):
         if full_refresh or self._master_data is None:
             if bool(config.data.always_refresh_data) or full_refresh:
                 LOGGER.info("Reloading transaction data from scratch...")
-                self._master_data = process_data_from_start(config=config)
+                self._master_data = yield from process_data_from_start(config=config)
 
             elif self._master_data is None:
                 LOGGER.info(
@@ -219,7 +249,9 @@ class DataState(rx.State):
                         "An error occurred while reading pre-processed tables: %s. Processing data from start.",
                         e,
                     )
-                    self._master_data = process_data_from_start(config=config)
+                    self._master_data = yield from process_data_from_start(
+                        config=config
+                    )
 
             # Sync initial filtered view with our master data copy
             self._shared_data = UserData(
@@ -230,14 +262,14 @@ class DataState(rx.State):
             )
 
     @rx.event
-    def load_shared_data(self) -> None:
+    def load_shared_data(self) -> typing.Generator:
         """Lazily load user-data when page is loaded."""
-        self.load_user_data(full_refresh=False)
+        yield from self.load_user_data(full_refresh=False)
 
     @rx.event
-    def reload_data(self) -> None:
+    def reload_data(self) -> typing.Generator:
         """Reload user-data from scratch."""
-        self.load_user_data(full_refresh=True)
+        yield from self.load_user_data(full_refresh=True)
 
     @rx.event
     def purge_data(self) -> None:
@@ -300,16 +332,17 @@ class DataState(rx.State):
             return "All Time"
 
     @rx.event
-    def set_year(self, year: str):
+    def set_year(self, year: str) -> typing.Generator:
         """Sets the selected year and updates the filtered data."""
         self.selected_year = year if year != "All Years" else ""
-        self.filter_data_dates()
+        yield from self.filter_data_dates()
 
     @rx.event
-    def set_month(self, month: str):
-        """"""
+    def set_month(self, month: str) -> typing.Generator:
+        """Sets the selected month and updates the filtered data."""
         self.selected_month = month if month != "All Months" else ""
-        self.filter_data_dates()
+        yield from self.filter_data_dates()
+        yield
 
     @rx.event
     def set_is_edit_modal_open(self, is_open: bool):
