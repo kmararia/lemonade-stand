@@ -16,7 +16,7 @@ from .read import Statement
 from .utils import StateCities
 from .utils import Transactions
 
-LOGGER = set_up_logger(Path(__file__).stem)
+LOGGER = set_up_logger(__name__)
 APP_DATA_DIR = AppPaths().data_dir
 
 
@@ -58,13 +58,13 @@ def run_staging_pipeline(input_df: pl.LazyFrame) -> pl.LazyFrame:
     write_path = APP_DATA_DIR / "staging"
     clean_df = clean_transactions(input_df=input_df)
 
-    LOGGER.info("Writing all transactions to delta lake path:\t-> %s", write_path)
-
     # Write out to delta lake
     write_path = write_delta(
         write_dir=write_path,
         write_info_dict={"all_transactions": {"dataframe": clean_df}},
     )
+
+    LOGGER.info("Written all transactions to delta lake path:\t-> %s\n", write_path)
 
     return read_delta(table="all_transactions", search_dir=write_path)
 

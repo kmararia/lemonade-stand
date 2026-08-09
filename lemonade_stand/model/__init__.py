@@ -17,7 +17,7 @@ from .predict import predict_cosine_similarity
 from .utils import ModelData
 from .vectorize import vectorize_tfidf
 
-LOGGER = set_up_logger(Path(__file__).stem)
+LOGGER = set_up_logger(__name__)
 MODEL_DATA_SCHEMA = pl.Schema(
     {
         "index": pl.Int32(),
@@ -111,7 +111,7 @@ def run_model_pipeline(config: UserConfig, input_data: pl.LazyFrame) -> dict:
     )
 
     # Return the fully formed object
-    LOGGER.info("Written split categories to delta lake path:\t-> %s", write_path)
+    LOGGER.info("Written split categories to delta lake path:\t-> %s\n", write_path)
 
     return {table: read_delta(table=table, search_dir=write_path) for table in tables}
 
