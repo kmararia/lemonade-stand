@@ -287,11 +287,33 @@ class DataState(rx.State):
         pass
 
     @rx.var
-    def available_months(self) -> list[str]:
+    def available_years(self) -> dict[str, list[str]]:
+        """Dynamically generate available years based on the user's expense data."""
+
+        # Safety fallback for if the data has not finished loading
+        years_dto = self.shared_data if self._master_data is None else self._master_data
+
+        years_info = (
+            pl.concat(
+                [
+                    years_dto.income,
+                    years_dto.savings,
+                    years_dto.expenses,
+                ]
+            )
+            .sort("date")
+            .group_by(year=pl.col("date").dt.strftime("%Y"), maintain_order=True)
+            .agg(months=pl.col("date").dt.strftime("%B").unique())
+            .collect()
+        ).to_dicts()
+
+        return {**{"All Years": []}, **{x["year"]: x["months"] for x in years_info}}
+
+    @rx.var
+    def available_months(self) -> list[tuple[str, bool]]:
         """Dynamically generate available months based on the user's expense data."""
 
-        return [
-            "All Months",  # Represents "All Months" option
+        all_months = [
             "January",
             "February",
             "March",
@@ -305,30 +327,12 @@ class DataState(rx.State):
             "November",
             "December",
         ]
+        curr_year_months = self.available_years.get(self.selected_year, all_months)
 
-    @rx.var
-    def available_years(self) -> list[str]:
-        """Dynamically generate available years based on the user's expense data."""
-
-        return ["All Years"] + (
-            (
-                pl.concat(
-                    [
-                        self.shared_data.income,
-                        self.shared_data.savings,
-                        self.shared_data.expenses,
-                    ]
-                )
-                .select(
-                    year=pl.col("date").dt.strftime("%Y"),
-                )
-                .unique()
-                .sort("year")
-                .collect()
-            )
-            .to_series()
-            .to_list()
-        )
+        return [
+            ("All Months", False),
+            *[(month, month not in curr_year_months) for month in all_months],
+        ]
 
     @rx.var
     def date_selection_text(self) -> str:
