@@ -49,7 +49,7 @@ class ModelData:
             )
 
         # Prepare the training fields
-        self.train_data = self.func_field_cleaner(input_df=self.train_data)
+        self.train_data = self.func_field_cleaner(data_df=self.train_data)
 
     def read_csv(self, read_path: Path) -> pl.LazyFrame:
         """
