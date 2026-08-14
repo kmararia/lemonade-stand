@@ -1,13 +1,11 @@
-<pre style="display: inline-block; text-align: left;">
+<div align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/feat/improve-logic/images/lemonade-stand-light.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/feat/improve-logic/images/lemonade-stand-dark.svg">
+  <img alt="Lemonade-Stand Logo" src="https://raw.githubusercontent.com/kmararia/lemonade-stand/feat/improve-logic/images/lemonade-stand-light.svg" width="300px">
+</picture>
 
-█████┐  █┐  █┐ ████┐  █▀▀▀▀┐ █▀▀▀▀┐ █████┐ █┐ █┐  █┐ █▀▀▀▀┐    ██████┐  ▀▀▀┐   ▀▀▀┐  █┐
-█┌──██┐ █│  █│ █┌──█┐ █┌───┘ █┌───┘   █┌─┘ █│ ██┐ █│ █┌───┘      ██┌─┘ █┌──█┐ █┌──█┐ █│
-█████─┘ █│  █│ █│  █│ █│▀▀█│ █▀▀▀▀┐   █│   █│ █│█┐█│ █│▀▀█│      ██│   █│  █│ █│  █│ █│
-█┌──██┐ █│  █│ █│  █│ █│  █│ █ ┌──┘   █│   █│ █│ ██│ █│  █│      ██│   █│  █│ █│  █│ █│
-█████┌┘  ███┌┘ ████┌┘ └▄▄▄█┐ █▄▄▄▄┐   █│   █│ █│  █│ └▄▄▄█┐      ██│    ███┌┘  ███┌┘ █▄▄▄┐
- └───┘   └──┘  └───┘   └───┘ └────┘   └┘   └┘ └┘  └┘  └───┘      └─┘    └──┘   └──┘  └───┘
-
-</pre>
+<hr>
 
 ## Live Interactive Demo
 
