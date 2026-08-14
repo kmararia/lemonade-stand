@@ -47,7 +47,9 @@ class HomeState(DataState):
                     [
                         self.shared_data.income,
                         self.shared_data.savings,
-                        self.shared_data.expenses,
+                        self.shared_data.expenses.with_columns(
+                            amount=pl.col("amount") * -1,
+                        ),
                     ]
                 )
                 .sort("date", descending=True)

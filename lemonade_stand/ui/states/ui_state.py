@@ -1,5 +1,6 @@
 """"""
 
+import os
 import typing
 from dataclasses import dataclass
 
@@ -12,6 +13,7 @@ from lemonade_stand.utils import set_up_logger
 LOGGER = set_up_logger(__name__)
 _USER_CONFIG = UserConfig()
 _ACCOUNT_CONFIG = AccountConfig()
+_IS_RUNNING_DEMO = os.environ.get("LEMONADE_STAND_DEMO", "false")
 
 
 @dataclass
@@ -32,6 +34,7 @@ class AccountState(rx.State):
     config_updates: dict[str, typing.Any] = {}
     logged_in: bool = _ACCOUNT_CONFIG.always_skip_login
     is_registering: bool = False
+    is_demo_account: bool = _IS_RUNNING_DEMO.lower() == "true"
 
     @rx.event
     def set_logged_in(self):

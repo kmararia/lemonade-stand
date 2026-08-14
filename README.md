@@ -1,19 +1,14 @@
-<pre style="display: inline-block; text-align: left;">
-
-█████┐  █┐  █┐ ████┐  █▀▀▀▀┐ █▀▀▀▀┐ █████┐ █┐ █┐  █┐ █▀▀▀▀┐    ██████┐  ▀▀▀┐   ▀▀▀┐  █┐
-█┌──██┐ █│  █│ █┌──█┐ █┌───┘ █┌───┘   █┌─┘ █│ ██┐ █│ █┌───┘      ██┌─┘ █┌──█┐ █┌──█┐ █│
-█████─┘ █│  █│ █│  █│ █│▀▀█│ █▀▀▀▀┐   █│   █│ █│█┐█│ █│▀▀█│      ██│   █│  █│ █│  █│ █│
-█┌──██┐ █│  █│ █│  █│ █│  █│ █ ┌──┘   █│   █│ █│ ██│ █│  █│      ██│   █│  █│ █│  █│ █│
-█████┌┘  ███┌┘ ████┌┘ └▄▄▄█┐ █▄▄▄▄┐   █│   █│ █│  █│ └▄▄▄█┐      ██│    ███┌┘  ███┌┘ █▄▄▄┐
- └───┘   └──┘  └───┘   └───┘ └────┘   └┘   └┘ └┘  └┘  └───┘      └─┘    └──┘   └──┘  └───┘
-
-</pre>
+<div align="center">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/main/images/lemonade-stand-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/main/images/lemonade-stand-light.svg">
+  <img alt="Lemonade-Stand Logo" src="https://raw.githubusercontent.com/kmararia/lemonade-stand/main/images/lemonade-stand-dark.svg" width="300px">
+</picture>
+</div>
 
 ## Live Interactive Demo
 
-Want to see how it works under the hood before installing?
-
-Check out the live [`Lemonade-Stand` web app](https://lemonade-stand-jj9j.onrender.com/) on Render.
+Want to see how `Lemonade-Stand` works before cloning? Check out this [live web app](https://lemonade-stand-jj9j.onrender.com/) demo.
 
 ## Getting Help
 

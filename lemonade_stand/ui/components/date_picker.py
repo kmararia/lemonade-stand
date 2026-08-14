@@ -26,7 +26,7 @@ def date_picker() -> rx.Component:
             rx.flex(
                 # Year Dropdown
                 rx.select(
-                    DataState.available_years,
+                    DataState.available_years.keys(),
                     value=DataState.selected_year,
                     on_change=DataState.set_year,
                     placeholder="All Years",
@@ -35,13 +35,26 @@ def date_picker() -> rx.Component:
                     size="1",
                 ),
                 # Month Dropdown
-                rx.select(
-                    DataState.available_months,
+                rx.select.root(
+                    rx.select.trigger(
+                        placeholder="All Months",
+                        color_scheme="mint",
+                        variant="ghost",
+                    ),
+                    rx.select.content(
+                        rx.select.group(
+                            rx.foreach(
+                                DataState.available_months,
+                                lambda month: rx.select.item(
+                                    month[0], value=month[0], disabled=month[1]
+                                ),
+                            ),
+                        ),
+                        color_scheme="mint",
+                        variant="solid",
+                    ),
                     value=DataState.selected_month,
                     on_change=DataState.set_month,
-                    placeholder="All Months",
-                    color_scheme="mint",
-                    variant="ghost",
                     size="1",
                 ),
                 direction="row-reverse",
