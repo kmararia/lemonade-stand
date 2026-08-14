@@ -255,12 +255,24 @@ class DataState(rx.State):
                     )
 
             # Sync initial filtered view with our master data copy
-            self._shared_data = UserData(
-                income=self.apply_allocations("income", self._master_data.income),
-                savings=self.apply_allocations("savings", self._master_data.savings),
-                expenses=self.apply_allocations("expenses", self._master_data.expenses),
-                unknown=self.apply_allocations("unknown", self._master_data.unknown),
+            max_date_df = (
+                pl.concat(
+                    [
+                        self._master_data.income,
+                        self._master_data.savings,
+                        self._master_data.expenses,
+                    ]
+                )
+                .select(pl.col("date").max().alias("max_date"))
+                .collect()
             )
+
+            if max_date_df.shape[0] > 0:
+                max_date = max_date_df.item(0, 0)
+                self.selected_year = max_date.strftime("%Y")
+                self.selected_month = max_date.strftime("%B")
+
+            yield from self.filter_data_dates()
 
     @rx.event()
     def load_user_data_background(self) -> typing.Generator:
@@ -327,11 +339,11 @@ class DataState(rx.State):
             "November",
             "December",
         ]
-        curr_year_months = self.available_years.get(self.selected_year, all_months)
 
+        current_months = self.available_years.get(self.selected_year, all_months)
         return [
             ("All Months", False),
-            *[(month, month not in curr_year_months) for month in all_months],
+            *[(month, month not in current_months) for month in all_months],
         ]
 
     @rx.var
