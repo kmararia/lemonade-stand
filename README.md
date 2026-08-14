@@ -1,8 +1,8 @@
 <div align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/feat/improve-logic/images/lemonade-stand-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/feat/improve-logic/images/lemonade-stand-light.svg">
-  <img alt="Lemonade-Stand Logo" src="https://raw.githubusercontent.com/kmararia/lemonade-stand/feat/improve-logic/images/lemonade-stand-dark.svg" width="300px">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/main/images/lemonade-stand-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kmararia/lemonade-stand/main/images/lemonade-stand-light.svg">
+  <img alt="Lemonade-Stand Logo" src="https://raw.githubusercontent.com/kmararia/lemonade-stand/main/images/lemonade-stand-dark.svg" width="300px">
 </picture>
 </div>
 
