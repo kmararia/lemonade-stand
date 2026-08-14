@@ -2,6 +2,7 @@
 
 import reflex as rx
 
+from lemonade_stand.ui.states.data_state import DataState
 from lemonade_stand.ui.states.ui_state import AccountState
 from lemonade_stand.ui.states.ui_state import UIState
 
@@ -50,6 +51,7 @@ def login_form() -> rx.Component:
             on_click=[
                 AccountState.set_logged_in,
                 AccountState.apply_account_settings,
+                DataState.load_shared_data,
             ],
             class_name="w-full bg-[var(--accent-color)] text-[var(--app-bg-inner)] font-bold hover:opacity-90 transition-opacity",
         ),
@@ -142,7 +144,10 @@ def register_form() -> rx.Component:
             "Create Account",
             size="3",
             radius="large",
-            on_click=AccountState.set_logged_in,
+            on_click=[
+                AccountState.set_logged_in,
+                DataState.load_shared_data,
+            ],
             class_name="w-full bg-[var(--accent-color)] text-[var(--app-bg-inner)] font-bold hover:opacity-90 transition-opacity",
         ),
         rx.el.div(
