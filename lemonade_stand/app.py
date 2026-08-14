@@ -20,8 +20,19 @@ app = rx.App(
     ],
 )
 
-app.add_page(home_content, route="/", on_load=DataState.load_shared_data)
-app.add_page(income_page, route="/income", on_load=DataState.load_shared_data)
-app.add_page(savings_page, route="/savings", on_load=DataState.load_shared_data)
-app.add_page(expense_page, route="/expenses", on_load=DataState.load_shared_data)
-app.add_page(goals_page, route="/goals", on_load=DataState.load_shared_data)
+
+def add_pages(page_list: list) -> None:
+    """Adds pages to the app."""
+    for arg_dict in page_list:
+        app.add_page(**arg_dict, on_load=DataState.load_user_data_background)
+
+
+add_pages(
+    [
+        {"component": home_content, "route": "/"},
+        {"component": income_page, "route": "/income"},
+        {"component": savings_page, "route": "/savings"},
+        {"component": expense_page, "route": "/expenses"},
+        {"component": goals_page, "route": "/goals"},
+    ]
+)

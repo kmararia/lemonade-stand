@@ -7,6 +7,7 @@ from dataclasses import field
 import polars as pl
 import reflex as rx
 
+from lemonade_stand.config import AccountConfig
 from lemonade_stand.config import AppPaths
 from lemonade_stand.config import UserConfig
 from lemonade_stand.load_data import run_import_pipeline
@@ -260,6 +261,15 @@ class DataState(rx.State):
                 expenses=self.apply_allocations("expenses", self._master_data.expenses),
                 unknown=self.apply_allocations("unknown", self._master_data.unknown),
             )
+
+    @rx.event()
+    def load_user_data_background(self) -> typing.Generator:
+        """Background task to load user data without blocking the UI."""
+        config = AccountConfig()
+        if config.always_skip_login and self._master_data is None:
+            yield from self.load_user_data(full_refresh=False)
+        else:
+            yield
 
     @rx.event
     def load_shared_data(self) -> typing.Generator:
