@@ -9,9 +9,7 @@
 
 ## Live Interactive Demo
 
-Want to see how it works under the hood before installing?
-
-Check out the live [`Lemonade-Stand` web app](https://lemonade-stand-jj9j.onrender.com/) on Render.
+Want to see how `Lemonade-Stand` works before cloning? Check out this [live web app](https://lemonade-stand-jj9j.onrender.com/) demo.
 
 ## Getting Help
 
