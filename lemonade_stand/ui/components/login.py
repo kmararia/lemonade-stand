@@ -166,6 +166,60 @@ def register_form() -> rx.Component:
     )
 
 
+def welcome_view():
+    """The modern welcome view shown during demo mode."""
+    return rx.vstack(
+        rx.icon(
+            "flask_conical",
+            size=40,
+            class_name="""
+                mt-12 mb-4 text-[var(--accent-color)] hover:text-[var(--accent-color)]
+                hover:bg-[var(--bg-subtle)] transition-colors
+            """,
+        ),
+        rx.heading(
+            "Welcome to the Live Demo!",
+            size="6",
+            weight="bold",
+            class_name="mb-4 text-[var(--text-main)]",
+        ),
+        rx.text(
+            "Explore the app's features with simulated sample data. No account required.",
+            color="gray",
+            text_align="center",
+            size="3",
+        ),
+        rx.text(
+            "Found a bug? ",
+            rx.link(
+                "Let me know.",
+                href="https://github.com/kmararia/lemonade-stand/issues",
+                underline="always",
+                weight="medium",
+                class_name="text-indigo-500",
+            ),
+            size="2",
+            color="gray",
+            margin_top="4",
+            text_align="center",
+            class_name="mt-1 mb-8",
+        ),
+        rx.button(
+            "Explore as Guest",
+            size="3",
+            margin_top="4",
+            color_scheme="indigo",
+            cursor="pointer",
+            on_click=[
+                AccountState.set_logged_in,
+                DataState.load_shared_data,
+            ],
+        ),
+        align_items="center",
+        padding="4",
+    )
+
+
 def login_modal() -> rx.Component:
     """Login modal window."""
 
@@ -213,28 +267,38 @@ def login_modal() -> rx.Component:
                 ),
                 # Dynamically switch the form based on state
                 rx.cond(
-                    AccountState.is_registering,
-                    register_form(),
-                    login_form(),
+                    AccountState.is_demo_account,
+                    welcome_view(),
+                    rx.cond(
+                        AccountState.is_registering,
+                        register_form(),
+                        login_form(),
+                    ),
                 ),
                 # Login switch and Theme
                 rx.el.div(
                     rx.cond(
-                        AccountState.is_registering,
+                        AccountState.is_demo_account,
                         rx.fragment(),
-                        rx.hstack(
-                            rx.switch(
-                                size="1",
-                                radius="small",
-                                default_checked=AccountState.user_account.always_skip_login,
-                                on_change=lambda x: AccountState.set_user_account_value(
-                                    "always_skip_login", x
+                        rx.cond(
+                            AccountState.is_registering,
+                            rx.fragment(),
+                            rx.hstack(
+                                rx.switch(
+                                    size="1",
+                                    radius="small",
+                                    default_checked=AccountState.user_account.always_skip_login,
+                                    on_change=lambda x: (
+                                        AccountState.set_user_account_value(
+                                            "always_skip_login", x
+                                        )
+                                    ),
+                                    class_name="items-end shrink-0",
                                 ),
-                                class_name="items-end shrink-0",
-                            ),
-                            rx.el.label(
-                                "always skip login",
-                                class_name="block text-sm font-medium text-[var(--text-muted)]",
+                                rx.el.label(
+                                    "always skip login",
+                                    class_name="block text-sm font-medium text-[var(--text-muted)]",
+                                ),
                             ),
                         ),
                     ),
