@@ -239,37 +239,38 @@ def sidebar() -> rx.Component:
 
 def loading_modal():
     """A modal that shows a loading and progress bar during data processing."""
-    return rx.dialog.root(
-        rx.dialog.content(
-            rx.vstack(
-                rx.spinner(size="3"),
-                rx.text(
-                    DataState.step_text,
-                    font_weight="bold",
-                    text_align="center",
-                    style={"text_shadow": "0px 2px 4px rgba(0,0,0,0.5)"},
-                ),
-                rx.progress(
-                    value=DataState.progress,
-                    color_scheme="blue",
+    return rx.cond(
+        DataState.is_processing,
+        rx.el.div(
+            # Inner Content Wrapper
+            rx.el.div(
+                rx.vstack(
+                    rx.spinner(size="3"),
+                    rx.text(
+                        DataState.step_text,
+                        font_weight="bold",
+                        text_align="center",
+                        style={"text_shadow": "0px 2px 4px rgba(0,0,0,0.5)"},
+                    ),
+                    rx.progress(
+                        value=DataState.progress,
+                        color_scheme="blue",
+                        width="100%",
+                        style={
+                            "& .rt-ProgressIndicator": {
+                                "transition": f"transform {DataState.progress_speed} cubic-bezier(0.1, 1, 0, 1) !important"
+                            }
+                        },
+                    ),
+                    align="center",
+                    spacing="4",
                     width="100%",
-                    style={
-                        "& .rt-ProgressIndicator": {
-                            "transition": f"transform {DataState.progress_speed} cubic-bezier(0.1, 1, 0, 1) !important"
-                        }
-                    },
                 ),
-                align="center",
-                spacing="4",
-                width="100%",
-                max_width="400px",
-                margin="auto",
+                class_name="w-full max-w-sm mx-auto animate-in fade-in zoom-in-95 duration-300",
             ),
-            show_close_button=False,
-            background_color="transparent",
-            box_shadow="none",
+            class_name="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm",
         ),
-        open=DataState.is_processing,
+        rx.fragment(),
     )
 
 
