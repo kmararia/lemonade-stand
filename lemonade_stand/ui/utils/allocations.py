@@ -154,7 +154,7 @@ class Allocations:
             with config_path.open("w") as file:
                 json.dump({self.name: self.as_dicts}, file, indent=4)
 
-            LOGGER.info("Allocations data saved to: \n\t%s", config_path)
+            LOGGER.info("\nAllocations data saved to:\t-> %s", config_path)
 
     def add_allocation(self, category: str, allocated_amount: float) -> bool:
         """Adds a new allocation to the allocations data"""
