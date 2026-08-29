@@ -15,10 +15,14 @@ import pymupdf.layout
 import pymupdf4llm
 from dateutil.parser import parse
 
+from lemonade_stand.config import AppPaths
+from lemonade_stand.utils import read_delta
 from lemonade_stand.utils import set_up_logger
+from lemonade_stand.utils import write_delta
 from lemonade_stand.utils.exceptions import DataLoadingError
 
 LOGGER = set_up_logger(Path(__file__).stem)
+APP_DATA_DIR = AppPaths().data_dir
 STATEMENT_DATA_SCHEMA = pl.Schema(
     {
         "date": pl.Date(),
@@ -53,12 +57,30 @@ class Statement:
         while True:
             try:
                 used_engines.append(self.engine)
-                self.transactions = self.get_transactions(
+                lazy_transactions = self.get_transactions(
                     pdf_text=self.read_file(read_path=self.file_path),
+                )
+
+                # Write the transactions to delta lake and read back in
+                write_path = APP_DATA_DIR / "raw"
+                write_path = write_delta(
+                    write_dir=write_path,
+                    write_info_dict={
+                        self.file_path.stem: {
+                            "dataframe": lazy_transactions,
+                            "partition_by": ["extract_date"],
+                        },
+                    },
+                )
+                self.transactions = read_delta(
+                    table=self.file_path.stem,
+                    search_dir=write_path,
+                    silence=True,
                 )
                 break
 
-            except Exception:
+            except Exception as e:
+                print(e)
                 remaining_engines = [x for x in try_engines if x not in used_engines]
 
                 if len(remaining_engines) >= 1:
