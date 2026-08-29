@@ -14,7 +14,7 @@ LOGGER = set_up_logger(__name__)
 SPECIAL_CHARS = r"[^a-zA-Z0-9]+"
 
 
-def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
+def read_delta(table: str, search_dir: Path, silence: bool = False) -> pl.LazyFrame:
     """A function that finds the delta lake associated with the table and reads it in as a polars dataframe
 
     Arguments:
@@ -44,7 +44,8 @@ def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
             f"Found file/dir does not contain any readable parquet files!! \n\t{parquet_path}"
         )
 
-    LOGGER.info("Reading deltalake:\t-> %s", parquet_path)
+    if not silence:
+        LOGGER.info("Reading deltalake:\t-> %s", parquet_path)
 
     return pl.scan_delta(source=parquet_path)
 
