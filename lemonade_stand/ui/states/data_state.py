@@ -186,7 +186,7 @@ class DataState(rx.State):
     def load_user_data(self, full_refresh: bool = False) -> typing.Generator:
         """Load user data from disk or refresh from scratch."""
 
-        data_path = AppPaths().data_dir / "03_gold"
+        data_path = AppPaths().model_dir / "outputs"
         config = UserConfig()
 
         def process_data_from_start(
@@ -238,12 +238,11 @@ class DataState(rx.State):
                 )
 
                 try:
-                    read_dir = data_path
                     self._master_data = UserData(
-                        income=read_delta(table="income", search_dir=read_dir),
-                        savings=read_delta(table="savings", search_dir=read_dir),
-                        expenses=read_delta(table="expenses", search_dir=read_dir),
-                        unknown=read_delta(table="unknown", search_dir=read_dir),
+                        income=read_delta(table="income", search_dir=data_path),
+                        savings=read_delta(table="savings", search_dir=data_path),
+                        expenses=read_delta(table="expenses", search_dir=data_path),
+                        unknown=read_delta(table="unknown", search_dir=data_path),
                     )
                 except MissingDeltaError as e:
                     LOGGER.warning(
