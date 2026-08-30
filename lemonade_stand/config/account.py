@@ -45,7 +45,7 @@ class AccountConfig:
             with account_config.open("w") as file:
                 json.dump(config_dict, file, indent=4)
 
-            LOGGER.info("Account configuration saved to: \n\t%s", account_config)
+            LOGGER.info("\nAccount configuration saved to:\t-> %s", account_config)
 
     def apply_account_configs(self) -> None:
         """Sets up account configurations. Utilizes the saved configs or user input configs"""
@@ -54,14 +54,14 @@ class AccountConfig:
 
         # Search for the configuration file in the path
         if user_config.exists():
-            LOGGER.info("Loading account configuration file from: \n\t%s", user_config)
+            LOGGER.info("Loading account configuration file from:\t-> %s", user_config)
 
             with user_config.open("r") as file:
                 config_dict = json.load(file)
                 self.update_attribute(mappings=config_dict)
         else:
             LOGGER.info(
-                "Account configuration file not found. Using base configurations."
+                "\nAccount configuration file not found. Using base configurations."
             )
 
         self.save_config()

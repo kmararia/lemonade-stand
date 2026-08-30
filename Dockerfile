@@ -29,8 +29,10 @@ WORKDIR /lemonade-stand
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-cache
 
-# Copy the processed Parquet data to root directory
-COPY tests/_mocks/.lemonade-stand /root/.lemonade-stand
+# Copy configs and processed data to root directory
+COPY tests/config/data /root/.lemonade-stand/configs
+COPY tests/model/data/ /root/.lemonade-stand/shared/model/
+
 COPY . .
 
 # Initialize Reflex and pre-compile the frontend

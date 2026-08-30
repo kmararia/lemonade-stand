@@ -1,5 +1,6 @@
 """A module to help read and write delta lakes as needed"""
 
+import re
 import shutil
 from pathlib import Path
 from typing import Any
@@ -10,9 +11,10 @@ from .exceptions import MissingDeltaError
 from .logging import set_up_logger
 
 LOGGER = set_up_logger(__name__)
+SPECIAL_CHARS = r"[^a-zA-Z0-9]+"
 
 
-def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
+def read_delta(table: str, search_dir: Path, silence: bool = False) -> pl.LazyFrame:
     """A function that finds the delta lake associated with the table and reads it in as a polars dataframe
 
     Arguments:
@@ -23,7 +25,9 @@ def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
 
     """
 
+    table = re.sub(SPECIAL_CHARS, "_", table)
     parquet_path = search_dir / table
+
     if not parquet_path.exists():
         raise MissingDeltaError(
             f"Table or file '{table}' is missing in the following directory: \n\t{search_dir}"
@@ -40,7 +44,8 @@ def read_delta(table: str, search_dir: Path) -> pl.LazyFrame:
             f"Found file/dir does not contain any readable parquet files!! \n\t{parquet_path}"
         )
 
-    LOGGER.info("Reading deltalake:\t-> %s", parquet_path)
+    if not silence:
+        LOGGER.info("Reading deltalake:\t-> %s", parquet_path)
 
     return pl.scan_delta(source=parquet_path)
 
@@ -60,7 +65,9 @@ def write_delta(write_info_dict: dict[str, dict[str, Any]], write_dir: Path) -> 
     write_dir.mkdir(parents=True, exist_ok=True)
 
     for table, data_info in write_info_dict.items():
+        table = re.sub(SPECIAL_CHARS, "_", table)
         parquet_path = write_dir / table
+
         data_df: pl.LazyFrame = data_info["dataframe"]
         partition_by = data_info.get("partition_by", ["source_file"])
 

@@ -55,10 +55,10 @@ def run_staging_pipeline(input_df: pl.LazyFrame) -> pl.LazyFrame:
 
     LOGGER.info("Beginning data cleaning process...")
 
-    write_path = APP_DATA_DIR / "staging"
     clean_df = clean_transactions(input_df=input_df)
 
     # Write out to delta lake
+    write_path = APP_DATA_DIR / "processed"
     write_path = write_delta(
         write_dir=write_path,
         write_info_dict={"all_transactions": {"dataframe": clean_df}},

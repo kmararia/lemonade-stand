@@ -107,11 +107,11 @@ def run_model_pipeline(config: UserConfig, input_data: pl.LazyFrame) -> dict:
     # Write out to delta lake
     write_path = write_delta(
         write_info_dict=table_dict,
-        write_dir=AppPaths().data_dir / "03_gold",
+        write_dir=AppPaths().model_dir / "outputs",
     )
 
     # Return the fully formed object
-    LOGGER.info("Written split categories to delta lake path:\t-> %s\n", write_path)
+    LOGGER.info("Written split categories to delta lake path:\t-> %s", write_path)
 
     return {table: read_delta(table=table, search_dir=write_path) for table in tables}
 
