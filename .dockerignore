@@ -40,6 +40,5 @@ assets/external/
 
 # Ignore tests suites and fixtures except the mock directory
 tests/*
-!tests/_mocks/
-!tests/data/inputs
-!tests/model/inputs/training.csv
+!tests/config/data
+!tests/model/data
